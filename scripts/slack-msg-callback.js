@@ -4,7 +4,7 @@
  */
 var slackToken = process.env.HUBOT_SLACK_VERIFY_TOKEN;
   
-module.exports = (robot) {
+module.exports = function(robot) {
 
 
   robot.respond(/slack token/i, function(res) {
