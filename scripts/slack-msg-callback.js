@@ -31,7 +31,7 @@ module.exports = function(robot)  {
 
     var msg = 'slack:msg_action:';
     var callback_id = '';
-    var handled = robot.emit(`slack:msg_action:${data.callback_id}`, data, res);
+    var handled = robot.emit(msg+callback_id, data, res);
     if (!handled) {
       //res.send(500)
       res.send('No scripts handled the action.');
