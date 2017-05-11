@@ -3,7 +3,6 @@
  * slack's app basic info page, anyone can trigger these actions.
  */
 var slackToken = process.env.HUBOT_SLACK_VERIFY_TOKEN;
-require('./folder/listener.js');
 
 module.exports = (robot) => {
 
