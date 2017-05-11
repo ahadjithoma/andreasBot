@@ -2,8 +2,8 @@
  * If there isn't any verification token against the one on the 
  * slack's app basic info page, anyone can trigger these actions.
  */
-var slackToken = process.env.HUBOT_SLACK_VERIFY_TOKEN;
-
+var slackToken = "f";//process.env.HUBOT_SLACK_VERIFY_TOKEN;
+  
 module.exports = (robot) => {
 
 
