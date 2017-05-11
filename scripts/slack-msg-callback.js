@@ -1,7 +1,7 @@
 //var slackToken = process.env.HUBOT_SLACK_VERIFY_TOKEN;
 
 module.exports = function(robot)  {
-  // robot.router.post('/hubot/slack-msg-callback', (req, res) => {
+  robot.router.post('/hubot/slack-msg-callback', (req, res) => {
   //   var data = null;
 
   //   if(req.body.payload) {
@@ -34,5 +34,5 @@ module.exports = function(robot)  {
   //     //res.send(500)
   //     res.send('No scripts handled the action.');
   //   }
-  // });
+  });
 };
