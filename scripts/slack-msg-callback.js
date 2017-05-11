@@ -3,6 +3,7 @@
  * slack's app basic info page, anyone can trigger these actions.
  */
 var slackToken = process.env.HUBOT_SLACK_VERIFY_TOKEN;
+require('./folder/listener.js');
 
 module.exports = (robot) => {
 
@@ -40,11 +41,15 @@ module.exports = (robot) => {
       return;
     }
 
-    var handled = robot.emit(`slack:msg_action:${data.callback_id}`, data, res);
+    var msg = 'slack:msg_action:';
+    var callback_id = data.callback_id;
+    //msg = msg + callback_id;
+    
+    var handled = robot.emit(msg+callback_id, data, res);
     if (!handled) {
-      res.send('No scripts handled the action.');
+      //res.send('No scripts handled the action.');
       //res.send(550)
-      //res.send(data)
+      res.send('callback_id: ' + data.callback_id)
     }
   });
 };
