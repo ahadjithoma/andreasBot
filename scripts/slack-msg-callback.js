@@ -29,9 +29,9 @@ module.exports = function(robot)  {
       return;
     }
 
-    var slack_msg = 'slack:msg_action:'; 
+    var msg = 'slack:msg_action:'; 
     var callback_id = data.callback_id;
-    var handled = robot.emit(msg+ callback_id, data, res);
+    var handled = robot.emit(msg+callback_id, data, res);
     if (!handled) {
       //res.send(500)
       res.send('No scripts handled the action.');
