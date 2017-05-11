@@ -35,4 +35,4 @@ module.exports = function(robot)  {
   //     res.send('No scripts handled the action.');
   //   }
   // });
-};
+}
