@@ -3,7 +3,6 @@ var slackToken = process.env.HUBOT_SLACK_VERIFY_TOKEN;
 module.exports = function(robot)  {
   robot.router.post('/hubot/slack-msg-callback', function(req, res) {
     var data = null;
-    res.send("come on");
 
   //   if(req.body.payload) {
   //     try {
@@ -30,10 +29,12 @@ module.exports = function(robot)  {
   //     return;
   //   }
 
-  //   var handled = robot.emit(`slack:msg_action:${data.callback_id}`, data, res);
-  //   if (!handled) {
-  //     //res.send(500)
-  //     res.send('No scripts handled the action.');
-  //   }
+    var msg = 'slack:msg_action:';
+    var callback_id = '';
+    var handled = robot.emit(`slack:msg_action:${data.callback_id}`, data, res);
+    if (!handled) {
+      //res.send(500)
+      res.send('No scripts handled the action.');
+    }
   });
 }
