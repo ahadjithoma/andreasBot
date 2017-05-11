@@ -3,6 +3,7 @@ var slackToken = process.env.HUBOT_SLACK_VERIFY_TOKEN;
 module.exports = function(robot)  {
   robot.router.post('/hubot/slack-msg-callback', function(req, res) {
     var data = null;
+    res.send("come on");
 
   //   if(req.body.payload) {
   //     try {
@@ -34,5 +35,5 @@ module.exports = function(robot)  {
   //     //res.send(500)
   //     res.send('No scripts handled the action.');
   //   }
-  // });
+  });
 }
