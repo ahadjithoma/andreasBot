@@ -18,7 +18,7 @@ module.exports = function(robot) {
 
     // var server = app.listen("/hubot/trello-oauth");    
     // app.listen('/tmp/sock');
-    var server = app.listen(process.env.PORT || 3000, function () {
+    var server = app.listen(3000, function () {
       console.log('Server up and running...🏃🏃');
       console.log("Listening on port %s", server.address().port);
     });
