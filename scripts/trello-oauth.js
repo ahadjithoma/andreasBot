@@ -15,10 +15,12 @@ module.exports = function(robot) {
 
     app.use(express.static('public'));
 
-    var server = app.listen('https://andreasbot.herokuapp.com:3000', function () {
-      console.log('Server up and running...🏃🏃');
-      console.log("Listening on port %s", server.address().port);
-    });
+
+    var server = app.listen("/hubot/trello-oauth");
+    // var server = app.listen(3000, function () {
+    //   console.log('Server up and running...🏃🏃');
+    //   console.log("Listening on port %s", server.address().port);
+    // });
 
     /*
     /     OAuth Setup and Functions
