@@ -15,12 +15,10 @@ module.exports = function(robot) {
 
     app.use(express.static('public'));
 
-    var server = app.listen(3000, function () {
+    var server = app.listen('https://andreasbot.herokuapp.com:3000', function () {
       console.log('Server up and running...🏃🏃');
       console.log("Listening on port %s", server.address().port);
     });
-    var port = process.env.PORT || 3000; 
-    app.listen(port)
 
     /*
     /     OAuth Setup and Functions
