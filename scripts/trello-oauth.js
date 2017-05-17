@@ -19,7 +19,8 @@ module.exports = function(robot) {
       console.log('Server up and running...🏃🏃');
       console.log("Listening on port %s", server.address().port);
     });
-
+    var port = process.env.PORT || 3000; 
+    app.listen(port)
 
     /*
     /     OAuth Setup and Functions
