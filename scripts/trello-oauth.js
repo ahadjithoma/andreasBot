@@ -51,7 +51,7 @@ module.exports = function(robot) {
       oauth.getOAuthRequestToken(function(error, token, tokenSecret, results){
         // console.log(`in getOAuthRequestToken - token: ${token}, tokenSecret: ${tokenSecret}, resultes ${JSON.stringify(results)}, error: ${JSON.stringify(error)}`);
         oauth_secrets[token] = tokenSecret;
-        res.redirect(`${authorizeURL}?oauth_token=${token}&name=${appName}`);
+        //res.redirect(`${authorizeURL}?oauth_token=${token}&name=${appName}`);
         res_r.send(`${authorizeURL}?oauth_token=${token}&name=${appName}`);
         console.log(`${authorizeURL}?oauth_token=${token}&name=${appName}`);
       });
