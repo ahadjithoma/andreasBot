@@ -17,10 +17,10 @@ module.exports = function(robot) {
 
 
 
-    var server = app.listen(3000, function () {
-      console.log('Server up and running...🏃🏃');
-      console.log("Listening on port %s", server.address().port);
-    });
+    // var server = app.listen(3000, function () {
+    //   console.log('Server up and running...🏃🏃');
+    //   console.log("Listening on port %s", server.address().port);
+    // });
 
 
 
@@ -35,11 +35,10 @@ module.exports = function(robot) {
     // Be sure to include your key and secret in 🗝.env ↖️ over there.
     // You can get your key and secret from Trello at: https://trello.com/app-key
     const key = process.env.HUBOT_TRELLO_KEY;
-    //const token = process.env.HUBOT_TRELLO_TOKEN;
     const secret = process.env.HUBOT_TRELLO_OAUTH;
 
     // Trello redirects the user here after authentication
-    const loginCallback = "andreasbot.herokuapp.com";
+    const loginCallback = "";
 
     // You should {"token": "tokenSecret"} pairs in a real application
     // Storage should be more permanent (redis would be a good choice)
@@ -53,7 +52,6 @@ module.exports = function(robot) {
         oauth_secrets[token] = tokenSecret;
         //res.redirect(`${authorizeURL}?oauth_token=${token}&name=${appName}`);
         res_r.send(`${authorizeURL}?oauth_token=${token}&name=${appName}`);
-        console.log(`${authorizeURL}?oauth_token=${token}&name=${appName}`);
       });
     };
 
@@ -78,7 +76,6 @@ module.exports = function(robot) {
     /     Routes
     */
     
-    res_r.send("localhost:3000");
     login("","");
 
     // app.get("/", function (request, response) {
