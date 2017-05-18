@@ -39,7 +39,7 @@ module.exports = function(robot) {
     const secret = process.env.HUBOT_TRELLO_OAUTH;
 
     // Trello redirects the user here after authentication
-    const loginCallback = "";
+    const loginCallback = "andreasbot.herokuapp.com";
 
     // You should {"token": "tokenSecret"} pairs in a real application
     // Storage should be more permanent (redis would be a good choice)
