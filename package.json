@@ -5,9 +5,12 @@
   "author": "andreash92 <andreas_h92@outlook.com>",
   "description": "hubot - heroku - slack ",
   "dependencies": {
+    "express": "^4.15.2",
     "github": "^9.2.0",
+    "http": "^0.0.0",
     "hubot": "^2.19.0",
     "hubot-diagnostics": "0.0.1",
+    "hubot-env": "0.0.2",
     "hubot-google-images": "^0.2.6",
     "hubot-google-translate": "^0.2.0",
     "hubot-help": "^0.2.0",
@@ -20,9 +23,7 @@
     "hubot-shipit": "^0.2.0",
     "hubot-slack": "^4.3.4",
     "node-trello": "^1.1.2",
-    "express": "^4.15.2",
     "oauth": "^0.9.15",
-    "http": "^0.0.0",
     "url": "0.11.0"
   },
   "engines": {
