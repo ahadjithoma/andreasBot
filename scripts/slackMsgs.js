@@ -1,6 +1,5 @@
 module.exports = {
 
-
     menu: function(){
         return {
                 "text": "",
@@ -37,8 +36,25 @@ module.exports = {
 
     buttons: function(){
         return {} //TODO
-    }
+    },
 
+    basicMessage: function(){
+    return {
+            "attachments": [
+                { 
+                    "fallback": "",
+                    "mrkdwn_in": ["text", "pretext"],
+                    "color": "#36a64f",
+                    "pretext": "",
+                    "title": "title",
+                    "title_link": "",
+                    "text": "",
+                    "footer": "",
+                    "footer_icon": ""        
+                }
+            ]
+        }
+    }
     
 }
 

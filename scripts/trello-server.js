@@ -1,6 +1,6 @@
 module.exports = function(robot) {
 
-  robot.respond(/trello auth/i, function(res_r) {
+  robot.respond(/trello oauth/i, function(res_r) {
     
     var express = require('express');
  
