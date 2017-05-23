@@ -10,7 +10,7 @@ module.exports = function(robot) {
   	robot.on(slack_msg + 'trello_board', function(data, res) {
 		res.send('trello board button pressed');
 	    var msg = 'trello_board_list'; 
-	    var handled = robot.emit(msg, 'a', 'a');
+	    var handled = robot.emit(msg, data, res);
 	    if (!handled) {
 	      //res.send(500)
 	      res.send('No scripts handled the action.');
