@@ -10,7 +10,6 @@ module.exports = function(robot) {
   	robot.on(slack_msg + 'trello_board', function(data, res) {
 		 res.send('trello board button pressed');
 		 console.log(data);
-		 console.log(res);
 	});
   
   
