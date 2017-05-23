@@ -24,10 +24,11 @@ module.exports = function(robot) {
 
 
     /************** TESTING ************/
-    robot.on('trello_board_list', function(data, res2){
-        res2.send('back to trello-integration.js');
+    robot.on('trello_board_list', function(data, res){
+        res.send('back to trello-integration.js');
     })
-        
+    /***********************************/
+
     
     /*******************************************************************/
     /*                            BOARDS                               */
