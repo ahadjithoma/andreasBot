@@ -51,7 +51,7 @@ module.exports = function(robot) {
             let msg = slackmsg.buttons();
             msg.text = `Board Name: *${data.name}*`;
             msg.attachments[0].text = `Board's Lists`;
-            msg.attachments[0].callback_d = `trello_board`;
+            msg.attachments[0].callback_id = `trello_board`;
 
             // attach the board lists to buttons
             let listsNum = Object.keys(data.lists).length;
