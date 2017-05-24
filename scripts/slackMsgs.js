@@ -60,6 +60,7 @@ module.exports = {
     buttons: function(){
         return {
                 "text": "",
+                "replace_original": true,
                 "attachments": [
                     {
                         "text": "",
