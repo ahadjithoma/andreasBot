@@ -39,11 +39,22 @@ module.exports = function(robot)  {
 
     var msg = 'slack:msg_action:'; 
     var callback_id = data.callback_id;
-    console.log(data);
-    var handled = robot.emit(msg+callback_id, data, res);
-    if (!handled) {
-      //res.send(500)
-      res.send('No scripts handled the action.');
-    }
+    var response_url = data.response_url;
+    console.log(data.response_url);
+    var slackMsg = require('./slackMsgs');
+    var response = slackMsg.basicMessage();
+
+    robot.http(response_url)
+    .header('Content-Type', 'application/json')
+    .post(response)(function(err, res, body) {
+      console.log('http')
+      console.log(err)
+    });
+
+    // var handled = robot.emit(msg+callback_id, data, res);
+    // if (!handled) {
+    //   //res.send(500)
+    //   res.send('No scripts handled the action.');
+    // }
   });
 }
