@@ -11,8 +11,8 @@ module.exports = function(robot) {
 		res.send('trello board button pressed');
 	    
 	    var msg = 'trello_board_list'; 
-	    
-	    return robot.emit(msg, 'data', res);
+	    k = res; 
+	    return robot.emit(msg, 'data', k);
 	    //var handled = robot.emit(msg, 'data', res);
 	    // if (!handled) {
 	    //   //res.send(500)
