@@ -25,8 +25,8 @@ module.exports = function(robot) {
 
 
     /************** TESTING ************/
-    robot.on('trello_board_list', function(data, res) {
-         robot.send('robot.on: TODO');
+    robot.on('trello_board_list', function(data, res_r) {
+         res_r.send('robot.on: TODO');
          console.log('\nrobot.on: TODO\n');
     });
     /***********************************/
