@@ -46,7 +46,7 @@ module.exports = function(robot)  {
 
     robot.http(response_url)
     .header('Content-Type', 'application/json')
-    .post(response)(function(err, res, body) {
+    .post('response')(function(err, res, body) {
       console.log('http')
       console.log(err)
     });
