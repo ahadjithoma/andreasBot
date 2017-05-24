@@ -15,7 +15,8 @@ module.exports = function(robot) {
 	      //res.send(500)
 	      res.send('No scripts handled the action.');
 	    }
-		console.log(data);
+	    return
+		//console.log(data);
 	});
   
   
