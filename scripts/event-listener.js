@@ -16,7 +16,8 @@ module.exports = function(robot) {
 	    var handled = robot.emit(msg, 'data', res);
 	    if (!handled) {
 	      //res.send(500)
-	      res.send('No scripts handled the action.');
+	      res.send('\nNo scripts handled the action.\n');
+	      console.log('\nNo scripts handled the action.\n');
 	    }
 		// //console.log(data);
 	});
