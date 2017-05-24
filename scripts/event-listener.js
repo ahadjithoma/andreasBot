@@ -12,12 +12,12 @@ module.exports = function(robot) {
 	    
 	    var msg = 'trello_board_list'; 
 	    
-	    //return robot.emit(msg, 'data', 'res');
-	    var handled = robot.emit(msg, 'data', res);
-	    if (!handled) {
-	      //res.send(500)
-	      res.send('\nNo scripts handled the action.\n');
-	    }
+	    return robot.emit(msg, 'data', 'res');
+	    //var handled = robot.emit(msg, 'data', res);
+	    // if (!handled) {
+	    //   //res.send(500)
+	    //   res.send('\nNo scripts handled the action.\n');
+	    // }
 		// //console.log(data);
 	});
   
