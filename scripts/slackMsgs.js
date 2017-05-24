@@ -89,7 +89,7 @@ module.exports = {
     },
 
     basicMessage: function(){
-    return {
+        return {
             "attachments": [
                 {
                     "fallback": "",
@@ -102,6 +102,14 @@ module.exports = {
                     "footer": "Trello Authorization",
                     "footer_icon": "https://d2k1ftgv7pobq7.cloudfront.net/meta/u/res/images/b428584f224c42e98d158dad366351b0/trello-mark-blue.png"        }
             ]
+        }
+    },
+
+    ephemeralMsg: function(){
+        return {
+          "response_type": "ephemeral",
+          "replace_original": true,
+          "text": "Sorry, that didn't work. Please try again."
         }
     }
 

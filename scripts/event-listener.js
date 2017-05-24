@@ -3,7 +3,12 @@ module.exports = function(robot) {
 	var slack_msg = 'slack:msg_action:'; 
 
   	robot.on(slack_msg + 'wopr_game', function(data, res) {
-		 res.send('robot.on: TODO');
+		
+	    var response_url = data.response_url;
+	    console.log(data.response_url);
+	    var slackMsg = require('./slackMsgs');
+	    var response = slackMsg.basicMessage();
+		res.send(response);
 	});
 
 
