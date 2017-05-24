@@ -109,7 +109,7 @@ module.exports = {
     ephemeralMsg: function(){
         return {
           "response_type": "ephemeral",
-          "replace_original": true,
+          "replace_original": false,
           "text": "Sorry, that didn't work. Please try again."
         }
     }
