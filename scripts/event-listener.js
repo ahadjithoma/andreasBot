@@ -7,7 +7,7 @@ module.exports = function(robot) {
 	    var response_url = data.response_url;
 	    console.log(data.response_url);
 	    var slackMsg = require('./slackMsgs');
-	    var response = slackMsg.basicMessage();
+	    var response = slackMsg.ephemeralMsg();
 		res.send(response);
 	});
 
