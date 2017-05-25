@@ -43,13 +43,6 @@ module.exports = function(robot)  {
     var callback_id = data.callback_id;
 
 
-    if (callback_id == 'trello_board'){
-      res.send('callback_id = trello_board');
-      var handled = robot.emit(msg+callback_id, data, res);
-      if (!handled){
-        res.send('No scripts handled the action.');
-      }
-    }
 
     var response_url = data.response_url;
     console.log(data.response_url);
@@ -69,12 +62,12 @@ module.exports = function(robot)  {
     // });
 
 
-    // original code 
-    // var handled = robot.emit(msg+callback_id, data, res);
-    // if (!handled) {
-    //   //res.send(500)
-    //   res.send('No scripts handled the action.');
-    // }
+    original code 
+    var handled = robot.emit(msg+callback_id, data, res);
+    if (!handled) {
+      //res.send(500)
+      res.send('No scripts handled the action.');
+    }
 
 
   });
