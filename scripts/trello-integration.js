@@ -91,7 +91,7 @@ module.exports = function(robot) {
     robot.on(slackCB + 'trello_board', function(data, res){
         console.log('robot.on: trello_board');
         var games_buttons = require('./games.json');
-        res.send('games_buttons');
+        res.send(games_buttons);
     }) 
 
 
