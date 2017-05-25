@@ -44,9 +44,10 @@ module.exports = function(robot)  {
 
 
     if (callback_id == 'trello_board'){
+      res.send('callback_id = trello_board');
       var handled = robot.emit(msg+callback_id, data, res);
       if (!handled){
-        res.send('Ni scripts handled the action.');
+        res.send('No scripts handled the action.');
       }
     }
 
