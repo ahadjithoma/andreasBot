@@ -95,7 +95,7 @@ module.exports = function(robot) {
     function cb(data, res){
         console.log('robot.on: trello_board');
         console.log(data);
-        res.send('robot.on: trello_board'); 
+        //res.send('robot.on: trello_board'); 
         let value = data.actions[0].value;
         let btn_name = data.actions[0].name;
         let cb_id = data.callback_id;
