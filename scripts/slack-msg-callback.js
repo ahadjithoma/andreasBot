@@ -45,7 +45,7 @@ module.exports = function(robot)  {
     console.log(data.response_url);
     
     var slackMsg = require('./slackMsgs');
-    var response = slackMsg.basicMessage();
+    var response = slackMsg.ephermeralMsg();
 
     sendMessageToSlackResponseURL(response_url, response);
 

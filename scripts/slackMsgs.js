@@ -105,10 +105,11 @@ module.exports = {
         }
     },
 
+    // only visible to the user involved 
     ephemeralMsg: function(){
         return {
           "response_type": "ephemeral",
-          "replace_original": false,
+          "replace_original": true,
           "text": "Sorry, that didn't work. Please try again."
         }
     }
