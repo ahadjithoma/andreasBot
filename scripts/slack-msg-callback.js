@@ -3,12 +3,6 @@ var request = require('request');
 
 module.exports = function(robot)  {
 
-  robot.router.post('/hubot/trello', function(req, res){
-    var data = null;
-    res.send('hello there');
-    console.log("\n*********\n");
-  });
-
 
   robot.router.post('/hubot/slack-msg-callback', function(req, res) {
     var data = null;
