@@ -48,14 +48,14 @@ module.exports = function(robot)  {
     var slackMsg = require('./slackMsgs');
     var response = slackMsg.ephemeralMsg();
 
-    sendMessageToSlackResponseURL(response_url, response);
+//    sendMessageToSlackResponseURL(response_url, response);
 
-    // robot.http(response_url)
-    // .header('Content-Type', 'application/json')
-    // .post('response')(function(err, res, body) {
-    //   console.log('http')
-    //   console.log(err)
-    // });
+    robot.http(response_url)
+    .header('Content-Type', 'application/json')
+    .post(response)(function(err, res, body) {
+      console.log('http')
+      console.log(err)
+    });
 
 
 
