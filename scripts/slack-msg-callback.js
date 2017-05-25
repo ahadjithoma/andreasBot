@@ -12,6 +12,7 @@ module.exports = function(robot)  {
 
   robot.router.post('/hubot/slack-msg-callback', function(req, res) {
     var data = null;
+    res.status(200).end() // best practice to respond with 200 status
 
     if(req.body.payload) {
       try {
