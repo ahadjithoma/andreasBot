@@ -13,8 +13,8 @@ module.exports = function(robot)  {
   robot.router.post('/hubot/slack-msg-callback', function(req, res) {
     var data = null;
     res.status(200).end() // best practice to respond with 200 status
-
-    if(req.body.payload) {
+ 
+    if (req.body.payload) {
       try {
         data = JSON.parse(req.body.payload);
       } catch(e) {
@@ -30,7 +30,7 @@ module.exports = function(robot)  {
       return;
     }
 
-    if(data.token === slackToken) {
+    if (data.token === slackToken) {
       robot.logger.info("Request is good");
     } else {
       robot.logger.error("Token mismatch on Slack message callback");
@@ -41,6 +41,14 @@ module.exports = function(robot)  {
 
     var msg = 'slack:msg_action:'; 
     var callback_id = data.callback_id;
+
+
+    if (callback_id == 'trello-board'){
+      var handled = robot.emit(msg+callback_id, data, res);
+      if (!handled){
+        res.send('Ni scripts handled the action.');
+      }
+    }
 
     var response_url = data.response_url;
     console.log(data.response_url);
@@ -80,11 +88,11 @@ module.exports = function(robot)  {
               'Content-type': 'application/json'
           },
           json: JSONmessage
-      }
+      };
       request(postOptions, (error, response, body) => {
           if (error){
               // handle errors as you see fit
-          }
+          };
       })
     }
 }

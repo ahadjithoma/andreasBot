@@ -12,24 +12,14 @@ module.exports = function(robot) {
     robot.respond(/trello account name/i, function(res_r) {
         t.get("/1/members/me", function(err, data) {
             if (err) {
-                //console.log(err);
-                //throw err;
                 res_r.send('Error: ' + err['responseBody']);
                 return false;
             };
-            //res_r.send(res);
             res_r.send(data['fullName']);
         });
     })
 
 
-
-    /************** TESTING ************/
-    robot.on('trello_board_list', function(data, res_r) {
-         res_r.send('robot.on: TODO');
-         console.log('\nrobot.on: TODO\n');
-    });
-    /***********************************/
 
     /*******************************************************************/
     /*                            BOARDS                               */
