@@ -48,16 +48,16 @@ module.exports = function(robot)  {
     var slackMsg = require('./slackMsgs');
     var response = slackMsg.ephemeralMsg();
 
-//    sendMessageToSlackResponseURL(response_url, response);
-
-    robot.http(response_url)
-    .header({'Content-Type': 'application/json'})
-    .post(response)(function(err, res, body) {
-      console.log('http')
-      console.log(err)
-    });
+    sendMessageToSlackResponseURL(response_url, response);
 
 
+    // this code snippet doesn't work for response_url
+    // robot.http(response_url)
+    // .header('Content-Type', 'application/json')
+    // .post(response)(function(err, res, body) {
+    //   console.log('http')
+    //   console.log(err)
+    // });
 
 
     function sendMessageToSlackResponseURL(responseURL, JSONmessage){
