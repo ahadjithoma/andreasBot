@@ -88,29 +88,14 @@ module.exports = function(robot) {
 
     var slackCB = 'slack:msg_action:';
 
+    // responding to 'trello_board' interactive message
     robot.on(slackCB + 'trello_board', function(data, res){
         console.log('robot.on: trello_board');
-        var games_buttons = require('./games.json');
-        res.send(games_buttons);
     }) 
 
 
 
-    // robot.respond(/trello /i, function(res_r) {
-    //     t.post("/1/", function(err, data){
-    //         if (err){
-    //             res_r.send('Error Encountered: '+ err['responseBody']);
-    //         }
-    //     })
-    // })
-
-    // robot.respond(/trello /i, function(res_r) {
-    //     t.post("/1/", function(err, data){
-    //         if (err){
-    //             res_r.send('Error Encountered: '+ err['responseBody']);
-    //         }
-    //     })
-    // })    
+    /* template */
 
     // robot.respond(/trello /i, function(res_r) {
     //     t.post("/1/", function(err, data){
@@ -124,6 +109,6 @@ module.exports = function(robot) {
 
 
     /*/
-    /// TODO: add more functionality 
+    /*  TODO: add more functionality */ 
     /*/
 }
