@@ -22,7 +22,7 @@ module.exports = function(robot) {
 
 
     /*******************************************************************/
-    /*                            BOARDS                               */
+    /* trello api                 BOARDS                               */
     /*******************************************************************/
 
     // Associate a board with a specific Channel 
@@ -64,7 +64,7 @@ module.exports = function(robot) {
     })
 
     /*******************************************************************/
-    /*                             LISTS                               */
+    /* trello api                  LISTS                               */
     /*******************************************************************/
 
     
@@ -82,6 +82,19 @@ module.exports = function(robot) {
     })
 
     
+    /*******************************************************************/
+    /*                        robot.on listeners                       */
+    /*******************************************************************/
+
+    var slackCB = 'slack:msg_action:';
+
+    robot.on(slackCB + 'trello_board', function(data, res){
+        console.log('robot.on: trello_board');
+        res.send('robot.on: trello_board');
+    }) 
+
+
+
     // robot.respond(/trello /i, function(res_r) {
     //     t.post("/1/", function(err, data){
     //         if (err){

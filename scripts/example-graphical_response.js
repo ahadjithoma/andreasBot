@@ -4,8 +4,7 @@ module.exports = function(robot) {
   var games_menu = require('./games.json');
 
   robot.hear(/games - buttons/i, function(res) {
-	msg.attachments[0].callback_id = 'wopr_game';
-	res.send(games_buttons)
+	res.send(games_menu)
   })
 
   robot.respond(/games - menu/i, function(res) {
