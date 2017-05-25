@@ -1,15 +1,10 @@
 module.exports = function(robot) {
   
 	var slack_msg = 'slack:msg_action:'; 
+  var callback_id = 'wopr_game'; // 'worp_game' is an example for testing purposes
 
-  	robot.on(slack_msg + 'wopr_game', function(data, res) {
-		res.send('slack:msg_action:wopr_game');
+  robot.on(slack_msg + callback_id, function(data, res) {
+		 res.send('robot.on: TODO')
 	});
-
-
-  	robot.on(slack_msg + 'trello_board', function(data, res) {
-		res.send('slack:msg_action:'+data.callback_id);
-	});
-  
   
 }
