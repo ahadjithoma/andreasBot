@@ -62,7 +62,7 @@ module.exports = function(robot)  {
     // });
 
 
-    original code 
+    //original code 
     var handled = robot.emit(msg+callback_id, data, res);
     if (!handled) {
       //res.send(500)
