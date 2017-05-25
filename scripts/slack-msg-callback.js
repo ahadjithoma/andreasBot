@@ -1,4 +1,5 @@
 var slackToken = process.env.HUBOT_SLACK_VERIFY_TOKEN;
+var request = require('request');
 
 module.exports = function(robot)  {
 
@@ -40,10 +41,13 @@ module.exports = function(robot)  {
     var msg = 'slack:msg_action:'; 
     var callback_id = data.callback_id;
 
-    // var response_url = data.response_url;
-    // console.log(data.response_url);
-    // var slackMsg = require('./slackMsgs');
-    // var response = slackMsg.basicMessage();
+    var response_url = data.response_url;
+    console.log(data.response_url);
+    
+    var slackMsg = require('./slackMsgs');
+    var response = slackMsg.basicMessage();
+
+    sendMessageToSlackResponseURL(response_url, response);
 
     // robot.http(response_url)
     // .header('Content-Type', 'application/json')
@@ -52,10 +56,33 @@ module.exports = function(robot)  {
     //   console.log(err)
     // });
 
-    var handled = robot.emit(msg+callback_id, data, res);
-    if (!handled) {
-      //res.send(500)
-      res.send('No scripts handled the action.');
+
+
+
+    function sendMessageToSlackResponseURL(responseURL, JSONmessage){
+      var postOptions = {
+          uri: responseURL,
+          method: 'POST',
+          headers: {
+              'Content-type': 'application/json'
+          },
+          json: JSONmessage
+      }
+      request(postOptions, (error, response, body) => {
+          if (error){
+              // handle errors as you see fit
+          }
+      })
     }
+
+
+    // original code 
+    // var handled = robot.emit(msg+callback_id, data, res);
+    // if (!handled) {
+    //   //res.send(500)
+    //   res.send('No scripts handled the action.');
+    // }
+
+
   });
 }

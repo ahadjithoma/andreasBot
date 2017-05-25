@@ -24,6 +24,7 @@
     "hubot-slack": "^4.3.4",
     "node-trello": "^1.1.2",
     "oauth": "^0.9.15",
+    "request": "^2.81.0",
     "url": "0.11.0"
   },
   "engines": {
