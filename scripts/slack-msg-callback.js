@@ -60,6 +60,18 @@ module.exports = function(robot)  {
     // });
 
 
+    // original code 
+    // var handled = robot.emit(msg+callback_id, data, res);
+    // if (!handled) {
+    //   //res.send(500)
+    //   res.send('No scripts handled the action.');
+    // }
+
+
+  });
+
+
+
     function sendMessageToSlackResponseURL(responseURL, JSONmessage){
       var postOptions = {
           uri: responseURL,
@@ -75,15 +87,4 @@ module.exports = function(robot)  {
           }
       })
     }
-
-
-    // original code 
-    // var handled = robot.emit(msg+callback_id, data, res);
-    // if (!handled) {
-    //   //res.send(500)
-    //   res.send('No scripts handled the action.');
-    // }
-
-
-  });
 }
