@@ -91,10 +91,15 @@ module.exports = function(robot) {
     // responding to 'trello_board' interactive message
     robot.on(slackCB + 'trello_board', cb)
 
+    // todo: change name 
     function cb(data, res){
         console.log('robot.on: trello_board');
+        console.log(data);
         res.send('robot.on: trello_board'); 
+
     }
+
+
 
     /* template */
 
