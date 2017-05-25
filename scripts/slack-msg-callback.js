@@ -50,7 +50,7 @@ module.exports = function(robot)  {
     var slackMsg = require('./slackMsgs');
     var response = slackMsg.ephemeralMsg();
 
-    sendMessageToSlackResponseURL(response_url, response);
+    // sendMessageToSlackResponseURL(response_url, response);
 
 
     // this code snippet doesn't work for response_url
