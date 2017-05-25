@@ -91,6 +91,7 @@ module.exports = function(robot) {
     // responding to 'trello_board' interactive message
     robot.on(slackCB + 'trello_board', function(data, res){
         console.log('robot.on: trello_board');
+        res.send('robot.on: trello_board');
     }) 
 
 
