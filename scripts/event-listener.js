@@ -12,8 +12,8 @@ module.exports = function(robot) {
 	});
 
 
- //  	robot.on(slack_msg + 'trello_board', function(data, res) {
-	// 	res.send('trello board button pressed');
+  	robot.on(slack_msg + 'trello_board', function(data, res) {
+		res.send('trello board button pressed');
 	    
 	//     var msg = 'trello_board_list'; 
 	//     k = res; 
@@ -24,7 +24,7 @@ module.exports = function(robot) {
 	//     //   res.send('\nNo scripts handled the action.\n');
 	//     // }
 	// 	// //console.log(data);
-	// });
+	});
   
   
 }
