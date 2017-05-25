@@ -1,7 +1,7 @@
 module.exports = function(robot) {
 
-  var games_buttons = require('./example-buttons.json');
-  var games_menu = require('./example-menu.json');
+  var games_buttons = require('./games.json');
+  var games_menu = require('./games.json');
 
   robot.hear(/games - buttons/i, function(res) {
 	res.send(games_buttons)
