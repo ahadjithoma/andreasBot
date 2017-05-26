@@ -39,12 +39,6 @@ module.exports = function(robot) {
     function trello_board(res_r){
         // TODO: fetch the board id from other source (env, redis or mongodb)
         let boardId = 'BE7seI7e';
-        res_r.send(getBoard(boardId));
-        
-
-    }
-
-    function getBoard(boardId){
         
         t.get("/1/board/"+boardId, {lists:"all"}, function(err, data){
             if (err){
@@ -65,11 +59,10 @@ module.exports = function(robot) {
                 let item = {"name": list, "text": list,"type":"button", "value": list};
                 msg.attachments[0].actions.push(item);
             }
-            return msg;
-
-            //res_r.send(msg);
+            
+            res_r.send(msg);
         })
-    } 
+    }
 
     /*******************************************************************/
     /* trello api                  LISTS                               */
@@ -89,8 +82,7 @@ module.exports = function(robot) {
         })
     })
 
-
-
+    
     /*******************************************************************/
     /*                        robot.on listeners                       */
     /*******************************************************************/
@@ -108,7 +100,7 @@ module.exports = function(robot) {
         let value = data.actions[0].value;
         let btn_name = data.actions[0].name;
         let cb_id = data.callback_id;
-
+        
     }
 
 
