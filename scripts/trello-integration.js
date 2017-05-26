@@ -95,7 +95,7 @@ module.exports = function(robot) {
     robot.on(slackCB + 'trello_board', function(data_board, res){
         console.log('robot.on: trello_board');
         // console.log(data);
-        res.send('robot.on: trello_board'); 
+        // res.send('robot.on: trello_board'); 
         let listId = data_board.actions[0].value;
         // let listName = data_board.actions[0].name;
         // let cb_id = data_board.callback_id;
@@ -104,14 +104,12 @@ module.exports = function(robot) {
         let pars = {cards: "all"};
         trelloapi.list_id(listId, pars)
             .then(function(data_list){
+                res.send('aa');
                 console.log(listId);
                 })
             .fail(function(err){
                 console.log(err);
             });
-        console.log(data_list);
-
-
 
         // create buttons msg\
         /*
