@@ -95,7 +95,7 @@ module.exports = function(robot) {
     robot.on(slackCB + 'trello_board', function(data_board, res){
         console.log('robot.on: trello_board');
         let listId = data_board.actions[0].value;
-        // let listName = data_board.actions[0].name;
+        let listName = data_board.actions[0].name;
         // let cb_id = data_board.callback_id;
 
         // call function to fetch list - provide list id
