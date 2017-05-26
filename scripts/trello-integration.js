@@ -119,7 +119,7 @@ module.exports = function(robot) {
 
                 // respond with information for that list
                 res.send(msg);
-                console.log(msg.actions);
+                console.log(msg.attachments[0].actions);
                 })
             .fail(function(err){
                 console.log(err);
