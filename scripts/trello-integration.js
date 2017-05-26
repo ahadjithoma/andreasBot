@@ -104,7 +104,7 @@ module.exports = function(robot) {
         let pars = {cards: "all"};
         trelloapi.list_id(listId, pars)
             .then(function(data_list){
-                res.send('aa');
+                res.send(data_board.actions[0].value);
                 console.log(listId);
                 })
             .fail(function(err){
