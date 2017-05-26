@@ -104,13 +104,14 @@ module.exports = function(robot) {
         let pars = {cards: "all"};
         trelloapi.list_id(listId, pars)
             .then(function(data_list){
-                res.send(data_board.actions[0].value);
-                console.log(listId);
+
+                console.log(data_list);
                 })
             .fail(function(err){
                 console.log(err);
             });
 
+        console.log(data_list);
         // create buttons msg\
         /*
         let msg = slackmsg.buttons();
