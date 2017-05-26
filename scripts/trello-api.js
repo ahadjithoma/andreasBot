@@ -14,9 +14,10 @@ var t = new trello(key, token);
 
 module.exports ={ 
 
-	/* MEMBERS */
-
-	members_me: function(n, cb){
+    /*******************************************************************/
+    /*                              MEMBERS                            */
+    /*******************************************************************/
+	members_me: function(callback){
         var deferred = q.defer();
 	    t.get("/1/members/me", function(err, data) {
 	        if (err) {
@@ -24,11 +25,24 @@ module.exports ={
 	        };
             deferred.resolve(data);
 	    });
-        deferred.promise.nodeify(cb);
+        deferred.promise.nodeify(callback);
 	    return deferred.promise;
 	},
 
-	/* LISTS */
+    /*******************************************************************/
+    /*                              LISTS                              */
+    /*******************************************************************/
+	list_id: function(id, par, callback){
+		var deferred = q.defer();
+		t.get("1/lists/"+id, function(err, data){
+			if (err){
+				deferred.reject(err);
+			};
+			deferred.resolve(data);
+		});
+		deferred.promise.nodeify(callback);
+		returnd deferred.promise;
+	}
 
 
 }

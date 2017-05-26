@@ -3,6 +3,7 @@ module.exports = function(robot) {
 
     var trello = require("node-trello");
     var slackmsg = require("./slackMsgs.js");
+    var trelloapi = require("./trello-api.js");
 
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
@@ -55,8 +56,9 @@ module.exports = function(robot) {
             // attach the board lists to buttons
             let listsNum = Object.keys(data.lists).length;
             for (var i=0; i<listsNum; i++){
-                let list = data.lists[i].name;
-                let item = {"name": list, "text": list,"type":"button", "value": list};
+                let list    = data.lists[i].name;
+                let listId  = data.lists[i].id;
+                let item    = {"name": list, "text": list,"type":"button", "value": listId};
                 msg.attachments[0].actions.push(item);
             }
             
@@ -90,18 +92,26 @@ module.exports = function(robot) {
     var slackCB = 'slack:msg_action:';
 
     // responding to 'trello_board' interactive message
-    robot.on(slackCB + 'trello_board', cb)
-
-    // todo: change name 
-    function cb(data, res){
+    robot.on(slackCB + 'trello_board', function(data, res){
         console.log('robot.on: trello_board');
         // console.log(data);
         res.send('robot.on: trello_board'); 
-        let value = data.actions[0].value;
+        let listId = data.actions[0].value;
         let btn_name = data.actions[0].name;
         let cb_id = data.callback_id;
-        
-    }
+
+        // call function to fetch list - provide list id
+        trelloapi.list_id(listId, ' ')
+            .then(function(data){
+                console.log(data);
+            })
+            .fail(function(err){
+                console.log(err);
+            });
+
+        // create buttons msg
+        // respond with information for that list
+    })
 
 
 
