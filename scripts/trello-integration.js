@@ -43,7 +43,7 @@ module.exports = function(robot) {
         t.get("/1/board/"+boardId, {lists:"all"}, getBoard_cb)
     }
 
-    function getBoard_cb(err, data){
+    function getBoard_cb(res_r, err, data){
         if (err){
             res_r.send('Error Encountered: '+ err['responseBody']);
             return false;
