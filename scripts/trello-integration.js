@@ -40,7 +40,7 @@ module.exports = function(robot) {
         let boardId = 'BE7seI7e';
         let pars = {lists:"all"};
         trelloapi.getBoard(boardId, pars)
-            .then(function(data_board){
+            .then(function(data){
                 // customize slack's interactive message 
                 let msg = slackmsg.buttons();
                 msg.text = `Board Name: *${data.name}*`;
