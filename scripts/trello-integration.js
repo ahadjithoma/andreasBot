@@ -105,12 +105,11 @@ module.exports = function(robot) {
         trelloapi.list_id(listId, pars)
             .then(function(data_list){
                 console.log(listId);
-                res.send('a');
-            })
+                })
             .fail(function(err){
                 console.log(err);
             });
-
+        console.log(data_list);
 
 
 
