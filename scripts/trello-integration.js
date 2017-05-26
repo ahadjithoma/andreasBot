@@ -37,7 +37,7 @@ module.exports = function(robot) {
 
     function trello_board(res_r){
         // TODO: fetch the board id from other source (env, redis or mongodb)
-        let boardId = 'BE7seI7e';
+        var boardId = 'BE7seI7e';
         let pars = {lists:"all"};
         trelloapi.getBoard(boardId, pars)
             .then(function(data_board){
