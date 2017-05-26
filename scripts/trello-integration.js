@@ -101,7 +101,7 @@ module.exports = function(robot) {
         // let cb_id = data.callback_id;
 
         // call function to fetch list - provide list id
-        let pars = {cards: "all"};
+        let pars = '';//{cards: "all"};
         trelloapi.list_id(listId, pars)
             .then(function(data){
                 console.log(data);
