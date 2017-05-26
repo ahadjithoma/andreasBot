@@ -41,7 +41,7 @@ module.exports ={
 			deferred.resolve(data);
 		});
 		deferred.promise.nodeify(callback);
-		returnd deferred.promise;
+		return deferred.promise;
 	}
 
 
