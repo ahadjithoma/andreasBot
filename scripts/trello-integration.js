@@ -104,7 +104,7 @@ module.exports = function(robot) {
 
         // call function to fetch list - provide list id
         let pars = {cards: "all"};
-        trelloapi.list_id(listId, pars)
+        trelloapi.getList(listId, pars)
             .then(function(data_list){
 
                 // create buttons msg
