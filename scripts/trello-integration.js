@@ -29,9 +29,7 @@ module.exports = function(robot) {
     // Associate a board with a specific Channel 
     robot.hear(/trello board (.*)/i, function(res_r) {
         let board = res_r.match[1];
-
         // TODO!
-
     })
 
     //GET /1/boards/[board_id]
@@ -40,7 +38,30 @@ module.exports = function(robot) {
     function trello_board(res_r){
         // TODO: fetch the board id from other source (env, redis or mongodb)
         let boardId = 'BE7seI7e';
-        
+        let pars = {lists:"all"};
+        trelloapi.getBoard(boardId, pars)
+            .then(function(data_board){
+                // customize slack's interactive message 
+                let msg = slackmsg.buttons();
+                msg.text = `Board Name: *${data.name}*`;
+                msg.attachments[0].text = `Board's Lists`;
+                msg.attachments[0].callback_id = `trello_board`;
+
+                // attach the board lists to buttons
+                let listsNum = Object.keys(data.lists).length;
+                for (var i=0; i<listsNum; i++){
+                    let list    = data.lists[i].name;
+                    let listId  = data.lists[i].id;
+                    let item    = {"name": list, "text": list,"type":"button", "value": listId};
+                    msg.attachments[0].actions.push(item);
+                }
+                
+                res_r.send(msg);
+            })
+            .fail(function(err){
+                console.log(err);
+            })
+        /*
         t.get("/1/board/"+boardId, {lists:"all"}, function(err, data){
             if (err){
                 res_r.send('Error Encountered: '+ err['responseBody']);
@@ -63,26 +84,9 @@ module.exports = function(robot) {
             }
             
             res_r.send(msg);
-        })
+        })*/
     }
 
-    /*******************************************************************/
-    /* trello api                  LISTS                               */
-    /*******************************************************************/
-
-    
-    //GET /1/lists/[idList]
-    robot.hear(/trello lists/i, function(res_r) {
-        t.post("/1/lists/", function(err, data){
-            if (err){
-                res_r.send('Error Encountered: '+ err['responseBody']);
-                return false;
-            } 
-            else {
-                res_r.send(data.lists);
-            }
-        })
-    })
 
     
     /*******************************************************************/
@@ -125,8 +129,6 @@ module.exports = function(robot) {
             .fail(function(err){
                 console.log(err);
             });
-
-
     })
 
 

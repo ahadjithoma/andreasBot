@@ -17,31 +17,3 @@ module.exports = function(robot) {
 
 
 
-/* An example of using slack's response_url. ~For future use */
-/* Add this snippet inside robot.on that u want to trigger   */
-/*
-    var response_url = data.response_url;
-    var slackMsg = require('./slackMsgs');
-    var response = slackMsg.ephemeralMsg();
-
-    sendMessageToSlackResponseURL(response_url, response);
-
-
-    function sendMessageToSlackResponseURL(responseURL, JSONmessage){
-      var postOptions = {
-          uri: responseURL,
-          method: 'POST',
-          headers: {
-              'Content-type': 'application/json'
-          },
-          json: JSONmessage
-      };
-      request(postOptions, (error, response, body) => {
-          if (error){
-              // handle errors as you see fit
-          };
-      })
-    }
-
-
-*/
