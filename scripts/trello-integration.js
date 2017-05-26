@@ -34,8 +34,9 @@ module.exports = function(robot) {
     })
 
     //GET /1/boards/[board_id]
-    robot.hear(/trello board/i, function(res_r) {
+    robot.hear(/trello board/i, trello_board)
 
+    function trello_board(res_r){
         // TODO: fetch the board id from other source (env, redis or mongodb)
         let boardId = 'BE7seI7e';
         
@@ -61,7 +62,7 @@ module.exports = function(robot) {
             
             res_r.send(msg);
         })
-    })
+    }
 
     /*******************************************************************/
     /* trello api                  LISTS                               */
@@ -100,9 +101,6 @@ module.exports = function(robot) {
         let btn_name = data.actions[0].name;
         let cb_id = data.callback_id;
 
-        res.send(value);
-        res.send(cb_id);
-        res.send(btn_name);
     }
 
 
