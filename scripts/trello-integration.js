@@ -32,11 +32,11 @@ module.exports = function(robot) {
                 msg.attachments[0].callback_id = `trello_board`;
 
                 // attach the board lists to buttons
-                let joinBtn = {"name": join, "text": Join,"type":"button", "value": join};
-                let subBtn  = {"name": sub, "text": Subscribe,"type":"button", "value": sub};
-                let starBtn = {"name": star, "text": Star,"type":"button", "value": star};
-                let listsBtn= {"name": lists, "text": Lists,"type":"button", "value": lists};
-                let doneBtn = {"name": done, "text": Done,"type":"button", "value": done,"style": "danger"};
+                let joinBtn = {"name": "join", "text": "Join","type":"button", "value": "join"};
+                let subBtn  = {"name": "sub", "text": "Subscribe","type":"button", "value": "sub"};
+                let starBtn = {"name": "star", "text": "Star","type":"button", "value": "star"};
+                let listsBtn= {"name": "lists", "text": "Lists","type":"button", "value": "lists"};
+                let doneBtn = {"name": "done", "text": "Done","type":"button", "value": "done","style": "danger"};
                 msg.attachments[0].actions.push(joinBtn);
                 msg.attachments[0].actions.push(subBtn);
                 msg.attachments[0].actions.push(listsBtn);
