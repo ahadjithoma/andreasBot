@@ -96,7 +96,7 @@ module.exports = function(robot) {
         console.log('robot.on: trello_board');
         // console.log(data);
         res.send('robot.on: trello_board'); 
-        // let listId = data.actions[0].value;
+        let listId = data.actions[0].value;
         // let listName = data.actions[0].name;
         // let cb_id = data.callback_id;
 
