@@ -94,8 +94,6 @@ module.exports = function(robot) {
     // responding to 'trello_board' interactive message
     robot.on(slackCB + 'trello_board', function(data_board, res){
         console.log('robot.on: trello_board');
-        // console.log(data);
-        // res.send('robot.on: trello_board'); 
         let listId = data_board.actions[0].value;
         // let listName = data_board.actions[0].name;
         // let cb_id = data_board.callback_id;
@@ -115,7 +113,7 @@ module.exports = function(robot) {
                 //let cardsNum = Object.keys(data.)
 
                 // respond with information for that list
-                res.send(msg);
+                res.send('a');
                 })
             .fail(function(err){
                 console.log(err);
@@ -123,6 +121,17 @@ module.exports = function(robot) {
 
 
     })
+
+
+
+
+
+    
+    /*  TODO: add more functionality */ 
+    
+}
+
+
 
 
 
@@ -139,7 +148,32 @@ module.exports = function(robot) {
 
 
 
-    
-    /*  TODO: add more functionality */ 
-    
-}
+
+/* An example of using slack's response_url. ~For future use */
+/* Add this snippet inside robot.on that u want to trigger   */
+/*
+    var response_url = data.response_url;
+    var slackMsg = require('./slackMsgs');
+    var response = slackMsg.ephemeralMsg();
+
+    sendMessageToSlackResponseURL(response_url, response);
+
+
+    function sendMessageToSlackResponseURL(responseURL, JSONmessage){
+      var postOptions = {
+          uri: responseURL,
+          method: 'POST',
+          headers: {
+              'Content-type': 'application/json'
+          },
+          json: JSONmessage
+      };
+      request(postOptions, (error, response, body) => {
+          if (error){
+              // handle errors as you see fit
+          };
+      })
+    }
+
+
+*/
