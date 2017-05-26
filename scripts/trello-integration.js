@@ -111,7 +111,7 @@ module.exports = function(robot) {
                 console.log(err);
             });
 
-        console(data_list);
+        console.log(data_list);
 
 
 
