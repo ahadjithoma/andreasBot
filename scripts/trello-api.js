@@ -20,7 +20,7 @@ module.exports ={
 
 	getBoard: function(id, pars, callback){
         var deferred = q.defer();
-        t.get("/1/board/"+boardId, pars, function(err, data){
+        t.get("/1/board/"+id, pars, function(err, data){
 			if (err) {
       		    deferred.reject(err);
 	        };
