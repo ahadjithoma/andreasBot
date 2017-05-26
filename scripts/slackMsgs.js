@@ -61,8 +61,11 @@ module.exports = {
         return {
                 "text": "",
                 "attachments": [
-                    {
+                    {   
+                        "title":"",
+                        "title_link":"",
                         "text": "",
+                        "author_name": "",
                         "fallback": "",
                         "callback_id": "cb_id",
                         "mrkdwn_in": [
