@@ -103,17 +103,16 @@ module.exports = function(robot) {
         trelloapi.list_id(listId, pars)
             .then(function(data_list){
 
-                // create buttons msg\
-                
-                // let msg = slackmsg.buttons();
-                // msg.text = `*${name}* list`;
+                // create buttons msg
+                let msg = slackmsg.buttons();
+                msg.text = `*${name}* list`;
                 // msg.attachments[0].text = ``;
                 // msg.attachments[0].callback_id = `trello_list`;
                 
                 //let cardsNum = Object.keys(data.)
 
                 // respond with information for that list
-                res.send('a');
+                res.send(msg);
                 })
             .fail(function(err){
                 console.log(err);
