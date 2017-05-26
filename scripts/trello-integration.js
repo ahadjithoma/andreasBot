@@ -115,7 +115,7 @@ module.exports = function(robot) {
                     let card    = data_list.cards[i].name;
                     let cardId  = data_list.cards[i].id;
                     let item    = {"name": card, "text": card,"type":"button", "value": cardId};
-                    msg.attachments[0].actions.push({"name": 'card', "text": 'card',"type":"button", "value": 'cardId'});
+                    msg.attachments[0].actions.push(item);
                 }
 
                 // respond with information for that list
