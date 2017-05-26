@@ -39,8 +39,8 @@ module.exports = function(robot) {
                 let doneBtn = {"name": "done", "text": "Done","type":"button", "value": "done","style": "danger"};
                 msg.attachments[0].actions.push(joinBtn);
                 msg.attachments[0].actions.push(subBtn);
+                msg.attachments[0].actions.push(starBtn);
                 msg.attachments[0].actions.push(listsBtn);
-                msg.attachments[0].actions.push(cardsBtn);
                 msg.attachments[0].actions.push(doneBtn);
 
                 res_r.send(msg);
