@@ -37,9 +37,9 @@ module.exports = function(robot) {
 
     function trello_board(res_r){
         // TODO: fetch the board id from other source (env, redis or mongodb)
-        var boardId = 'BE7seI7e';
+        let id = 'BE7seI7e';//        var boardId = 'BE7seI7e';
         let pars = {lists:"all"};
-        trelloapi.getBoard(boardId, pars)
+        trelloapi.getBoard(id, pars)
             .then(function(data_board){
                 // customize slack's interactive message 
                 let msg = slackmsg.buttons();
