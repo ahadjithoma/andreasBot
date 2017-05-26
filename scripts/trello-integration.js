@@ -97,11 +97,12 @@ module.exports = function(robot) {
         // console.log(data);
         res.send('robot.on: trello_board'); 
         let listId = data.actions[0].value;
-        let btn_name = data.actions[0].name;
+        let listName = data.actions[0].name;
         let cb_id = data.callback_id;
 
         // call function to fetch list - provide list id
-        trelloapi.list_id(listId, ' ')
+        let pars = `{cards: "all"}`
+        trelloapi.list_id(listId, pars)
             .then(function(data){
                 console.log(data);
             })
@@ -110,7 +111,15 @@ module.exports = function(robot) {
             });
 
         // create buttons msg
+        let msg = slackmsg.buttons();
+        msg.text = `*${name}* list`;
+        msg.attachments[0].text = ``;
+        msg.attachments[0].callback_id = `trello_list`;
+        
+        //let cardsNum = Object.keys(data.)
+
         // respond with information for that list
+        res.send(msg);
     })
 
 
