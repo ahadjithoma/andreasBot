@@ -26,18 +26,18 @@ module.exports = function(robot) {
             .then(function(data){
                 // customize slack's interactive message 
                 let msg = slackmsg.buttons();
-                msg.attachments[0].title = `*${data.name}*`;
+                msg.attachments[0].title = `<https://trello.com/b/${boardId}|${data.name}>`;
                 msg.attachments[0].title_url = 'www.google.com'
                 msg.attachments[0].author_name = 'Board'
                 msg.attachments[0].callback_id = `trello_board`;
 
                 // attach the board lists to buttons
-                let buttons = {"name": "join", "text": "Join","type":"button", "value": "join"},
+                let buttons = `{"name": "join", "text": "Join","type":"button", "value": "join"},
                 {"name": "join", "text": "Join","type":"button", "value": "join"},
                 {"name": "sub", "text": "Subscribe","type":"button", "value": "sub"},
                 {"name": "star", "text": "Star","type":"button", "value": "star"},
                 {"name": "lists", "text": "Lists","type":"button", "value": "lists"},
-                {"name": "done", "text": "Done","type":"button", "value": "done","style": "danger"};
+                {"name": "done", "text": "Done","type":"button", "value": "done","style": "danger"}`;
                 // msg.attachments[0].actions.push(joinBtn);
                 // msg.attachments[0].actions.push(subBtn);
                 // msg.attachments[0].actions.push(starBtn);
