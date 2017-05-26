@@ -4,13 +4,6 @@ module.exports = function(robot) {
     var slackmsg = require("./slackMsgs.js");
     var trello = require("./trello-api.js");
 
-    // auth
-    var key = process.env.HUBOT_TRELLO_KEY;
-    var token = process.env.HUBOT_TRELLO_TOKEN;
-    var t = new trello(key, token);
-
-
-
 
     /*******************************************************************/
     /* trello api                 BOARDS                               */
