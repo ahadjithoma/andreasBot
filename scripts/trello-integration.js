@@ -40,28 +40,30 @@ module.exports = function(robot) {
         // TODO: fetch the board id from other source (env, redis or mongodb)
         let boardId = 'BE7seI7e';
         
-        t.get("/1/board/"+boardId, {lists:"all"}, function(err, data){
-            if (err){
-                res_r.send('Error Encountered: '+ err['responseBody']);
-                return false;
-            } 
+        t.get("/1/board/"+boardId, {lists:"all"}, getBoard_cb)
+    }
 
-            // customize slack's interactive message 
-            let msg = slackmsg.buttons();
-            msg.text = `Board Name: *${data.name}*`;
-            msg.attachments[0].text = `Board's Lists`;
-            msg.attachments[0].callback_id = `trello_board`;
+    function getBoard_cb(err, data){
+        if (err){
+            res_r.send('Error Encountered: '+ err['responseBody']);
+            return false;
+        } 
 
-            // attach the board lists to buttons
-            let listsNum = Object.keys(data.lists).length;
-            for (var i=0; i<listsNum; i++){
-                let list = data.lists[i].name;
-                let item = {"name": list, "text": list,"type":"button", "value": list};
-                msg.attachments[0].actions.push(item);
-            }
-            
-            res_r.send(msg);
-        })
+        // customize slack's interactive message 
+        let msg = slackmsg.buttons();
+        msg.text = `Board Name: *${data.name}*`;
+        msg.attachments[0].text = `Board's Lists`;
+        msg.attachments[0].callback_id = `trello_board`;
+
+        // attach the board lists to buttons
+        let listsNum = Object.keys(data.lists).length;
+        for (var i=0; i<listsNum; i++){
+            let list = data.lists[i].name;
+            let item = {"name": list, "text": list,"type":"button", "value": list};
+            msg.attachments[0].actions.push(item);
+        }
+        
+        res_r.send(msg);
     }
 
     /*******************************************************************/
@@ -96,7 +98,7 @@ module.exports = function(robot) {
     function cb(data, res){
         console.log('robot.on: trello_board');
         console.log(data);
-        //res.send('robot.on: trello_board'); 
+        res.send('robot.on: trello_board'); 
         let value = data.actions[0].value;
         let btn_name = data.actions[0].name;
         let cb_id = data.callback_id;
