@@ -32,9 +32,9 @@ module.exports ={
     /*******************************************************************/
     /*                              LISTS                              */
     /*******************************************************************/
-	list_id: function(id, par, callback){
+	list_id: function(id, pars, callback){
 		var deferred = q.defer();
-		t.get("1/lists/"+id, function(err, data){
+		t.get("1/lists/"+id, pars, function(err, data){
 			if (err){
 				deferred.reject(err);
 			};
