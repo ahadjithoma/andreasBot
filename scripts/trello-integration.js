@@ -1,24 +1,14 @@
 module.exports = function(robot) {
     'use strict'
 
-    var trello = require("node-trello");
     var slackmsg = require("./slackMsgs.js");
-    var trelloapi = require("./trello-api.js");
+    var trello = require("./trello-api.js");
 
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
     var t = new trello(key, token);
 
-    robot.respond(/trello account name/i, function(res_r) {
-        t.get("/1/members/me", function(err, data) {
-            if (err) {
-                res_r.send('Error: ' + err['responseBody']);
-                return false;
-            };
-            res_r.send(data['fullName']);
-        });
-    })
 
 
 
@@ -39,7 +29,7 @@ module.exports = function(robot) {
         // TODO: fetch the board id from other source (env, redis or mongodb)
         let boardId = 'BE7seI7e';
         let pars = {lists:"all"};
-        trelloapi.getBoard(boardId, pars)
+        trello.getBoard(boardId, pars)
             .then(function(data){
                 // customize slack's interactive message 
                 let msg = slackmsg.buttons();
@@ -104,7 +94,7 @@ module.exports = function(robot) {
 
         // call function to fetch list - provide list id
         let pars = {cards: "all"};
-        trelloapi.getList(listId, pars)
+        trello.getList(listId, pars)
             .then(function(data_list){
 
                 // create buttons msg
