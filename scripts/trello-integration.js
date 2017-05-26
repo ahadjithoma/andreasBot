@@ -102,16 +102,15 @@ module.exports = function(robot) {
 
         // call function to fetch list - provide list id
         let pars = {cards: "all"};
-        var data_list = trelloapi.list_id(listId, pars)
+        trelloapi.list_id(listId, pars)
             .then(function(data_list){
-                //console.log(data_list);
+                console.log(data);
                 return data_list;
             })
             .fail(function(err){
                 console.log(err);
             });
 
-        console.log(data_list);
 
 
 
