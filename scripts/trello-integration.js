@@ -119,6 +119,7 @@ module.exports = function(robot) {
 
                 // respond with information for that list
                 res.send(msg);
+                console.log(msg);
                 })
             .fail(function(err){
                 console.log(err);
