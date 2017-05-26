@@ -109,8 +109,8 @@ module.exports = function(robot) {
                 msg.attachments[0].text = `Available Cards`;
                 msg.attachments[0].callback_id = `trello_list`;
                 
-                let cardsNum = Object.keys(data_list.cards);
-                res.send(cardsNum);
+                let cardsNum = Object.keys(data_list.cards).length;
+                console.log(`total cards: ${cardsNum}`);
                 for (var i=0; i<cardsNum; i++){
                     let card    = data_list.cards[i].name;
                     let cardId  = data_list.cards[i].id;
