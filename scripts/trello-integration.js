@@ -106,7 +106,7 @@ module.exports = function(robot) {
                 // create buttons msg
                 let msg = slackmsg.buttons();
                 msg.text = `*${listName}* list`;
-                msg.attachments[0].text = ``;
+                msg.attachments[0].text = `Available Cards`;
                 msg.attachments[0].callback_id = `trello_list`;
                 
                 let cardsNum = Object.keys(data_list.cards);
