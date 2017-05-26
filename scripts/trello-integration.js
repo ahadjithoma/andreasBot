@@ -44,7 +44,7 @@ module.exports = function(robot) {
 
     }
 
-    function getBoard(board_id){
+    function getBoard(boardId){
         
         t.get("/1/board/"+boardId, {lists:"all"}, function(err, data){
             if (err){
