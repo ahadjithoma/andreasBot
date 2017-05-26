@@ -92,23 +92,28 @@ module.exports = function(robot) {
     var slackCB = 'slack:msg_action:';
 
     // responding to 'trello_board' interactive message
-    robot.on(slackCB + 'trello_board', function(data, res){
+    robot.on(slackCB + 'trello_board', function(data_board, res){
         console.log('robot.on: trello_board');
         // console.log(data);
         res.send('robot.on: trello_board'); 
-        let listId = data.actions[0].value;
-        // let listName = data.actions[0].name;
-        // let cb_id = data.callback_id;
+        let listId = data_board.actions[0].value;
+        // let listName = data_board.actions[0].name;
+        // let cb_id = data_board.callback_id;
 
         // call function to fetch list - provide list id
-        let pars = '';//{cards: "all"};
-        trelloapi.list_id(listId, pars)
-            .then(function(data){
-                console.log(data);
+        let pars = {cards: "all"};
+        var data_list = trelloapi.list_id(listId, pars)
+            .then(function(data_list){
+                //console.log(data_list);
+                return data_list;
             })
             .fail(function(err){
                 console.log(err);
             });
+
+        console(data_list);
+
+
 
         // create buttons msg\
         /*
