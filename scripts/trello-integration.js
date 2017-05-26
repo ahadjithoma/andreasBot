@@ -104,8 +104,9 @@ module.exports = function(robot) {
         let pars = {cards: "all"};
         trelloapi.list_id(listId, pars)
             .then(function(data_list){
+
                 // create buttons msg\
-                /*
+                
                 let msg = slackmsg.buttons();
                 msg.text = `*${name}* list`;
                 msg.attachments[0].text = ``;
@@ -114,8 +115,7 @@ module.exports = function(robot) {
                 //let cardsNum = Object.keys(data.)
 
                 // respond with information for that list
-                res.send(msg);*/
-                console.log(data_list);
+                res.send(msg);
                 })
             .fail(function(err){
                 console.log(err);
