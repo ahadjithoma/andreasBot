@@ -122,7 +122,7 @@ module.exports = {
     plainText: function(){
         return {
           "response_type": "in_channel",
-          "replace_original": true,
+          "replace_original": false,
           "text": " "
         }
     }
