@@ -85,7 +85,7 @@ module.exports = function(robot) {
     var slackCB = 'slack:msg_action:';
 
     // responding to 'trello_board' interactive message
-    robot.on(slackCB + 'trello_board', function(data_board, res){
+    robot.on(slackCB + 'trello_list', function(data_board, res){
         console.log('robot.on: trello_board');
         let listId = data_board.actions[0].value;
         let listName = data_board.actions[0].name;
@@ -116,6 +116,7 @@ module.exports = function(robot) {
                 console.log(msg.attachments[0].actions);
                 })
             .fail(function(err){
+                res.send(err);
                 console.log(err);
             });
     })
