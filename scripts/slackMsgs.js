@@ -123,7 +123,7 @@ module.exports = {
         return {
           "response_type": "in_channel",
           "replace_original": true,
-          "text": ""
+          "text": " "
         }
     }
 
