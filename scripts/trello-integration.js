@@ -98,7 +98,7 @@ module.exports = function(robot) {
           case 'lists':
             break;
           case 'done':
-            res.send('');
+            res.send(' ');
             break;
           default:
             //Statements executed when none of the values match the value of the expression
