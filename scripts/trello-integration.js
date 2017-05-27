@@ -89,6 +89,8 @@ module.exports = function(robot) {
         console.log(`robot.on: ${slackCB}trello_board`);
         let btnId = data.actions[0].value;
         let btnName = data.actions[0].name;
+        let response_url = data.response_url;
+
         switch (btnId) {
           case 'join':
             break;
@@ -100,7 +102,8 @@ module.exports = function(robot) {
             break;
           case 'done':
             let msg = slackmsg.plainText();
-            res.send(msg);
+            sendMessageToSlackResponseURL(response_url, msg);
+            // res.send(msg);
             break;
           default:
             //Statements executed when none of the values match the value of the expression
@@ -173,12 +176,12 @@ module.exports = function(robot) {
 
 /* An example of using slack's response_url. ~For future use */
 /* Add this snippet inside robot.on that u want to trigger   */
-/*
-    var response_url = data.response_url;
-    var slackMsg = require('./slackMsgs');
-    var response = slackMsg.ephemeralMsg();
 
-    sendMessageToSlackResponseURL(response_url, response);
+    // var response_url = data.response_url;
+    // var slackMsg = require('./slackMsgs');
+    // var response = slackMsg.ephemeralMsg();
+
+    // sendMessageToSlackResponseURL(response_url, response);
 
 
     function sendMessageToSlackResponseURL(responseURL, JSONmessage){
@@ -198,4 +201,3 @@ module.exports = function(robot) {
     }
 
 
-*/
