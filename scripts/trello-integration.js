@@ -15,7 +15,8 @@ module.exports = function(robot) {
         // TODO!
     })
 
-    //GET /1/boards/[board_id]
+
+    // trello board
     robot.hear(/trello board/i, trello_board)
 
     function trello_board(res_r){

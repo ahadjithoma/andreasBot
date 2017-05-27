@@ -61,6 +61,7 @@ module.exports = {
         return {
                 "text": "",
                 "response_type": "in_channel",
+                "replace_original": true,
                 "attachments": [
                     {   
                         "title":"",
