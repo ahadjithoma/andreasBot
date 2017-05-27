@@ -117,6 +117,14 @@ module.exports = {
           "replace_original": false,
           "text": "This is an ephemeral msg!"
         }
+    },
+
+    plainText: function(){
+        return {
+          "response_type": "in_channel",
+          "replace_original": true,
+          "text": ""
+        }
     }
 
     

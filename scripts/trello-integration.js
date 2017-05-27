@@ -99,7 +99,8 @@ module.exports = function(robot) {
           case 'lists':
             break;
           case 'done':
-            res.send(' ');
+            let msg = slackmsg.plainText();
+            res.send(msg);
             break;
           default:
             //Statements executed when none of the values match the value of the expression
