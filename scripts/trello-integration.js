@@ -118,6 +118,7 @@ module.exports = function(robot) {
           case 'lists':
             break;
           case 'done':
+            res.status(200).end() // best practice to respond with 200 status
             let msg = slackmsg.plainText();
             sendMessageToSlackResponseURL(response_url, msg);
             // res.send(msg);
