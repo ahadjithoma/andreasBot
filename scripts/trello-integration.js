@@ -32,7 +32,6 @@ module.exports = function(robot) {
                 msg.attachments[0].callback_id = `trello_board`;
 
                 // attach the board lists to buttons
-                let buttons = {"name": "join", "text": "Join","type":"button", "value": "join"};
                 let joinBtn = {"name": "join", "text": "Join","type":"button", "value": "join"};
                 let subBtn  = {"name": "sub", "text": "Subscribe","type":"button", "value": "sub"};
                 let starBtn = {"name": "star", "text": "Star","type":"button", "value": "star"};
@@ -85,11 +84,33 @@ module.exports = function(robot) {
     var slackCB = 'slack:msg_action:';
 
     // responding to 'trello_board' interactive message
+    robot.on(slackCB + 'trello_board', function(data, res){
+        console.log(`robot.on: ${slackCB}trello_board`);
+        let btnId = data.actions[0].value;
+        let btnName = data.actions[0].name;
+        switch (btnId) {
+          case 'join':
+            break;
+          case 'sub':
+            break;
+          case 'star':
+            break;
+          case 'lists':
+            break;
+          case 'done':
+            res.send('');
+            break;
+          default:
+            //Statements executed when none of the values match the value of the expression
+            break;
+        }
+    })
+
+    // responding to 'trello_list' interactive message
     robot.on(slackCB + 'trello_list', function(data_board, res){
-        console.log('robot.on: trello_board');
+        console.log(`robot.on: ${slackCB}trello_list`);
         let listId = data_board.actions[0].value;
         let listName = data_board.actions[0].name;
-        // let cb_id = data_board.callback_id;
 
         // call function to fetch list - provide list id
         let pars = {cards: "all"};
