@@ -3,6 +3,7 @@ module.exports = function(robot) {
 
     var slackmsg = require("./slackMsgs.js");
     var trello = require("./trello-api.js");
+    var request = require("request");
 
 
     /*******************************************************************/
