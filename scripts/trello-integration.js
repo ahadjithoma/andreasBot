@@ -3,7 +3,23 @@ module.exports = function(robot) {
 
     var slackmsg = require("./slackMsgs.js");
     var trello = require("./trello-api.js");
-    var request = require("request");
+    var request = require('request');
+
+    function sendMessageToSlackResponseURL(responseURL, JSONmessage){
+      var postOptions = {
+          uri: responseURL,
+          method: 'POST',
+          headers: {
+              'Content-type': 'application/json'
+          },
+          json: JSONmessage
+      };
+      request(postOptions, (error, response, body) => {
+          if (error){
+              // handle errors as you see fit
+          };
+      })
+    }
 
 
     /*******************************************************************/
@@ -185,20 +201,6 @@ module.exports = function(robot) {
     // sendMessageToSlackResponseURL(response_url, response);
 
 
-    function sendMessageToSlackResponseURL(responseURL, JSONmessage){
-      var postOptions = {
-          uri: responseURL,
-          method: 'POST',
-          headers: {
-              'Content-type': 'application/json'
-          },
-          json: JSONmessage
-      };
-      request(postOptions, (error, response, body) => {
-          if (error){
-              // handle errors as you see fit
-          };
-      })
-    }
+
 
 
