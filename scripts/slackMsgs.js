@@ -60,6 +60,7 @@ module.exports = {
     buttons: function(){
         return {
                 "text": "",
+                "response_type": "in_channel",
                 "attachments": [
                     {   
                         "title":"",
