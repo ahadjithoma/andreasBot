@@ -5,6 +5,8 @@ module.exports = function(robot) {
     var trello = require("./trello-api.js");
     var request = require('request');
 
+    var board_data;
+
     function sendMessageToSlackResponseURL(responseURL, JSONmessage){
       var postOptions = {
           uri: responseURL,
@@ -42,7 +44,7 @@ module.exports = function(robot) {
         let pars = {lists:"all"};
         trello.getBoard(boardId, pars)
             .then(function(data){
-                var board_data = data;
+                board_data = data;
                 // customize slack's interactive message 
                 let msg = slackmsg.buttons();
                 msg.attachments[0].title = `<https://trello.com/b/${boardId}|${data.name}>`;
