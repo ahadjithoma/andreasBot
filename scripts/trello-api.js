@@ -73,6 +73,7 @@ module.exports ={
 			};
 			console.log(`cb: ${data}`);
 			k = data;
+			return k;
 		})
 		console.log(`k - test: ${k}`);
 	}
