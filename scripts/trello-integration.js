@@ -49,7 +49,7 @@ module.exports = function(robot) {
                 msg.attachments[0].title_url = 'www.google.com'
                 msg.attachments[0].author_name = 'Board'
                 msg.attachments[0].callback_id = `trello_board`;
-                msg.attachments[0].coloro = `${data.prefs.backgroundColor}`;
+                msg.attachments[0].color = `${data.prefs.backgroundColor}`;
 
                 // attach the board lists to buttons
                 let joinBtn = {"name": "join", "text": "Join","type":"button", "value": "join"};
