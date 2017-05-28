@@ -72,10 +72,9 @@ module.exports ={
 				k = err;
 			};
 			console.log(`cb: ${data}`);
-			k = data;
+			return cb(data);
 		})
 		console.log(`k - test: ${k}`);
-		return cb(data);
 	}
 
 
