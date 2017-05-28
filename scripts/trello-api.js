@@ -65,20 +65,17 @@ module.exports ={
     /*******************************************************************/
     /*                         TESTING PURPOSES                        */
     /*******************************************************************/
-	test: function(){
+	test: function(cb){
 		var k;
-		t.get("1/board/BE7seI7e",'', cb); 
-
-
-		function cb(err, data){
+		t.get("1/board/BE7seI7e",'', function(err, data){
 			if (err){
 				k = err;
 			};
 			console.log(`cb: ${data}`);
-			return cb(data);	
+			k = data;
 		}
 		console.log(`k - test: ${k}`);
-		return k;
+		return cb(data);
 	}
 
 
