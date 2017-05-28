@@ -122,7 +122,35 @@ module.exports = function(robot) {
             res.status(200).end() // best practice to respond with 200 status
             // FETCH LISTS FIRST
             
+            // call function to fetch list - provide list id
+            let pars = ''; //{cards: "all"};
+            let listId = '';
+            trello.getList(listId, pars)
+                .then(function(data_list){
 
+                    // create buttons msg
+                    let msg = slackmsg.buttons();
+                    msg.text = `*${listName}* list`;
+                    msg.attachments[0].text = `Available Cards`;
+                    msg.attachments[0].callback_id = `trello_list`;
+                    
+                    let cardsNum = Object.keys(data_list.cards).length;
+                    console.log(`total cards: ${cardsNum}`);
+                    for (var i=0; i<cardsNum; i++){
+                        let card    = data_list.cards[i].name;
+                        let cardId  = data_list.cards[i].id;
+                        let item    = {"name": card, "text": card,"type":"button", "value": cardId};
+                        msg.attachments[0].actions.push(item);
+                    }
+
+                    // respond with information for that list
+                    res.send(msg);
+                    console.log(msg.attachments[0].actions);
+                    })
+                .fail(function(err){
+                    res.send(err);
+                    console.log(err);
+            });
             // let listsNum = Object.keys(data.lists).length;
             // msg = slackmsg.menu();
             // for (var i=0; i<listsNum; i++){
@@ -177,7 +205,7 @@ module.exports = function(robot) {
             .fail(function(err){
                 res.send(err);
                 console.log(err);
-            });
+        });
     })
 
 
