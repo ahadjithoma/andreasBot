@@ -107,6 +107,7 @@ module.exports = function(robot) {
         let btnId = data.actions[0].value;
         let btnName = data.actions[0].name;
         let response_url = data.response_url;
+        let msg;
 
         switch (btnId) {
           case 'join':
@@ -118,7 +119,7 @@ module.exports = function(robot) {
           case 'lists':
             res.status(200).end() // best practice to respond with 200 status
             let listsNum = Object.keys(data.lists).length;
-            let msg = slackmsg.menu();
+            msg = slackmsg.menu();
             for (var i=0; i<listsNum; i++){
                 // TODO change value to some id or something similar
                 let list = {"text": data.lists[i], "value": data.lists[i]};
@@ -128,7 +129,7 @@ module.exports = function(robot) {
             break;
           case 'done':
             res.status(200).end() // best practice to respond with 200 status
-            let msg = slackmsg.plainText();
+            msg = slackmsg.plainText();
             sendMessageToSlackResponseURL(response_url, msg);
             // res.send(msg);
             break;
