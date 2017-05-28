@@ -114,8 +114,17 @@ module.exports = function(robot) {
           case 'sub':
             break;
           case 'star':
-            break;
+                break;
           case 'lists':
+            res.status(200).end() // best practice to respond with 200 status
+            let listsNum = Object.keys(data.lists).length;
+            let msg = slackmsg.menu();
+            for (var i=0; i<listsNum; i++){
+                // TODO change value to some id or something similar
+                let list = {"text": data.lists[i], "value": data.lists[i]};
+                msg.attachments[0].actions[0].options.push();
+            }
+            sendMessageToSlackResponseURL(response_url, msg);
             break;
           case 'done':
             res.status(200).end() // best practice to respond with 200 status

@@ -25,6 +25,7 @@ module.exports = {
                 "text": "",
                 "mrkdwn": true,
                 "response_type": "in_channel",
+                "replace_original": false,
                 "attachments": [
                     {
                         "text": "",
