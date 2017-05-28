@@ -5,8 +5,6 @@ module.exports = function(robot) {
     var trello = require("./trello-api.js");
     var request = require('request');
 
-    var board_data;
-
     function sendMessageToSlackResponseURL(responseURL, JSONmessage){
       var postOptions = {
           uri: responseURL,
@@ -41,10 +39,10 @@ module.exports = function(robot) {
     function trello_board(res_r){
         // TODO: fetch the board id from other source (env, redis or mongodb)
         let boardId = 'BE7seI7e';
-        let pars = {lists:"all"};
+        let pars = null; //{lists:"all"};
         trello.getBoard(boardId, pars)
             .then(function(data){
-                board_data = data;
+                var board_data = data;
                 // customize slack's interactive message 
                 let msg = slackmsg.buttons();
                 msg.attachments[0].title = `<https://trello.com/b/${boardId}|${data.name}>`;
@@ -64,7 +62,7 @@ module.exports = function(robot) {
                 msg.attachments[0].actions.push(listsBtn);
                 msg.attachments[0].actions.push(doneBtn);
 
-
+                console(data);
                 res_r.send(msg);
             })
             .fail(function(err){
@@ -124,14 +122,14 @@ module.exports = function(robot) {
             // FETCH LISTS FIRST
             
 
-            let listsNum = Object.keys(board_data.lists).length;
-            msg = slackmsg.menu();
-            for (var i=0; i<listsNum; i++){
-                // TODO change value to some id or something similar
-                let list = {"text": board_data.lists[i], "value": board_data.lists[i]};
-                msg.attachments[0].actions[0].options.push(list);
-            }
-            sendMessageToSlackResponseURL(response_url, msg);
+            // let listsNum = Object.keys(data.lists).length;
+            // msg = slackmsg.menu();
+            // for (var i=0; i<listsNum; i++){
+            //     // TODO change value to some id or something similar
+            //     let list = {"text": data.lists[i], "value": data.lists[i]};
+            //     msg.attachments[0].actions[0].options.push(list);
+            // }
+            // sendMessageToSlackResponseURL(response_url, msg);
             break;
           case 'done':
             res.status(200).end() // best practice to respond with 200 status
@@ -152,7 +150,7 @@ module.exports = function(robot) {
         let listName = data_board.actions[0].name;
 
         // call function to fetch list - provide list id
-        let pars = {lists: "all"};
+        let pars = {cards: "all"};
         trello.getList(listId, pars)
             .then(function(data_list){
 
