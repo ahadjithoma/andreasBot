@@ -42,6 +42,7 @@ module.exports = function(robot) {
         let pars = {lists:"all"};
         trello.getBoard(boardId, pars)
             .then(function(data){
+                var board_data = data;
                 // customize slack's interactive message 
                 let msg = slackmsg.buttons();
                 msg.attachments[0].title = `<https://trello.com/b/${boardId}|${data.name}>`;
@@ -118,11 +119,14 @@ module.exports = function(robot) {
                 break;
           case 'lists':
             res.status(200).end() // best practice to respond with 200 status
-            let listsNum = Object.keys(data.lists).length;
+            // FETCH LISTS FIRST
+            
+
+            let listsNum = Object.keys(board_data.lists).length;
             msg = slackmsg.menu();
             for (var i=0; i<listsNum; i++){
                 // TODO change value to some id or something similar
-                let list = {"text": data.lists[i], "value": data.lists[i]};
+                let list = {"text": board_data.lists[i], "value": board_data.lists[i]};
                 msg.attachments[0].actions[0].options.push(list);
             }
             sendMessageToSlackResponseURL(response_url, msg);
@@ -146,7 +150,7 @@ module.exports = function(robot) {
         let listName = data_board.actions[0].name;
 
         // call function to fetch list - provide list id
-        let pars = {cards: "all"};
+        let pars = {lists: "all"};
         trello.getList(listId, pars)
             .then(function(data_list){
 
