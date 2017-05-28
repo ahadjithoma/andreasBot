@@ -218,7 +218,7 @@ module.exports = function(robot) {
 
         robot.hear(/trello test/i, function(data, res){
             var d = trello.test();
-            console.log(d);
+            console.log(`d: ${d}`);
         })
 
     
