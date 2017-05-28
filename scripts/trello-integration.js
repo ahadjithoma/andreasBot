@@ -39,13 +39,14 @@ module.exports = function(robot) {
     function trello_board(res_r){
         // TODO: fetch the board id from other source (env, redis or mongodb)
         let boardId = 'BE7seI7e';
-        let pars = {fields:"id, url, name"};
+        let pars = {fields:"name, url"};
         trello.getBoard(boardId, pars)
             .then(function(data){
                 var board_data = data;
                 // customize slack's interactive message 
                 let msg = slackmsg.buttons();
                 msg.attachments[0].title = `<${data.url}|${data.name}>`;
+                msg.attachments[0].title_url = 'www.google.com'
                 msg.attachments[0].author_name = 'Board'
                 msg.attachments[0].callback_id = `trello_board`;
 
