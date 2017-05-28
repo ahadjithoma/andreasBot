@@ -218,14 +218,16 @@ module.exports = function(robot) {
 
         robot.hear(/trello test/i, function(data, res){
             var d = trello.test();
-            console(d);
+            console.log(d);
         })
 
     
 }
 
 
-
+    function console(var){
+        console.log(var);
+    }
 
 
     /* template */
