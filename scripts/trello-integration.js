@@ -39,7 +39,7 @@ module.exports = function(robot) {
     function trello_board(res_r){
         // TODO: fetch the board id from other source (env, redis or mongodb)
         let boardId = 'BE7seI7e';
-        let pars = {fields: "name,url"};
+        let pars = {fields: "name,url,prefs"};
         trello.getBoard(boardId, pars)
             .then(function(data){
                 var board_data = data;
@@ -49,6 +49,7 @@ module.exports = function(robot) {
                 msg.attachments[0].title_url = 'www.google.com'
                 msg.attachments[0].author_name = 'Board'
                 msg.attachments[0].callback_id = `trello_board`;
+                msg.attachments[0].coloro = `${data.prefs.backgroundColor}`;
 
                 // attach the board lists to buttons
                 let joinBtn = {"name": "join", "text": "Join","type":"button", "value": "join"};
