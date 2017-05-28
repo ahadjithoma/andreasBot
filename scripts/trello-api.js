@@ -58,7 +58,7 @@ module.exports ={
 		});
 		deferred.promise.nodeify(callback);
 		return deferred.promise;
-	}
+	},
 
 
 
