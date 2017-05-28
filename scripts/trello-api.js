@@ -61,6 +61,26 @@ module.exports ={
 	}
 
 
+
+    /*******************************************************************/
+    /*                         TESTING PURPOSES                        */
+    /*******************************************************************/
+	test: function(){
+		var k;
+		k = t.get("1/board/BE7seI7e",'', cb){
+			return cb;
+		};
+
+		function cb(err, data){
+			if (err){
+				return err;
+			};
+			return data;
+		}
+		return k;
+	}
+
+
 }
 
 
