@@ -62,7 +62,7 @@ module.exports = function(robot) {
                 msg.attachments[0].actions.push(listsBtn);
                 msg.attachments[0].actions.push(doneBtn);
 
-                console(data);
+                console.log(data);
                 res_r.send(msg);
             })
             .fail(function(err){
