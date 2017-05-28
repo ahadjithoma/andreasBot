@@ -224,12 +224,6 @@ module.exports = function(robot) {
     
 }
 
-
-    function console(var){
-        console.log(var);
-    }
-
-
     /* template */
 
     // robot.respond(/trello /i, function(res_r) {
