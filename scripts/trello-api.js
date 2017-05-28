@@ -70,7 +70,7 @@ module.exports ={
 		t.get("1/board/BE7seI7e",'', cb); 
 
 
-		cb =function(err, data){
+		function cb(err, data){
 			if (err){
 				k = err;
 			};
