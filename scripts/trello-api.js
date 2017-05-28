@@ -73,8 +73,10 @@ module.exports ={
 			if (err){
 				return err;
 			};
+			console.log(`cb: ${data}`);
 			return data;
 		}
+		console.log(`k - test: ${k}`);
 		return k;
 	}
 
