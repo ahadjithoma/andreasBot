@@ -122,7 +122,7 @@ module.exports = function(robot) {
             for (var i=0; i<listsNum; i++){
                 // TODO change value to some id or something similar
                 let list = {"text": data.lists[i], "value": data.lists[i]};
-                msg.attachments[0].actions[0].options.push();
+                msg.attachments[0].actions[0].options.push(list);
             }
             sendMessageToSlackResponseURL(response_url, msg);
             break;
