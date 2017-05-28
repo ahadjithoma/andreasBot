@@ -67,7 +67,7 @@ module.exports ={
     /*******************************************************************/
 	test: function(k){
 		var k;
-		t.get("1/board/BE7seI7e",'', function(err, data){
+		k = t.get("1/board/BE7seI7e",'', function(err, data){
 			if (err){
 				k = err;
 			};
@@ -75,6 +75,7 @@ module.exports ={
 			k = data;
 			return k;
 		})
+		return k;
 		console.log(`k - test: ${k}`);
 	}
 
