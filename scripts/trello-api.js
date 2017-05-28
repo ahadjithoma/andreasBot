@@ -67,7 +67,8 @@ module.exports ={
     /*******************************************************************/
 	test: function(){
 		var k;
-		t.get("1/board/BE7seI7e",'', cb){
+		t.get("1/board/BE7seI7e",'', cb);
+		function cb(err,data){
 			if (err){
 				k = cb(err);
 			};
