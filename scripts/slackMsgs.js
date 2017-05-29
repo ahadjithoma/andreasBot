@@ -126,8 +126,7 @@ module.exports = {
           "replace_original": true,
           "text": "text here",
           //"response_type": "ephemeral",
-          "delete_original": true,
-          "replace_original": true
+          "delete_original": true
         }
     }
 

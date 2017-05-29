@@ -130,7 +130,8 @@ module.exports = function(robot) {
             
             // get board info to fetch lists
             let boardId = 'BE7seI7e';
-            t.get("1/board/"+boardId, function(err, data){
+            let args = {lists:"all"};
+            t.get("1/board/"+boardId, args, function(err, data){
                 if (err){
                     res.send(err);
                     robot.logger.error(err);
