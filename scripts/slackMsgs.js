@@ -122,10 +122,10 @@ module.exports = {
 
     plainText: function(){
         return {
-          "response_type": "in_channel",
+          //"response_type": "in_channel",
           "replace_original": true,
           "text": "text here",
-          "response_type": "ephemeral",
+          //"response_type": "ephemeral",
           "delete_original": true,
           "replace_original": true
         }
