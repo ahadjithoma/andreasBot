@@ -9,7 +9,7 @@ module.exports = function(robot) {
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
-    var t = new trello(key, token);
+    var t = new Trello(key, token);
 
     function sendMessageToSlackResponseURL(responseURL, JSONmessage){
       var postOptions = {
