@@ -129,7 +129,7 @@ module.exports = function(robot) {
             // FETCH LISTS FIRST
             
             // call function to fetch lists
-            t.get("1/lists/"+id, function(err, data){
+            t.get("1/lists/", function(err, data){
                 if (err){
                     res.send(err);
                     console.log(err);
