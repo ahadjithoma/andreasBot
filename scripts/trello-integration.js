@@ -152,7 +152,6 @@ module.exports = function(robot) {
                     let name = data.lists[i].name;
                     let list = {"name": name, "text": name, "type":"button", "value": name};
                     msg.attachments[0].actions.push(list);
-                    console("*"+i);
                 }
                 sendMessageToSlackResponseURL(response_url, msg);
             })
