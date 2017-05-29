@@ -142,6 +142,8 @@ module.exports = function(robot) {
                 let msg = slackmsg.buttons();
 
                 let listsNum = Object.keys(data.lists).length;
+                console.log(`lists: &{listsNum}`);
+                console.log(data);
                 for (var i=0; i<listsNum; i++){
                     // TODO change value to some id or something similar
                     let list = {"text": data.lists[i], "value": data.lists[i]};
@@ -201,7 +203,7 @@ module.exports = function(robot) {
 
     // responding to 'trello_list' interactive message
     robot.on(slackCB + 'trello_list', function(data_board, res){
-        console.log(`robot.on: ${slackCB}trello_list`);
+        robot.logger.info(`robot.on: ${slackCB}trello_list`);
         let listId = data_board.actions[0].value;
         let listName = data_board.actions[0].name;
 
@@ -217,7 +219,7 @@ module.exports = function(robot) {
                 msg.attachments[0].callback_id = `trello_list`;
                 
                 let cardsNum = Object.keys(data_list.cards).length;
-                console.log(`total cards: ${cardsNum}`);
+                robot.logger.info(`total cards: ${cardsNum}`);
                 for (var i=0; i<cardsNum; i++){
                     let card    = data_list.cards[i].name;
                     let cardId  = data_list.cards[i].id;
@@ -227,11 +229,11 @@ module.exports = function(robot) {
 
                 // respond with information for that list
                 res.send(msg);
-                console.log(msg.attachments[0].actions);
+                //console.log(msg.attachments[0].actions);
                 })
             .fail(function(err){
                 res.send(err);
-                console.log(err);
+                robot.logger.error(err);
         });
     })
 
