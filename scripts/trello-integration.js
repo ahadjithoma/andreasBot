@@ -141,6 +141,7 @@ module.exports = function(robot) {
                 // create buttons msg
                 let msg = slackmsg.buttons();
                 msg.text = `*${data.name}* board`;
+
                 msg.attachments[0].text = `Available lists`;
                 msg.attachments[0].callback_id = `trello_list`;
                 let listsNum = Object.keys(data.lists).length;
@@ -148,8 +149,10 @@ module.exports = function(robot) {
                 console.log(data);
                 for (var i=0; i<listsNum; i++){
                     // TODO change value to some id or something similar
-                    let list = {"text": data.lists[i].name, "value": data.lists[i].name};
-                    msg.attachments[0].actions.push(list);
+                    let name = data.lists[i].name;
+                    let list = {"name": name, "text": name, "type":"button", "value": name};
+                    msg.attachments[0].actions.push(item);
+                    console("*"+i);
                 }
                 sendMessageToSlackResponseURL(response_url, msg);
             })
