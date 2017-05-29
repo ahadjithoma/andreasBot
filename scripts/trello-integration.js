@@ -128,8 +128,9 @@ module.exports = function(robot) {
             res.status(200).end() // best practice to respond with 200 status
             // FETCH LISTS FIRST
             
-            // call function to fetch lists
-            t.get("1/lists/", function(err, data){
+            // get board info to fetch lists
+            let boardId = 'BE7seI7e';
+            t.get("1/board/"+boardId, function(err, data){
                 if (err){
                     res.send(err);
                     console.log(err);
