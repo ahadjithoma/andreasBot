@@ -124,7 +124,10 @@ module.exports = {
         return {
           "response_type": "in_channel",
           "replace_original": true,
-          "text": "text here"
+          "text": "text here",
+          "response_type": "ephemeral",
+          "delete_original": true,
+          "replace_original": true
         }
     }
 
