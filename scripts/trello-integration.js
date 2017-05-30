@@ -28,9 +28,6 @@ module.exports = function(robot) {
     }
 
 
-    /*******************************************************************/
-    /* trello api                 BOARDS                               */
-    /*******************************************************************/
 
     // Associate a board with a specific Channel 
     robot.hear(/trello board (.*)/i, function(res_r) {
@@ -40,9 +37,7 @@ module.exports = function(robot) {
 
 
     // trello board
-    robot.hear(/trello board/i, trello_board)
-
-    function trello_board(res_r){
+    robot.hear(/trello board/i, function(res_r){
         // TODO: fetch the board id from other source (env, redis or mongodb)
         let boardId = 'BE7seI7e';
         let args = {fields: "name,url,prefs"};
@@ -76,7 +71,6 @@ module.exports = function(robot) {
             console.log(data);
             res_r.send(msg);
         }) 
-
     }
 
 
@@ -103,9 +97,7 @@ module.exports = function(robot) {
           case 'star':
                 break;
           case 'lists':
-            res.status(200).end() // best practice to respond with 200 status
-            // FETCH LISTS FIRST
-            
+            res.status(200).end() // best practice to respond with 200 status           
             // get board info to fetch lists
             let boardId = 'BE7seI7e';
             let args = {lists:"all"};
@@ -134,43 +126,6 @@ module.exports = function(robot) {
                 }
                 sendMessageToSlackResponseURL(response_url, msg);
             })
-
-            // let pars = ''; //{cards: "all"};
-            // let listId = '';
-            // trello.getList(listId, pars)
-            //     .then(function(data_list){
-
-            //         // create buttons msg
-            //         let msg = slackmsg.buttons();
-            //         msg.text = `*${listName}* list`;
-            //         msg.attachments[0].text = `Available Cards`;
-            //         msg.attachments[0].callback_id = `trello_list`;
-                    
-            //         let cardsNum = Object.keys(data_list.cards).length;
-            //         console.log(`total cards: ${cardsNum}`);
-            //         for (var i=0; i<cardsNum; i++){
-            //             let card    = data_list.cards[i].name;
-            //             let cardId  = data_list.cards[i].id;
-            //             let item    = {"name": card, "text": card,"type":"button", "value": cardId};
-            //             msg.attachments[0].actions.push(item);
-            //         }
-
-            //         // respond with information for that list
-            //         res.send(msg);
-            //         console.log(msg.attachments[0].actions);
-            //         })
-            //     .fail(function(err){
-            //         res.send(err);
-            //         console.log(err);
-            // });
-            // let listsNum = Object.keys(data.lists).length;
-            // msg = slackmsg.menu();
-            // for (var i=0; i<listsNum; i++){
-            //     // TODO change value to some id or something similar
-            //     let list = {"text": data.lists[i], "value": data.lists[i]};
-            //     msg.attachments[0].actions[0].options.push(list);
-            // }
-            // sendMessageToSlackResponseURL(response_url, msg);
             break;
           case 'done':
             res.status(200).end() // best practice to respond with 200 status
@@ -197,35 +152,30 @@ module.exports = function(robot) {
 
 
         t.get("/1/lists"+listId, args, function(err, data){
-
-        })
-
-        trello.getList(listId, args)
-            .then(function(data_list){
-
-                // create buttons msg
-                let msg = slackmsg.buttons();
-                msg.text = `*${listName}* list`;
-                msg.attachments[0].text = `Available Cards`;
-                msg.attachments[0].callback_id = `trello_list`;
-                
-                let cardsNum = Object.keys(data_list.cards).length;
-                robot.logger.info(`total cards: ${cardsNum}`);
-                for (var i=0; i<cardsNum; i++){
-                    let card    = data_list.cards[i].name;
-                    let cardId  = data_list.cards[i].id;
-                    let item    = {"name": card, "text": card,"type":"button", "value": cardId};
-                    msg.attachments[0].actions.push(item);
-                }
-
-                // respond with information for that list
-                res.send(msg);
-                //console.log(msg.attachments[0].actions);
-                })
-            .fail(function(err){
-                res.send(err);
+            if (err){
                 robot.logger.error(err);
-        });
+                res.send(`Error: ${err}`)
+                return 0;
+            }
+            // else !err
+            // create buttons msg
+            let msg = slackmsg.buttons();
+            msg.text = `*${listName}* list`;
+            msg.attachments[0].text = `Available Cards`;
+            msg.attachments[0].callback_id = `trello_list`;
+            
+            let cardsNum = Object.keys(data_list.cards).length;
+            robot.logger.info(`total cards: ${cardsNum}`);
+            for (var i=0; i<cardsNum; i++){
+                let card    = data_list.cards[i].name;
+                let cardId  = data_list.cards[i].id;
+                let item    = {"name": card, "text": card,"type":"button", "value": cardId};
+                msg.attachments[0].actions.push(item);
+            }
+
+            // respond with information for that list
+            res.send(msg);
+        })
     })
 
 
@@ -236,13 +186,6 @@ module.exports = function(robot) {
     /*  TODO: add more functionality */ 
 
 
-        robot.hear(/trello test/i, function(data, res){
-            var d;
-            trello.test(d);
-            console.log(`d: ${d}`);
-        })
-
-    
 }
 
 
