@@ -123,8 +123,8 @@ module.exports = {
 
     plainText: function(){
         return {
-          //"response_type": "in_channel",
-          "replace_original": true,
+          "response_type": "in_channel",
+          "replace_original": false,
           "text": "text here",
           //"response_type": "ephemeral",
           "delete_original": true
