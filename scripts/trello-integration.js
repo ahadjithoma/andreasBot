@@ -47,7 +47,7 @@ module.exports = function(robot) {
         let boardId = 'BE7seI7e';
         let args = {fields: "name,url,prefs"};
 
-        t.get("/1/board/"+board, args, function(err, data){
+        t.get("/1/board/"+boardId, args, function(err, data){
             if (err){
                 res.send('Error: ' + err);
                 robot.logger.error(err);
@@ -106,7 +106,9 @@ module.exports = function(robot) {
         //     .fail(function(err){
         //         console.log(err);
         //     })
-        /*
+        
+
+        /* GET LISTS 
         t.get("/1/board/"+boardId, {lists:"all"}, function(err, data){
             if (err){
                 res_r.send('Error Encountered: '+ err['responseBody']);
