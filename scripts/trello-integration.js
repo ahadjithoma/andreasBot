@@ -45,36 +45,67 @@ module.exports = function(robot) {
     function trello_board(res_r){
         // TODO: fetch the board id from other source (env, redis or mongodb)
         let boardId = 'BE7seI7e';
-        let pars = {fields: "name,url,prefs"};
-        trello.getBoard(boardId, pars)
-            .then(function(data){
-                var board_data = data;
-                // customize slack's interactive message 
-                let msg = slackmsg.buttons();
-                msg.attachments[0].title = `<${data.url}|${data.name}>`;
-                msg.attachments[0].title_url = 'www.google.com'
-                msg.attachments[0].author_name = 'Board'
-                msg.attachments[0].callback_id = `trello_board`;
-                msg.attachments[0].color = `${data.prefs.backgroundColor}`;
+        let args = {fields: "name,url,prefs"};
 
-                // attach the board lists to buttons
-                let joinBtn = {"name": "join", "text": "Join","type":"button", "value": "join"};
-                let subBtn  = {"name": "sub", "text": "Subscribe","type":"button", "value": "sub"};
-                let starBtn = {"name": "star", "text": "Star","type":"button", "value": "star"};
-                let listsBtn= {"name": "lists", "text": "Lists","type":"button", "value": "lists"};
-                let doneBtn = {"name": "done", "text": "Done","type":"button", "value": "done","style": "danger"};
-                msg.attachments[0].actions.push(joinBtn);
-                msg.attachments[0].actions.push(subBtn);
-                msg.attachments[0].actions.push(starBtn);
-                msg.attachments[0].actions.push(listsBtn);
-                msg.attachments[0].actions.push(doneBtn);
+        t.get("/1/board/"+board, args, function(err, data){
+            if (err){
+                res.send('Error: ' + err);
+                robot.logger.error(err);
+                return 0;
+            }
+            // else !err
+            let msg = slackmsg.buttons();
+            msg.attachments[0].title = `<${data.url}|${data.name}>`;
+            msg.attachments[0].title_url = 'www.google.com'
+            msg.attachments[0].author_name = 'Board'
+            msg.attachments[0].callback_id = `trello_board`;
+            msg.attachments[0].color = `${data.prefs.backgroundColor}`;
 
-                console.log(data);
-                res_r.send(msg);
-            })
-            .fail(function(err){
-                console.log(err);
-            })
+            // attach the board lists to buttons
+            let joinBtn = {"name": "join", "text": "Join","type":"button", "value": "join"};
+            let subBtn  = {"name": "sub", "text": "Subscribe","type":"button", "value": "sub"};
+            let starBtn = {"name": "star", "text": "Star","type":"button", "value": "star"};
+            let listsBtn= {"name": "lists", "text": "Lists","type":"button", "value": "lists"};
+            let doneBtn = {"name": "done", "text": "Done","type":"button", "value": "done","style": "danger"};
+            msg.attachments[0].actions.push(joinBtn);
+            msg.attachments[0].actions.push(subBtn);
+            msg.attachments[0].actions.push(starBtn);
+            msg.attachments[0].actions.push(listsBtn);
+            msg.attachments[0].actions.push(doneBtn);
+
+            console.log(data);
+            res_r.send(msg);
+        }) 
+        
+        // trello.getBoard(boardId, args)
+        //     .then(function(data){
+        //         var board_data = data;
+        //         // customize slack's interactive message 
+        //         let msg = slackmsg.buttons();
+        //         msg.attachments[0].title = `<${data.url}|${data.name}>`;
+        //         msg.attachments[0].title_url = 'www.google.com'
+        //         msg.attachments[0].author_name = 'Board'
+        //         msg.attachments[0].callback_id = `trello_board`;
+        //         msg.attachments[0].color = `${data.prefs.backgroundColor}`;
+
+        //         // attach the board lists to buttons
+        //         let joinBtn = {"name": "join", "text": "Join","type":"button", "value": "join"};
+        //         let subBtn  = {"name": "sub", "text": "Subscribe","type":"button", "value": "sub"};
+        //         let starBtn = {"name": "star", "text": "Star","type":"button", "value": "star"};
+        //         let listsBtn= {"name": "lists", "text": "Lists","type":"button", "value": "lists"};
+        //         let doneBtn = {"name": "done", "text": "Done","type":"button", "value": "done","style": "danger"};
+        //         msg.attachments[0].actions.push(joinBtn);
+        //         msg.attachments[0].actions.push(subBtn);
+        //         msg.attachments[0].actions.push(starBtn);
+        //         msg.attachments[0].actions.push(listsBtn);
+        //         msg.attachments[0].actions.push(doneBtn);
+
+        //         console.log(data);
+        //         res_r.send(msg);
+        //     })
+        //     .fail(function(err){
+        //         console.log(err);
+        //     })
         /*
         t.get("/1/board/"+boardId, {lists:"all"}, function(err, data){
             if (err){
