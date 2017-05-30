@@ -71,7 +71,7 @@ module.exports = function(robot) {
             console.log(data);
             res_r.send(msg);
         }) 
-    }
+    })
 
 
     
