@@ -166,11 +166,11 @@ module.exports = function(robot) {
             msg.attachments[0].text = `Available Cards`;
             msg.attachments[0].callback_id = `trello_list`;
             
-            let cardsNum = Object.keys(data_list.cards).length;
+            let cardsNum = Object.keys(data.cards).length;
             robot.logger.info(`total cards: ${cardsNum}`);
             for (var i=0; i<cardsNum; i++){
-                let card    = data_list.cards[i].name;
-                let cardId  = data_list.cards[i].id;
+                let card    = data.cards[i].name;
+                let cardId  = data.cards[i].id;
                 let item    = {"name": card, "text": card,"type":"button", "value": cardId};
                 msg.attachments[0].actions.push(item);
             }
