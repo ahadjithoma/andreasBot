@@ -68,7 +68,6 @@ module.exports = function(robot) {
             msg.attachments[0].actions.push(listsBtn);
             msg.attachments[0].actions.push(doneBtn);
 
-            console.log(data);
             res_r.send(msg);
         }) 
     })
@@ -83,7 +82,7 @@ module.exports = function(robot) {
 
     // responding to 'trello_board' interactive message
     robot.on(slackCB + 'trello_board', function(data, res){
-        console.log(`robot.on: ${slackCB}trello_board`);
+        robot.logger.info(`robot.on: ${slackCB}trello_board`);
         let btnId = data.actions[0].value;
         let btnName = data.actions[0].name;
         let response_url = data.response_url;
@@ -115,8 +114,6 @@ module.exports = function(robot) {
                 msg.attachments[0].text = `Available lists`;
                 msg.attachments[0].callback_id = `trello_list`;
                 let listsNum = Object.keys(data.lists).length;
-                console.log(`lists: ${data.lists[3].name}`);
-                console.log(data);
                 for (var i=0; i<listsNum; i++){
                     // TODO change value to some id or something similar
                     let name = data.lists[i].name;
@@ -145,11 +142,9 @@ module.exports = function(robot) {
         let response_url = data_board.response_url;
 
         res.status(200).end() // best practice to respond with 200 status
-        console.log(data_board);
         robot.logger.info(`robot.on: ${slackCB}trello_list`);
         let listId = data_board.actions[0].value;
         let listName = data_board.actions[0].name;
-        console.log(`listId: ${listId}`);
 
         // call function to fetch list - provide list id
         let args = {cards: "all"};
@@ -176,7 +171,7 @@ module.exports = function(robot) {
             }
 
             // respond with information for that list
-            sendMessageToSlackResponseURL();
+            sendMessageToSlackResponseURL(response_url, msg);
         })
     })
 
