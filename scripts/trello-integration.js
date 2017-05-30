@@ -142,6 +142,8 @@ module.exports = function(robot) {
 
     // responding to 'trello_list' interactive message
     robot.on(slackCB + 'trello_list', function(data_board, res){
+        let response_url = data_board.response_url;
+
         res.status(200).end() // best practice to respond with 200 status
         console.log(data_board);
         robot.logger.info(`robot.on: ${slackCB}trello_list`);
@@ -176,7 +178,7 @@ module.exports = function(robot) {
             }
 
             // respond with information for that list
-            res.send(msg);
+            sendMessageToSlackResponseURL();
         })
     })
 
