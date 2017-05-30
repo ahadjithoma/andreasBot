@@ -128,10 +128,10 @@ module.exports = function(robot) {
             })
             break;
           case 'done':
-            res.status(200).end() // best practice to respond with 200 status
+            //res.status(200).end() // best practice to respond with 200 status
             msg = slackmsg.plainText();
-            //res.send(msg);
-            sendMessageToSlackResponseURL(response_url, msg);
+            res.send(msg);
+            //sendMessageToSlackResponseURL(response_url, msg);
             // res.send(msg);
             break;
           default:
