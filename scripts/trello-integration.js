@@ -130,8 +130,8 @@ module.exports = function(robot) {
           case 'done':
             res.status(200).end() // best practice to respond with 200 status
             msg = slackmsg.plainText();
-            res.send(msg);
-            //sendMessageToSlackResponseURL(response_url, msg);
+            //res.send(msg);
+            sendMessageToSlackResponseURL(response_url, msg);
             // res.send(msg);
             break;
           default:
@@ -153,8 +153,6 @@ module.exports = function(robot) {
 
         // call function to fetch list - provide list id
         let args = {cards: "all"};
-
-
         t.get("/1/lists/"+listId, args, function(err, data){
             if (err){
                 robot.logger.error(err);
