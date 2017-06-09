@@ -10,17 +10,21 @@ module.exports = function(robot)  {
 	      try {
 	        data = JSON.parse(req.body.payload);
 	      } catch(e) {
-	        robot.logger.error("Invalid JSON submitted to Slack message callback");
+	        robot.logger.error("Invalid JSON submitted to /hubot/github-hooks");
 	        //res.send(422)
 	        res.send('You supplied invalid JSON to this endpoint.');
 	        return;
 	      }
 	    } else {
-	      robot.logger.error("Non-JSON submitted to Slack message callback");
+	      robot.logger.error("Non-JSON submitted to /hubot/github-hooks");
 	      //res.send(422)
 	      res.send('You supplied invalid JSON to this endpoint.');
 	      return;
 	    }
+
+	    console.logger.info(data);
+
+
 	})
 
 
