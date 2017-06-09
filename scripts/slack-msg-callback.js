@@ -8,7 +8,6 @@ module.exports = function(robot)  {
   robot.router.post('/hubot/slack-msg-callback', function(req, res) {
     var data = null;
 
-    console.log(req);
 
     if(req.body.payload) {
       try {
@@ -25,6 +24,7 @@ module.exports = function(robot)  {
       res.send('You supplied invalid JSON to this endpoint.');
       return;
     }
+    console.log(data);
 
     if(data.token === slackToken) {
       robot.logger.info("Request is good");
