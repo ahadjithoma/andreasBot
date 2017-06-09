@@ -24,7 +24,7 @@ module.exports = function(robot)  {
       res.send('You supplied invalid JSON to this endpoint.');
       return;
     }
-    console.log(data);
+    console.log(data.ref);
 
     if(data.token === slackToken) {
       robot.logger.info("Request is good");
