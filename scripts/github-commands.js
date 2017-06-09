@@ -49,10 +49,10 @@ module.exports = function(robot) {
   			}}, 
   			function(err, res){
   				if (err){
-  					console.log(err);
+  					console.logger.error(err);
   					return 0;
   				}
-  				console.log(res);
+  				console.logger.info(res);
 		});
 
 	})

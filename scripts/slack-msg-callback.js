@@ -8,6 +8,8 @@ module.exports = function(robot)  {
   robot.router.post('/hubot/slack-msg-callback', function(req, res) {
     var data = null;
 
+    console.log(req);
+
     if(req.body.payload) {
       try {
         data = JSON.parse(req.body.payload);
