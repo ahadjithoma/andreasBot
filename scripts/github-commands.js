@@ -36,6 +36,28 @@ module.exports = function(robot) {
 	// });
 
 
+
+	robot.respond(/gh followers (.*)/i, function(res_r) {
+
+		github.repos.createHook({
+			"owner":"andreash92",
+			"repo":"andreasBot",
+			"name":"andreasBot-hook",
+			"config": {
+			    "url": "http://example.com/webhook",
+			    "content_type": "json"
+  			}}, 
+  			function(err, res){
+  				if (err){
+  					console.log(err);
+  					return 0;
+  				}
+  				console.log(res);
+		});
+
+	})
+
+
 	robot.respond(/gh followers (.*)/i, function(res_r) {
 		var username = res_r.match[1];	
 		github.users.getFollowersForUser({ 
