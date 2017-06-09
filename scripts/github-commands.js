@@ -37,14 +37,14 @@ module.exports = function(robot) {
 
 
 
-	robot.respond(/gh followers (.*)/i, function(res_r) {
+	robot.respond(/gh hook/i, function(res_r) {
 
 		github.repos.createHook({
 			"owner":"andreash92",
 			"repo":"andreasBot",
 			"name":"andreasBot-hook",
 			"config": {
-			    "url": "http://example.com/webhook",
+			    "url": "https://andreasbot.herokuapp.com/hubot/github-hooks",
 			    "content_type": "json"
   			}}, 
   			function(err, res){
