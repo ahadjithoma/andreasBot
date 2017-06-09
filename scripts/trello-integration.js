@@ -2,14 +2,13 @@ module.exports = function(robot) {
     'use strict'
 
     var slackmsg = require("./slackMsgs.js");
-    var trello = require("./trello-api.js");
     var request = require('request');
     var Trello = require('node-trello');
 
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
-    var t = new Trello(key, token);
+    var trello = new Trello(key, token);
 
     function sendMessageToSlackResponseURL(responseURL, JSONmessage){
       var postOptions = {
@@ -42,7 +41,7 @@ module.exports = function(robot) {
         let boardId = 'BE7seI7e';
         let args = {fields: "name,url,prefs"};
 
-        t.get("/1/board/"+boardId, args, function(err, data){
+        trello.get("/1/board/"+boardId, args, function(err, data){
             if (err){
                 res.send('Error: ' + err);
                 robot.logger.error(err);
@@ -100,7 +99,7 @@ module.exports = function(robot) {
             // get board info to fetch lists
             let boardId = 'BE7seI7e';
             let args = {lists:"all"};
-            t.get("1/board/"+boardId, args, function(err, data){
+            trello.get("1/board/"+boardId, args, function(err, data){
                 if (err){
                     res.send(err);
                     robot.logger.error(err);
@@ -148,7 +147,7 @@ module.exports = function(robot) {
 
         // call function to fetch list - provide list id
         let args = {cards: "all"};
-        t.get("/1/lists/"+listId, args, function(err, data){
+        trello.get("/1/lists/"+listId, args, function(err, data){
             if (err){
                 robot.logger.error(err);
                 res.send(`Error: ${err}`)
