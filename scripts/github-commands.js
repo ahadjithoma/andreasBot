@@ -37,6 +37,12 @@ module.exports = function(robot) {
 
 
 
+
+	robot.on('github-webhook-event', function(data){
+		console.log(data);
+	})
+
+
 	robot.respond(/gh hook/i, function(res_r) {
 
 		github.repos.createHook({

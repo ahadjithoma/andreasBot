@@ -19,7 +19,8 @@ module.exports = function(robot)  {
 	        payload: req.body,
 	        query: querystring.parse(url.parse(req.url).query)
 	      };
-	      robot.emit("github-repo-event", eventBody);
+	      res.send('json received');
+	      robot.emit("github-webhook-event", eventBody);
 	    } catch (e) {
     	  res.send('You supplied invalid JSON to this endpoint.');
 	      error = e;
