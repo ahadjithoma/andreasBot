@@ -1,30 +1,25 @@
 
 module.exports = function(robot)  {
   robot.router.post('/hubot/github-hooks', function(req, res) {
-    var data = null;
-
-    robot.logger.info("Github post received: ", req);
-
-
-    if(req.body) {
-      try {
-        data = JSON.parse(req.body);
-      } 
-      catch(e) {
-        robot.logger.error("Invalid JSON submitted to /hubot/github-hooks");
-        //res.send(422)
-        res.send('You supplied an invalid JSON to this endpoint.');
-        return;
-      }
-    } 
-    else {
-      robot.logger.error("Non-JSON submitted to  /hubot/github-hooks");
-      //res.send(422)
-      res.send('You supplied an invalid JSON to this endpoint.');
-      return;
-    }
-
-    console.log(data);
+	var error, eventBody, data;
+	
+	    try {
+	      if (debug) {
+	        robot.logger.info("Github post received: ", req);
+	      }
+	      eventBody = {
+	        eventType: req.headers["x-github-event"],
+	        signature: req.headers["X-Hub-Signature"],
+	        deliveryId: req.headers["X-Github-Delivery"],
+	        payload: req.body,
+	        query: querystring.parse(url.parse(req.url).query)
+	      };
+	      robot.emit("github-repo-event", eventBody);
+	    } catch (_error) {
+	      error = _error;
+	      robot.logger.error("Github repo webhook listener error: " + error.stack + ". Request: " + req.body);
+	    }
+	    return res.end("");
 
 
   });
