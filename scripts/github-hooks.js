@@ -1,7 +1,7 @@
 url           = require('url');
 querystring   = require('querystring');
 
-debug = false;
+debug = true;
 
 
 module.exports = function(robot)  {
@@ -20,8 +20,9 @@ module.exports = function(robot)  {
 	        query: querystring.parse(url.parse(req.url).query)
 	      };
 	      robot.emit("github-repo-event", eventBody);
-	    } catch (_error) {
-	      error = _error;
+	    } catch (e) {
+    	  res.send('You supplied invalid JSON to this endpoint.');
+	      error = e;
 	      robot.logger.error("Github repo webhook listener error: " + error.stack + ". Request: " + req.body);
 	    }
 	    return res.end("");
