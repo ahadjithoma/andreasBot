@@ -40,10 +40,20 @@ module.exports = function(robot) {
 
 	robot.on('github-webhook-event', function(data){
 		// console.log(data);
-
 		var room;
 		room = "random";
- 		robot.messageRoom(room, "data received");	
+
+		switch(repo_event.eventType){
+			case 'push': 
+				robot.messageRoom(room, "push event");	
+				break;
+			case 'deployment': 
+				robot.messageRoom(room, "deployment event");	
+				break;
+			case 'deployment_status': 
+				robot.messageRoom(room, "deployment_status event");	
+				break;
+		}
 	})
 
 
