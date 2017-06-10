@@ -3,9 +3,9 @@ module.exports = function(robot)  {
   robot.router.post('/hubot/github-hooks', function(req, res) {
     var data = null;
 
-    if(req.body.payload) {
+    if(req.body) {
       try {
-        data = JSON.parse(req.body.payload);
+        data = JSON.parse(req.body);
       } 
       catch(e) {
         robot.logger.error("Invalid JSON submitted to Slack message callback");
