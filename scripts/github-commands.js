@@ -40,8 +40,12 @@ module.exports = function(robot) {
 
 	robot.on('github-webhook-event', function(data){
 		// console.log(data);
-		var room;
+		var room, adapter;
 		room = "random";
+
+		adapter = robot.adapterName;
+		robot.messageRoom(room, adapter);	
+
 
 		switch(data.eventType){
 			case 'push': 
