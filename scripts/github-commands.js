@@ -53,6 +53,9 @@ module.exports = function(robot) {
 			case 'deployment_status': 
 				robot.messageRoom(room, "deployment_status event");	
 				break;
+			default: 
+				robot.messageRoom(room, `event: ${repo_event.eventType}`);	
+				break;
 		}
 	})
 
