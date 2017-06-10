@@ -24,7 +24,8 @@ module.exports = function(robot)  {
 	    } catch (e) {
     	  // res.send('You supplied invalid JSON to this endpoint.');
 	      error = e;
-	      robot.logger.error("Github repo webhook listener error: " + error.stack + ". Request: " + req.body);
+	      robot.logger.error('error');	
+	      // robot.logger.error("Github repo webhook listener error: " + error.stack + ". Request: " + req.body);
 	    }
 	    return res.end("");
 
