@@ -3,6 +3,9 @@ module.exports = function(robot)  {
   robot.router.post('/hubot/github-hooks', function(req, res) {
     var data = null;
 
+    robot.logger.info("Github post received: ", req);
+
+
     if(req.body) {
       try {
         data = JSON.parse(req.body);
@@ -20,6 +23,8 @@ module.exports = function(robot)  {
       res.send('You supplied an invalid JSON to this endpoint.');
       return;
     }
+
+    console.log(data);
 
 
   });
