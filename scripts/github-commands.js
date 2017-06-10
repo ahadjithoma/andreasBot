@@ -43,7 +43,7 @@ module.exports = function(robot) {
 		var room;
 		room = "random";
 
-		switch(repo_event.eventType){
+		switch(data.eventType){
 			case 'push': 
 				robot.messageRoom(room, "push event");	
 				break;
@@ -54,7 +54,7 @@ module.exports = function(robot) {
 				robot.messageRoom(room, "deployment_status event");	
 				break;
 			default: 
-				robot.messageRoom(room, `event: ${repo_event.eventType}`);	
+				robot.messageRoom(room, `event: ${data.eventType}`);	
 				break;
 		}
 	})
