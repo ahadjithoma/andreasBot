@@ -38,9 +38,12 @@ module.exports = function(robot) {
 
 
 
-	robot.on('github-webhook-event', function(data, res){
-		res.send('received')
+	robot.on('github-webhook-event', function(data){
 		console.log(data);
+
+		var room;
+		room = "random";
+ 		robot.messageRoom(room, "data received");	
 	})
 
 
