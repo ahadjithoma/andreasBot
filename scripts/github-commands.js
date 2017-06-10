@@ -39,7 +39,7 @@ module.exports = function(robot) {
 
 
 	robot.on('github-webhook-event', function(data){
-		console.log(data);
+		// console.log(data);
 
 		var room;
 		room = "random";
