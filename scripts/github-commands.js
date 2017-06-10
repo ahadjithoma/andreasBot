@@ -38,7 +38,8 @@ module.exports = function(robot) {
 
 
 
-	robot.on('github-webhook-event', function(data){
+	robot.on('github-webhook-event', function(data, res){
+		res.send('received')
 		console.log(data);
 	})
 
