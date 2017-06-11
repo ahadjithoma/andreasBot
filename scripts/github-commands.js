@@ -47,7 +47,7 @@ module.exports = function(robot) {
 
 		payload = data.body;
 		console.log(payload);
-		console./log(data);
+		console.log(data);
 		switch(data.eventType){
 			case 'push': 
 				if (adapter == 'slack'){
