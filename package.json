@@ -1,6 +1,6 @@
 {
   "name": "andreasbot",
-  "version": "0.0.0",
+  "version": "6.0.0",
   "private": true,
   "author": "andreash92 <andreas_h92@outlook.com>",
   "description": "hubot - heroku - slack ",
