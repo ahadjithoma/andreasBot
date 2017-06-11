@@ -63,9 +63,10 @@ module.exports = function(robot) {
 			case 'deployment': 
 				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
+					let url = payload.target_url;
 					msg.attachments[0].title = `Deployment ${payload.deployment_status}`;
 					msg.attachments[0].pretext = '';
-					msg.attachments[0].text = `<${payload.target_url}|[andreasBot:master]> 1 new commit by andreash92:`;
+					msg.attachments[0].text = `<${url}|[andreasBot:master]> 1 new commit by andreash92:`;
 					robot.messageRoom(room, msg);	
 				} else {
 					robot.messageRoom(room, "deployment event");	
@@ -75,9 +76,10 @@ module.exports = function(robot) {
 			case 'deployment_status': 
 				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
+					let url = payload.url;
 					msg.attachments[0].title = `Deployment ${payload.deployment_status}`;
 					msg.attachments[0].pretext = '';
-					msg.attachments[0].text = `<${payload.target_url}|[andreasBot:master]> 1 new commit by andreash92:`;
+					msg.attachments[0].text = `<${url}|[andreasBot:master]> 1 new commit by andreash92:`;
 					robot.messageRoom(room, msg);	
 				} else {
 					robot.messageRoom(room, "deployment_status event");	
