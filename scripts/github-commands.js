@@ -46,7 +46,7 @@ module.exports = function(robot) {
 		adapter = robot.adapterName;
 
 		payload = data.payload;
-		console.log(data.payload.target_url);
+		console.log(data.payload);
 		switch(data.eventType){
 			case 'push': 
 				if (adapter == 'slack'){
@@ -64,7 +64,7 @@ module.exports = function(robot) {
 				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
 					let url = payload.target_url;
-					msg.attachments[0].title = `Deployment ${payload.deployment_status}`;
+					msg.attachments[0].title = `Deployment ${payload.deployment_status.url}`;
 					msg.attachments[0].pretext = '';
 					msg.attachments[0].text = `<${url}|[andreasBot:master]> 1 new commit by andreash92:`;
 					robot.messageRoom(room, msg);	
