@@ -76,7 +76,7 @@ module.exports = function(robot) {
 			case 'deployment_status': 
 				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
-					let url = payload.url;
+					let url = data.payload.deployment_status.url;;
 					msg.attachments[0].title = `Deployment ${payload.deployment_status}`;
 					msg.attachments[0].pretext = '';
 					msg.attachments[0].text = `<${url}|[andreasBot:master]> 1 new commit by andreash92:`;
