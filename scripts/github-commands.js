@@ -63,7 +63,7 @@ module.exports = function(robot) {
 					let msg = slackMsgs.githubEvent();
 					msg.attachments[0].pretext = `<${repo_url}|[${repo_name}:${branch}]> 1 new commit by ${user_name}:`;
 					msg.attachments[0].title = '';
-					msg.attachments[0].text = `<${commit_url}|`+'`'+`${commit_id}>`+'`'+`${commit_msg} - <www.github.com/${user_login}|${user_name}>`;
+					msg.attachments[0].text = `<${commit_url}|`+'`'+`${commit_id}`>+'`'+`${commit_msg} - <www.github.com/${user_login}|${user_name}>`;
 					robot.messageRoom(room, msg);	
 				} else {
 					robot.messageRoom(room, "push event");	
