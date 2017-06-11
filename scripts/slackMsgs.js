@@ -99,11 +99,11 @@ module.exports = {
         return {
                   "attachments": [
                     {
-                      "title": "Deployment success",
-                      "pretext": "[andreash92/andreasBot] created by andreash92",
+                      "title": "empty",
+                      "pretext": "",
                       "attachment_type": "default",
                       "color": "#bdc3c7",
-                      "text": "<www.google.com|link of heroku deployment>",
+                      "text": "",
                       "mrkdwn_in": [
                         "text",
                         "pretext",
