@@ -50,8 +50,8 @@ module.exports = function(robot) {
 			case 'push': 
 				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
-					msg.attachments[0].title = `<www.link.com|[andreasBot:master]> 1 new commit by andreash92:`;
-					msg.attachments[0].pretext = '';
+					msg.attachments[0].pretext = `<www.google.com|[andreasBot:master]> 1 new commit by andreash92:`;
+					msg.attachments[0].title = '';
 					msg.attachments[0].text = '';
 					robot.messageRoom(room, msg);	
 				} else {
