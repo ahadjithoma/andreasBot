@@ -52,9 +52,9 @@ module.exports = function(robot) {
 				let branch 		= payload.repository.default_branch;
 				let repo_url	= payload.repository.url + 	'/tree/' + branch;
 				let pusher 		= payload.repository.pusher;
-				let commit_id 	= payload.commits.id;
-				let commit_msg	= 'something'//payload.commits.message;
-				let commit_id7  = commit_msg.substr(0,4)[0];
+				let commit_id 	= payload.commits[0].id;
+				let commit_num  = commit_id.substr(0,7);
+				let commit_msg	= payload.commits[0].message;
 
 				robot.messageRoom(room, "push event");	
 
@@ -62,7 +62,7 @@ module.exports = function(robot) {
 					let msg = slackMsgs.githubEvent();
 					msg.attachments[0].pretext = `<${repo_url}|[${repo_name}:${branch}]> 1 new commit by andreash92:`;
 					msg.attachments[0].title = '';
-					msg.attachments[0].text = `${commit_id7} ${commit_msg} - <www.url.com|${pusher}>`;
+					msg.attachments[0].text = `${commit_num} ${commit_msg} - <www.url.com|${pusher}>`;
 					robot.messageRoom(room, msg);	
 				} else {
 					robot.messageRoom(room, "push event");	
