@@ -48,11 +48,19 @@ module.exports = function(robot) {
 		payload = data.payload;
 		switch(data.eventType){
 			case 'push': 
+				let repo_name 	= payload.repository.full_name;
+				let branch 		= payload.repository.default_branch;
+				let repo_url	= payload.repository.url + 	'/tree/' + branch;
+				let pusher 		= payload.repository.pusher;
+				let commit_id 	= payload.commits.id;
+				let commit_msg	= payload.commits.message;
+
+
 				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
-					msg.attachments[0].pretext = `<http://www.google.com|[andreasBot:master]> 1 new commit by andreash92:`;
+					msg.attachments[0].pretext = `<${repo_url}|[${repo_name}:${branch}]> 1 new commit by andreash92:`;
 					msg.attachments[0].title = '';
-					msg.attachments[0].text = `5070196 update gh - andreash92`;
+					msg.attachments[0].text = `${commit_id.substring(0, 7)} update gh - <www.url.com|${pusher}>`;
 					robot.messageRoom(room, msg);	
 				} else {
 					robot.messageRoom(room, "push event");	
@@ -77,10 +85,11 @@ module.exports = function(robot) {
 					let msg 	= slackMsgs.githubEvent();
 					let url 	= payload.deployment_status.target_url;
 					let state   = payload.deployment_status.state;
-					let creator	= payload.deployment_status.creator.login;
+					let creator	= payload.deployment_status.repository.owner.login;
+					let repo 	= payload.deployment_status.repository.full_name; 
+					msg.attachments[0].pretext = `[andreash92/andreasBot] created by ${creator}`;
 					msg.attachments[0].title = `Deployment ${state}`;
-					msg.attachments[0].pretext = '';
-					msg.attachments[0].text = `<${url}|[andreasBot:master]> 1 new commit by ${creator}:`;
+					msg.attachments[0].text = ``;
 					robot.messageRoom(room, msg);	
 				} else {
 					robot.messageRoom(room, "deployment_status event");	
