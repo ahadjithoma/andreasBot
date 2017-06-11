@@ -23,7 +23,7 @@ module.exports = function(robot)  {
 	      robot.emit("github-webhook-event", eventBody);
 	    } catch (e) {
 		  // res.send('You supplied invalid JSON to this endpoint.');
-	      // error = e;
+	      error = e;
 	      // robot.logger.error('Could not receive github response on github-hooks.js');	
 	      robot.logger.error("github-hooks.js error: " + error.stack);
 	    }
