@@ -46,7 +46,6 @@ module.exports = function(robot) {
 		adapter = robot.adapterName;
 
 		payload = data.payload;
-		console.log(data.payload.deployment_status.url);
 		switch(data.eventType){
 			case 'push': 
 				if (adapter == 'slack'){

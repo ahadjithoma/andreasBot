@@ -25,7 +25,7 @@ module.exports = function(robot)  {
 		  // res.send('You supplied invalid JSON to this endpoint.');
 	      error = e;
 	      // robot.logger.error('Could not receive github response on github-hooks.js');	
-	      robot.logger.error("github-hooks.js error: " + error.stack + " *\n");
+	      robot.logger.error("github-hooks.js error: " + error.stack + "**" + "\n");
 	    }
 	    return res.end("");
 
