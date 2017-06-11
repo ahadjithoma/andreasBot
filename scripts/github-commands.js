@@ -53,9 +53,10 @@ module.exports = function(robot) {
 					msg.attachments[0].title = '<www.link.com|[andreasBot:master]> 1 new commit by andreash92:';
 					msg.attachments[0].pretext = '';
 					msg.attachments[0].text = '';
+					robot.messageRoom(room, msg);	
+				} else {
+					robot.messageRoom(room, "push event");	
 				}
-				
-				robot.messageRoom(room, "push event");	
 				break;
 			case 'deployment': 
 				robot.messageRoom(room, "deployment event");	
@@ -67,7 +68,6 @@ module.exports = function(robot) {
 					msg.attachments[0].pretext = '';
 					msg.attachments[0].text = '<${payload.target_url}|[andreasBot:master]> 1 new commit by andreash92:';
 					robot.messageRoom(room, msg);	
-
 				} else {
 					robot.messageRoom(room, "deployment_status event");	
 				}
