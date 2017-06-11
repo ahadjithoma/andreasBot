@@ -54,7 +54,7 @@ module.exports = function(robot) {
 				let pusher 		= payload.repository.pusher;
 				let commit_id 	= payload.commits.id;
 				let commit_msg	= 'δσδΣφσφεα'//payload.commits.message;
-				let commit_id7  = commit_id.substr(0,2);
+				let commit_id7  = commit_msg.substr(0,2);
 
 				robot.messageRoom(room, "push event");	
 
