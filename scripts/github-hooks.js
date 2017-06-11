@@ -1,7 +1,7 @@
 url           = require('url');
 querystring   = require('querystring');
 
-debug = true;
+debug = false;
 
 
 module.exports = function(robot)  {
