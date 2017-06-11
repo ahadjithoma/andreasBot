@@ -54,7 +54,7 @@ module.exports = function(robot) {
 				let pusher 		= payload.repository.pusher;
 				let commit_id 	= payload.commits.id;
 				let commit_msg	= payload.commits.message;
-				let commit_id7	= commit_id.substring(0, 7);
+				let commit_id7	= commit_id.substr(0, 7);
 				robot.messageRoom(room, "push event");	
 
 				if (adapter == 'slack'){
