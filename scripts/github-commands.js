@@ -59,6 +59,7 @@ module.exports = function(robot) {
 					robot.messageRoom(room, "push event");	
 				}
 				break;
+			
 			case 'deployment': 
 				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
@@ -68,7 +69,9 @@ module.exports = function(robot) {
 					robot.messageRoom(room, msg);	
 				} else {
 					robot.messageRoom(room, "deployment event");	
-				}				break;
+				}				
+				break;
+			
 			case 'deployment_status': 
 				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
@@ -80,6 +83,17 @@ module.exports = function(robot) {
 					robot.messageRoom(room, "deployment_status event");	
 				}
 				break;
+			case '':
+				break;
+			case '':
+				break;
+			case '':
+				break;
+			case '':
+				break;
+			case '':
+				break;
+			
 			default: 
 				robot.messageRoom(room, `event: ${data.eventType}`);	
 				break;
