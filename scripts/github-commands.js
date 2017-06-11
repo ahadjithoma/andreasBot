@@ -57,6 +57,7 @@ module.exports = function(robot) {
 				let commit_msg	= payload.commits[0].message;
 				let commit_url  = payload.commits[0].url;
 				let commits 	= Object.keys(payload.commits).length;
+				
 
 				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
