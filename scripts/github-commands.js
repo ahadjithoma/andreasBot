@@ -54,14 +54,14 @@ module.exports = function(robot) {
 				let pusher 		= payload.repository.pusher;
 				let commit_id 	= payload.commits.id;
 				let commit_msg	= payload.commits.message;
-
+				let commit_id7	= commit_id.substring(0, 7);
 				robot.messageRoom(room, "push event");	
 
 				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
 					msg.attachments[0].pretext = `<${repo_url}|[${repo_name}:${branch}]> 1 new commit by andreash92:`;
 					msg.attachments[0].title = '';
-					msg.attachments[0].text = `${commit_id.substring(0, 7)} update gh - <www.url.com|${pusher}>`;
+					msg.attachments[0].text = `${commit_id} update gh - <www.url.com|${pusher}>`;
 					robot.messageRoom(room, msg);	
 				} else {
 					robot.messageRoom(room, "push event");	
