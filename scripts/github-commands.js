@@ -75,11 +75,13 @@ module.exports = function(robot) {
 			
 			case 'deployment_status': 
 				if (adapter == 'slack'){
-					let msg = slackMsgs.githubEvent();
-					let url = payload.deployment_status.url;;
-					msg.attachments[0].title = `Deployment ${payload.deployment_status}`;
+					let msg 	= slackMsgs.githubEvent();
+					let url 	= payload.deployment_status.target_url;
+					let state   = payload.deployment_status.state;
+					let creator	= payload.deployment_status.creator.login;
+					msg.attachments[0].title = `Deployment ${state}`;
 					msg.attachments[0].pretext = '';
-					msg.attachments[0].text = `<${url}|[andreasBot:master]> 1 new commit by andreash92:`;
+					msg.attachments[0].text = `<${url}|[andreasBot:master]> 1 new commit by ${creator}:`;
 					robot.messageRoom(room, msg);	
 				} else {
 					robot.messageRoom(room, "deployment_status event");	
