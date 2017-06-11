@@ -60,8 +60,15 @@ module.exports = function(robot) {
 				}
 				break;
 			case 'deployment': 
-				robot.messageRoom(room, "deployment event");	
-				break;
+				if (adapter == 'slack'){
+					let msg = slackMsgs.githubEvent();
+					msg.attachments[0].title = `Deployment ${payload.deployment_status}`;
+					msg.attachments[0].pretext = '';
+					msg.attachments[0].text = `<${payload.target_url}|[andreasBot:master]> 1 new commit by andreash92:`;
+					robot.messageRoom(room, msg);	
+				} else {
+					robot.messageRoom(room, "deployment event");	
+				}				break;
 			case 'deployment_status': 
 				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
