@@ -48,7 +48,7 @@ module.exports = function(robot) {
 		payload = data.body;
 		switch(data.eventType){
 			case 'push': 
-				if (adapter='slack'){
+				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
 					msg.attachments[0].title = '<www.link.com|[andreasBot:master]> 1 new commit by andreash92:';
 					msg.attachments[0].pretext = '';
@@ -61,11 +61,13 @@ module.exports = function(robot) {
 				robot.messageRoom(room, "deployment event");	
 				break;
 			case 'deployment_status': 
-				if (adapter='slack'){
+				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
 					msg.attachments[0].title = 'Deployment ${payload.deployment_status.state}';
 					msg.attachments[0].pretext = '';
 					msg.attachments[0].text = '<${payload.target_url}|[andreasBot:master]> 1 new commit by andreash92:';
+					robot.messageRoom(room, msg);	
+
 				} else {
 					robot.messageRoom(room, "deployment_status event");	
 				}
