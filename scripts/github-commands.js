@@ -65,22 +65,16 @@ module.exports = function(robot) {
 
 				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
-					if (commits == 1){
-						msg.attachments[0].pretext = `<${repo_url}|[${repo_name}:${branch}]> 1 new commit by ${user_name}:`;
-						msg.attachments[0].title = '';
-						msg.attachments[0].text = `<${commit_url}|`+'`'+`${commit_id}`+'`'+`>`+`${commit_msg} - <www.github.com/${user_login}|${user_name}>`;
-						let msg2 = slackMsgs.githubEvent().attachments[0];
-						msg.attachments.push(msg2);
+					let attachment = slackMsgs.githubEvent().attachments[0];
+
+					for (i=0; i<commits; i++){
+						attachment.pretext = `<${repo_url}|[${repo_name}:${branch}]> 1 new commit(s) by ${user_login}:`;
+						attachment.title = '';
+						attachment.text = `<${commit_url}|`+'`'+`${commit_id}`+'`'+`>`+`${commit_msg} - <www.github.com/${user_login}|${user_name}>`;
+						msg.attachments.push(attachment);
 						robot.messageRoom(room, msg);						
 						return 1;
-					}
-					let i;
-					for (i=0; i<commits; i++){
-						msg.attachments[0].pretext = `<${repo_url}|[${repo_name}:${branch}]> 1 new commit by ${user_name}:`;
-						msg.attachments[0].title = '';
-						msg.attachments[0].text = `<${commit_url}|`+'`'+`${commit_id}`+'`'+`>`+`${commit_msg} - <www.github.com/${user_login}|${user_name}>`;
-					}
-					robot.messageRoom(room, msg);		
+					}	
 
 				} else {
 					robot.messageRoom(room, "push event");	
