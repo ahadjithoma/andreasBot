@@ -51,7 +51,9 @@ module.exports = function(robot) {
 				let repo_name 	= payload.repository.full_name;
 				let branch 		= payload.repository.default_branch;
 				let repo_url	= payload.repository.url + 	'/tree/' + branch;
-				let pusher 		= payload.repository.pusher;
+				let user_name	= payload.commits[0].name;
+				let user_login	= payload.commits[0].username;
+				let pusher_url  = payload.	
 				let commit_id 	= payload.commits[0].id;
 				let commit_num  = commit_id.substr(0,7);
 				let commit_msg	= payload.commits[0].message;
@@ -60,9 +62,9 @@ module.exports = function(robot) {
 
 				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
-					msg.attachments[0].pretext = `<${repo_url}|[${repo_name}:${branch}]> 1 new commit by andreash92:`;
+					msg.attachments[0].pretext = `<${repo_url}|[${repo_name}:${branch}]> 1 new commit by ${}:`;
 					msg.attachments[0].title = '';
-					msg.attachments[0].text = `${commit_num} ${commit_msg} - <www.url.com|${pusher}>`;
+					msg.attachments[0].text = `${commit_num} ${commit_msg} - <www.github.com/${user_login}|${user_name}>`;
 					robot.messageRoom(room, msg);	
 				} else {
 					robot.messageRoom(room, "push event");	
