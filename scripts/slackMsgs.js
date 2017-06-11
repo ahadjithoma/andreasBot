@@ -95,6 +95,27 @@ module.exports = {
         } 
     },
 
+    githubEvent: function(){
+        return {
+                  "attachments": [
+                    {
+                      "title": "Deployment success",
+                      "pretext": "[andreash92/andreasBot] created by andreash92",
+                      "attachment_type": "default"
+                      "color": "#bdc3c7",
+                      "text": "<www.google.com|link of heroku deployment>",
+                      "mrkdwn_in": [
+                        "text",
+                        "pretext",
+                        "fields"
+                      ],
+
+                    }
+                  ]
+                }
+    },
+
+
     basicMessage: function(){
         return {
             "attachments": [

@@ -40,22 +40,35 @@ module.exports = function(robot) {
 
 	robot.on('github-webhook-event', function(data){
 		// console.log(data);
-		var room, adapter;
+		var room, adapter, payload;
 		room = "random";
 
 		adapter = robot.adapterName;
-		robot.messageRoom(room, adapter);	
 
-
+		payload = data.body;
 		switch(data.eventType){
 			case 'push': 
+				if (adapter='slack'){
+					let msg = slackMsgs.githubEvent();
+					msg.attachments[0].title = '<www.link.com|[andreasBot:master]> 1 new commit by andreash92:';
+					msg.attachments[0].pretext = '';
+					msg.attachments[0].text = '';
+				}
+				
 				robot.messageRoom(room, "push event");	
 				break;
 			case 'deployment': 
 				robot.messageRoom(room, "deployment event");	
 				break;
 			case 'deployment_status': 
-				robot.messageRoom(room, "deployment_status event");	
+				if (adapter='slack'){
+					let msg = slackMsgs.githubEvent();
+					msg.attachments[0].title = 'Deployment ${payload.deployment_status.state}';
+					msg.attachments[0].pretext = '';
+					msg.attachments[0].text = '<${payload.target_url}|[andreasBot:master]> 1 new commit by andreash92:';
+				} else {
+					robot.messageRoom(room, "deployment_status event");	
+				}
 				break;
 			default: 
 				robot.messageRoom(room, `event: ${data.eventType}`);	
