@@ -114,7 +114,7 @@ module.exports = function(robot) {
 		let issue_title = payload.issue.title;
 		let issue_body	= payload.issue.body;
 		let user 		= payload.issue.user.login;
-		let labels 		= Object.keys(payload.issue.labesl).length;
+		let labels 		= Object.keys(payload.issue.labels).length;
 
 		if (adapter == 'slack'){
 			let msg = slackMsgs.githubEvent();
