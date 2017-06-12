@@ -99,7 +99,7 @@ module.exports = {
         return {
                   "attachments": [
                     {
-                      "title": "empty",
+                      "title": "",
                       "pretext": "",
                       "attachment_type": "default",
                       "color": "#bdc3c7",
