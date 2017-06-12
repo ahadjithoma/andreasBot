@@ -121,19 +121,21 @@ module.exports = function(robot) {
 			if (action == 'opened'){
 				msg.attachments[0].pretext = `[${repo}] Issue ${action} by <www.github.com/${user}|${user}>`;
 				msg.attachments[0].title = `<${issue_url}|#${issue_num} ${issue_title}>`;
-				msg.attachments[0].text = `${issue_body}`;
+				msg.attachments[0].text = `${issue_body}`;				
+				msg.attachments[0].color = '#00ff00'; // set color = green
 			} else {
-				msg.attachments[0].text = `[${repo}] Issue <${issue_url}|#${issue_num} ${issue_title}> ${action} by <www.github.com/${user}|${user}>`;
+				msg.text = `[${repo}] Issue <${issue_url}|#${issue_num} ${issue_title}>: *${action}* by <www.github.com/${user}|${user}>`;
 			}
 
-			// assign attachement color
+			/* assign attachement color - CURRENTLY I AM NOT USING ATTACHEMENTS FOR ALL ISSUES
 			if (action.includes('open')){
 				msg.attachments[0].color = '#00ff00'; // set color = green
 			} else if (action.includes('close')){
 				msg.attachments[0].color = '#ff0000'; // set color = red
 			} else {
 				msg.attachments[0].color = '#ff8533'; // set color = orange
-			}			
+			} 
+			*/			
 			robot.messageRoom(room, msg);		
 		
 		} else {
