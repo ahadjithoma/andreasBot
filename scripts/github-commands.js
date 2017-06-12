@@ -80,7 +80,7 @@ module.exports = function(robot) {
 			let creator		= payload.deployment_status.creator.login;
 			let repo 		= payload.repository.full_name; 
 			let environment = payload.deployment.environment;
-			msg.attachments[0].pretext = `<${repo_url}|[andreash92/andreasBot]> created by ${creator}`;
+			msg.attachments[0].pretext = `<${repo_url}|[${repo}]> created by ${creator}`;
 			msg.attachments[0].title = `Deployment ${state}`;
 			msg.attachments[0].text = `<${target_url}|${environment}>`;
 			if (state == 'pending'){
@@ -104,17 +104,23 @@ module.exports = function(robot) {
 
 	function issuesEvent(payload){
 		//under construction
-		var	room = "random";
+		var	room 		= "random";
 		var adapter 	= robot.adapterName;
+		let repo 		= payload.repository.full_name;
+		let repo_url 	= payload.repository.html_url;
 		let action 		= payload.action;
 		let issue_url   = payload.issue.url;
 		let issue_num	= payload.issue.number;
 		let issue_title = payload.issue.title;
-
+		let issue_body	= payload.issue.body;
+		let user 		= payload.issue.user.login;
+		let labels 		= Object.keys(payload.issue.labesl).length;
 
 		if (adapter == 'slack'){
-			let msg 		= slackMsgs.githubEvent();
-
+			let msg = slackMsgs.githubEvent();
+			msg.attachments[0].pretext = `<${repo_url}|[${repo}]> Issue ${action} by ${user}`;
+			msg.attachments[0].title = `<${issue_url}|#${issue_num} ${issue_title}>`;
+			msg.attachments[0].text = `${issue_body}`;		
 		}
 	};
 
