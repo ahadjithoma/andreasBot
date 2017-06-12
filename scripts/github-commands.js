@@ -144,10 +144,10 @@ module.exports = function(robot) {
 				developmentStatusEvent(data.payload);
 				break;
 			case 'issues':
-				issuesEvent(payload);
+				issuesEvent(data.payload);
 				break;
 			case 'issue_comment':
-				issue(payload);
+				issueCommentEvent(data.payload);
 				break;
 			case '':
 				break;
