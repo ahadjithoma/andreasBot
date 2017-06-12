@@ -72,6 +72,8 @@ module.exports = function(robot) {
 	}
 
 	function developmentStatusEvent(payload){
+		var	room = "random";
+		var adapter = robot.adapterName;
 		if (adapter == 'slack'){
 			let msg 		= slackMsgs.githubEvent();
 			let target_url 	= payload.deployment_status.target_url;
@@ -79,7 +81,8 @@ module.exports = function(robot) {
 			let state  		= payload.deployment_status.state;
 			let creator		= payload.deployment_status.creator.login;
 			let repo 		= payload.deployment_status.repository.full_name; 
-			msg.attachments[0].pretext = `[andreash92/andreasBot] created by ${creator}`;
+			let environment = payload.deployment.environment;
+			msg.attachments[0].pretext = `<repository_url|[andreash92/andreasBot]> created by ${creator}`;
 			msg.attachments[0].title = `Deployment ${state}`;
 			msg.attachments[0].text = ``;
 			robot.messageRoom(room, msg);	
