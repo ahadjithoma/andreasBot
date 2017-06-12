@@ -82,7 +82,7 @@ module.exports = function(robot) {
 			let creator		= payload.deployment_status.creator.login;
 			let repo 		= payload.repository.full_name; 
 			let environment = payload.deployment.environment;
-			msg.attachments[0].pretext = `<repository_url|[andreash92/andreasBot]> created by ${creator}`;
+			msg.attachments[0].pretext = `<repo_url|[andreash92/andreasBot]> created by ${creator}`;
 			msg.attachments[0].title = `Deployment ${state}`;
 			msg.attachments[0].text = ``;
 			robot.messageRoom(room, msg);	
