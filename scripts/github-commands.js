@@ -61,7 +61,7 @@ module.exports = function(robot) {
 			}	
 			msg.attachments[0].pretext = `<${repo_url}|[${repo_name}:${branch}]> <${compare_url}|${commits} new commit(s)> by <www.github.com/${user_login}|${user_name}>:`;
 			msg.attachments[0].color = '#0000ff'; // set color = blue
-			robot.messageRoom(room, '```'+msg+'```');
+			robot.messageRoom(room, msg);
 
 		} else {
 			//TODO: send a msg in plain text for other chat platforms or add any other specific formats than slack's
@@ -86,7 +86,7 @@ module.exports = function(robot) {
 			if (state == 'pending'){
 				msg.attachments[0].color = '#ff8533' // set color = orange
 			} else if (state == 'success'){
-				msg.attachments[0].color = '#00b300' // set color = green 
+				msg.attachments[0].color = '#00ff00' // set color = green 
 			} else if (state == 'fail'){
 				msg.attachments[0].color = '#0000ff' // set color = blue 
 			} else {
@@ -118,11 +118,29 @@ module.exports = function(robot) {
 
 		if (adapter == 'slack'){
 			let msg = slackMsgs.githubEvent();
-			msg.attachments[0].pretext = `<${repo_url}|[${repo}]> Issue ${action} by ${user}`;
-			msg.attachments[0].title = `<${issue_url}|#${issue_num} ${issue_title}>`;
-			msg.attachments[0].text = `${issue_body}`;
+			if (action == 'opened'){
+				msg.attachments[0].pretext = `<${repo_url}|[${repo}]> Issue ${action} by ${user}`;
+				msg.attachments[0].title = `<${issue_url}|#${issue_num} ${issue_title}>`;
+				msg.attachments[0].text = `${issue_body}`;
+			} else {
+				msg.attachments[0].pretext = `<${repo_url}|[${repo}]> Issue <${issue_url}|${issue_title}> ${action} by ${user}`;
+			}
+
+			// assign attachement color
+			if (action.includes('open')){
+				msg.attachments[0].color = '#00ff00'; // set color = green
+
+			} else if (action.includes('close')){
+				msg.attachments[0].color = '#ff0000'; // set color = red
+
+			} else {
+				msg.attachments[0].color = '#ff8533'; // set color = orange
+			}			
 			robot.messageRoom(room, msg);		
-		}
+		
+		} else {
+			//todo: plain text
+		} 
 	};
 
 	function issueCommentEvent(payload){
