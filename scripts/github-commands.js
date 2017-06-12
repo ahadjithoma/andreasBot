@@ -85,6 +85,13 @@ module.exports = function(robot) {
 			msg.attachments[0].pretext = `<${repo_url}|[andreash92/andreasBot]> created by ${creator}`;
 			msg.attachments[0].title = `Deployment ${state}`;
 			msg.attachments[0].text = ``;
+			if (state == 'pending'){
+				msg.attachments[0].color = '#ff8533' // set color = orange
+			} else if (state == 'success'){
+				msg.attachments[0].color = '#00b300' // set color = green 
+			} else {
+				msg.attachments[0].color = '#ff0000' // set color = red 
+			}
 			robot.messageRoom(room, msg);	
 		} else {
 			robot.messageRoom(room, "deployment_status event");	
