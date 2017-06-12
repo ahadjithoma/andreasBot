@@ -51,7 +51,7 @@ module.exports = function(robot) {
 				let repo_name 	= payload.repository.full_name;
 				let branch 		= payload.repository.default_branch;
 				let repo_url	= payload.repository.url + 	'/tree/' + branch;
-
+				let compare_url	= payload.compare;
 				let commits 	= Object.keys(payload.commits).length;		 // get the total number of commits done
 		
 				if (adapter == 'slack'){
@@ -68,7 +68,7 @@ module.exports = function(robot) {
 						commit_id = "`" + commit_id + "`"; // add slack's msg format 	
 						attachment.text = attachment.text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
 					}	
-					attachment.pretext = `<${repo_url}|[${repo_name}:${branch}]> ${commits} new commit(s) by <www.github.com/${user_login}|${user_name}>:`;
+					attachment.pretext = `<${repo_url}|[${repo_name}:${branch}]> <${compare_url}|${commits} new commit(s)> by <www.github.com/${user_login}|${user_name}>:`;
 					attachment.color = '#0000ff'; // set color = blue
 					msg.attachments.push(attachment);
 					robot.messageRoom(room, msg);
