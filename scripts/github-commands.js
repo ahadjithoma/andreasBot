@@ -89,6 +89,8 @@ module.exports = function(robot) {
 				msg.attachments[0].color = '#ff8533' // set color = orange
 			} else if (state == 'success'){
 				msg.attachments[0].color = '#00b300' // set color = green 
+			} else if (state == 'fail'){
+				msg.attachments[0].color = '#0000ff' // set color = blue 
 			} else {
 				msg.attachments[0].color = '#ff0000' // set color = red 
 			}
