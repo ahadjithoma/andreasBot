@@ -48,7 +48,6 @@ module.exports = function(robot) {
 
 		if (adapter == 'slack'){
 			let msg = slackMsgs.githubEvent();
-			let attachment = slackMsgs.githubEvent().attachments[0];
 			let i;
 			
 			for (i=0; i<commits; i++){
@@ -58,11 +57,10 @@ module.exports = function(robot) {
 				let commit_msg	= payload.commits[i].message.split('\n',1); // get only the commit msg, not the description
 				let commit_url  = payload.commits[i].url;		
 				commit_id = "`" + commit_id + "`"; // add slack's msg format 	
-				attachment.text = attachment.text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
+				msg.attachments[0].text = msg.attachments[0].text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
 			}	
-			attachment.pretext = `<${repo_url}|[${repo_name}:${branch}]> <${compare_url}|${commits} new commit(s)> by <www.github.com/${user_login}|${user_name}>:`;
-			attachment.color = '#0000ff'; // set color = blue
-			msg.attachments.push(attachment);
+			msg.attachments[0].pretext = `<${repo_url}|[${repo_name}:${branch}]> <${compare_url}|${commits} new commit(s)> by <www.github.com/${user_login}|${user_name}>:`;
+			msg.attachments[0].color = '#0000ff'; // set color = blue
 			robot.messageRoom(room, msg);
 
 		} else {
@@ -100,6 +98,30 @@ module.exports = function(robot) {
 		}
 	}
 
+	function developmentEvent(payload){ 
+		//TODO 
+	};	
+
+	function issuesEvent(payload){
+		//under construction
+		var	room = "random";
+		var adapter 	= robot.adapterName;
+		let action 		= payload.action;
+		let issue_url   = payload.issue.url;
+		let issue_num	= payload.issue.number;
+		let issue_title = payload.issue.title;
+
+
+		if (adapter == 'slack'){
+			let msg 		= slackMsgs.githubEvent();
+
+		}
+	};
+
+	function issueCommentEvent(payload){
+		//TODO
+	};
+
 
 	robot.on('github-webhook-event', function(data){
 
@@ -108,25 +130,18 @@ module.exports = function(robot) {
 				pushEvent(data.payload);
 				break;
 			
-			case '~deployment': 
-				if (adapter == 'slack'){
-					let msg = slackMsgs.githubEvent();
-					let url = data.payload.deployment_status.url;
-					msg.attachments[0].title = `Deployment ${data.payload.deployment_status.url}`;
-					msg.attachments[0].pretext = '';
-					msg.attachments[0].text = `<${url}|[andreasBot:master]> 1 new commit by andreash92:`;
-					robot.messageRoom(room, msg);	
-				} else {
-					robot.messageRoom(room, "deployment event");	
-				}				
+			case 'deployment': 
+				developmentEvent(payload);	
 				break;
 			
 			case 'deployment_status': 
 				developmentStatusEvent(data.payload);
 				break;
-			case 'issue':
+			case 'issues':
+				issuesEvent(payload);
 				break;
-			case 'comment':
+			case 'issue_comment':
+				issue(payload);
 				break;
 			case '':
 				break;
