@@ -37,46 +37,45 @@ module.exports = function(robot) {
 
 
 
+	function pushEvent(payload){
+		var	room = "random";
+		var adapter = robot.adapterName;
+		let repo_name 	= payload.repository.full_name;
+		let branch 		= payload.repository.default_branch;
+		let repo_url	= payload.repository.url + 	'/tree/' + branch;
+		let compare_url	= payload.compare;
+		let commits 	= Object.keys(payload.commits).length;		 // get the total number of commits done
+
+		if (adapter == 'slack'){
+			let msg = slackMsgs.githubEvent();
+			let attachment = slackMsgs.githubEvent().attachments[0];
+			let i;
+			
+			for (i=0; i<commits; i++){
+				var user_login	= payload.commits[i].author.username;
+				var user_name	= payload.commits[i].author.name;
+				let commit_id 	= payload.commits[i].id.substr(0,7);		 // get the first 7 chars of the commit id
+				let commit_msg	= payload.commits[i].message.split('\n',1); // get only the commit msg, not the description
+				let commit_url  = payload.commits[i].url;		
+				commit_id = "`" + commit_id + "`"; // add slack's msg format 	
+				attachment.text = attachment.text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
+			}	
+			attachment.pretext = `<${repo_url}|[${repo_name}:${branch}]> <${compare_url}|${commits} new commit(s)> by <www.github.com/${user_login}|${user_name}>:`;
+			attachment.color = '#0000ff'; // set color = blue
+			msg.attachments.push(attachment);
+			robot.messageRoom(room, msg);
+
+		} else {
+			//TODO: send a msg in plain text for other chat platforms or add any other specific formats than slack's
+			robot.messageRoom(room, "push event");	
+		}	
+	}
 
 	robot.on('github-webhook-event', function(data){
-		// console.log(data);
-		var room, adapter, payload;
-		room = "random";
 
-		adapter = robot.adapterName;
-
-		payload = data.payload;
 		switch(data.eventType){
 			case 'push': 
-				let repo_name 	= payload.repository.full_name;
-				let branch 		= payload.repository.default_branch;
-				let repo_url	= payload.repository.url + 	'/tree/' + branch;
-				let compare_url	= payload.compare;
-				let commits 	= Object.keys(payload.commits).length;		 // get the total number of commits done
-		
-				if (adapter == 'slack'){
-					let msg = slackMsgs.githubEvent();
-					let attachment = slackMsgs.githubEvent().attachments[0];
-					let i;
-					
-					for (i=0; i<commits; i++){
-						var user_login	= payload.commits[i].author.username;
-						var user_name	= payload.commits[i].author.name;
-						let commit_id 	= payload.commits[i].id.substr(0,7);		 // get the first 7 chars of the commit id
-						let commit_msg	= payload.commits[i].message.split('\n',1); // get only the commit msg, not the description
-						let commit_url  = payload.commits[i].url;		
-						commit_id = "`" + commit_id + "`"; // add slack's msg format 	
-						attachment.text = attachment.text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
-					}	
-					attachment.pretext = `<${repo_url}|[${repo_name}:${branch}]> <${compare_url}|${commits} new commit(s)> by <www.github.com/${user_login}|${user_name}>:`;
-					attachment.color = '#0000ff'; // set color = blue
-					msg.attachments.push(attachment);
-					robot.messageRoom(room, msg);
-
-				} else {
-					//TODO: send a msg in plain text for other chat platforms or add any other specific formats than slack's
-					robot.messageRoom(room, "push event");	
-				}
+				pushEvent(data.payload);
 				break;
 			
 			case '~deployment': 
