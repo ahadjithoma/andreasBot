@@ -66,13 +66,15 @@ module.exports = function(robot) {
 						let commit_msg	= payload.commits[i].message.split('\n',1); // get only the commit msg, not the description
 						let commit_url  = payload.commits[i].url;		
 						commit_id = "`" + commit_id + "`"; // add slack's msg format 	
-						attachment.text = attachment.text + '\n'+`<${commit_url}|${commit_id}> ${commit_msg}`;
+						attachment.text = attachment.text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
 					}	
 					attachment.pretext = `<${repo_url}|[${repo_name}:${branch}]> ${commits} new commit(s) by <www.github.com/${user_login}|${user_name}>:`;
+					attachment.color = '#0000ff'; // set color = blue
 					msg.attachments.push(attachment);
 					robot.messageRoom(room, msg);
 
 				} else {
+					//TODO: send a msg in plain text for other chat platforms or add any other specific formats than slack's
 					robot.messageRoom(room, "push event");	
 				}
 				break;
