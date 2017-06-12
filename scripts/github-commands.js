@@ -59,17 +59,17 @@ module.exports = function(robot) {
 					let attachment = slackMsgs.githubEvent().attachments[0];
 					let i;
 					
-					attachment.pretext = `<${repo_url}|[${repo_name}:${branch}]> 1 new commit(s) by ${user_login}:`;
 					attachment.title = '';		
 					for (i=0; i<commits; i++){
 						let user_name	= payload.commits[i].author.name;
-						let user_login	= payload.commits[i].author.username;
+						var user_login	= payload.commits[i].author.username;
 						let commit_id 	= payload.commits[i].id.substr(0,7);		 // get the first 7 chars of the commit id
 						let commit_msg	= payload.commits[i].messagek.split('\n',1); // get only the commit msg, not the description
 						let commit_url  = payload.commits[id].url;			
 						attachment.text = `<${commit_url}|`+'`'+`${commit_id}`+'`'+`>`+`${commit_msg} - <www.github.com/${user_login}|${user_name}>`;
 						attachment.text = attachment.text + '\nnew msg here';
 					}	
+					attachment.pretext = `<${repo_url}|[${repo_name}:${branch}]> 1 new commit(s) by ${user_login}:`;
 					msg.attachments.push(attachment);
 					robot.messageRoom(room, msg);
 
