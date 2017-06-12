@@ -51,18 +51,9 @@ module.exports = function(robot) {
 				let repo_name 	= payload.repository.full_name;
 				let branch 		= payload.repository.default_branch;
 				let repo_url	= payload.repository.url + 	'/tree/' + branch;
-				let user_name	= payload.commits[0].name;
-				let user_login	= payload.commits[0].username;
-				let commit_id 	= payload.commits[0].id.substr(0,7);
-				let commit_msg	= payload.commits[0].message;
-				let commit_url  = payload.commits[0].url;
-				let commits 	= Object.keys(payload.commits).length;
-				if (commits == 1){
-					let commits_msg = `${commits} new commit`
-				} else {
-					let commits_msg = `${commits} new commits`
-				}
 
+				let commits 	= Object.keys(payload.commits).length;		 // get the total number of commits done
+		
 				if (adapter == 'slack'){
 					let msg = slackMsgs.githubEvent();
 					let attachment = slackMsgs.githubEvent().attachments[0];
@@ -71,6 +62,11 @@ module.exports = function(robot) {
 					attachment.pretext = `<${repo_url}|[${repo_name}:${branch}]> 1 new commit(s) by ${user_login}:`;
 					attachment.title = '';		
 					for (i=0; i<commits; i++){
+						let user_name	= payload.commits[i].author.name;
+						let user_login	= payload.commits[i].author.username;
+						let commit_id 	= payload.commits[i].id.substr(0,7);		 // get the first 7 chars of the commit id
+						let commit_msg	= payload.commits[i].messagek.split('\n',1); // get only the commit msg, not the description
+						let commit_url  = payload.commits[id].url;			
 						attachment.text = `<${commit_url}|`+'`'+`${commit_id}`+'`'+`>`+`${commit_msg} - <www.github.com/${user_login}|${user_name}>`;
 						attachment.text = attachment.text + '\nnew msg here';
 					}	
