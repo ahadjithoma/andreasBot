@@ -71,8 +71,8 @@ module.exports = function(robot) {
 					attachment.pretext = `<${repo_url}|[${repo_name}:${branch}]> 1 new commit(s) by ${user_login}:`;
 					attachment.title = '';		
 					for (i=0; i<commits; i++){
-
 						attachment.text = `<${commit_url}|`+'`'+`${commit_id}`+'`'+`>`+`${commit_msg} - <www.github.com/${user_login}|${user_name}>`;
+						attachment.text = attachment.text + '\nnew msg here';
 					}	
 					msg.attachments.push(attachment);
 					robot.messageRoom(room, msg);
