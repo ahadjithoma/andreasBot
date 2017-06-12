@@ -71,6 +71,24 @@ module.exports = function(robot) {
 		}	
 	}
 
+	function developmentStatusEvent(payload){
+		if (adapter == 'slack'){
+			let msg 		= slackMsgs.githubEvent();
+			let target_url 	= payload.deployment_status.target_url;
+			let repo_url	= payload.deployment_status.repository_url;
+			let state  		= payload.deployment_status.state;
+			let creator		= payload.deployment_status.creator.login;
+			let repo 		= payload.deployment_status.repository.full_name; 
+			msg.attachments[0].pretext = `[andreash92/andreasBot] created by ${creator}`;
+			msg.attachments[0].title = `Deployment ${state}`;
+			msg.attachments[0].text = ``;
+			robot.messageRoom(room, msg);	
+		} else {
+			robot.messageRoom(room, "deployment_status event");	
+		}
+	}
+
+
 	robot.on('github-webhook-event', function(data){
 
 		switch(data.eventType){
@@ -92,23 +110,11 @@ module.exports = function(robot) {
 				break;
 			
 			case 'deployment_status': 
-				if (adapter == 'slack'){
-					let msg 	= slackMsgs.githubEvent();
-					let url 	= payload.deployment_status.target_url;
-					let state   = payload.deployment_status.state;
-					let creator	= payload.deployment_status.repository.owner.login;
-					let repo 	= payload.deployment_status.repository.full_name; 
-					msg.attachments[0].pretext = `[andreash92/andreasBot] created by ${creator}`;
-					msg.attachments[0].title = `Deployment ${state}`;
-					msg.attachments[0].text = ``;
-					robot.messageRoom(room, msg);	
-				} else {
-					robot.messageRoom(room, "deployment_status event");	
-				}
+				developmentStatusEvent(data.payload);
 				break;
-			case '':
+			case 'issue':
 				break;
-			case '':
+			case 'comment':
 				break;
 			case '':
 				break;
