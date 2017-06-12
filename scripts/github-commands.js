@@ -123,7 +123,7 @@ module.exports = function(robot) {
 				msg.attachments[0].title = `<${issue_url}|#${issue_num} ${issue_title}>`;
 				msg.attachments[0].text = `${issue_body}`;
 			} else {
-				msg.attachments[0].text = `<${repo_url}|[${repo}]> Issue <${issue_url}|#${issue_num} ${issue_title}> ${action} by <www.github.com/${user}|${user}>`;
+				msg.attachments[0].text = `[${repo}] Issue <${issue_url}|#${issue_num} ${issue_title}> ${action} by <www.github.com/${user}|${user}>`;
 			}
 
 			// assign attachement color
@@ -137,6 +137,10 @@ module.exports = function(robot) {
 			robot.messageRoom(room, msg);		
 		
 		} else {
+			let msg = `[${repo}] Issue ${action} by <www.github.com/${user}|${user}>`;
+			msg = msg + `\n <${issue_url}|#${issue_num} ${issue_title}>` + `\n${issue_body}`;
+			robot.messageRoom(room, msg);		
+
 			//todo: plain text
 		} 
 	};
