@@ -120,7 +120,8 @@ module.exports = function(robot) {
 			let msg = slackMsgs.githubEvent();
 			msg.attachments[0].pretext = `<${repo_url}|[${repo}]> Issue ${action} by ${user}`;
 			msg.attachments[0].title = `<${issue_url}|#${issue_num} ${issue_title}>`;
-			msg.attachments[0].text = `${issue_body}`;		
+			msg.attachments[0].text = `${issue_body}`;
+			robot.messageRoom(room, msg);		
 		}
 	};
 
