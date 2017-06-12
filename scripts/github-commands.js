@@ -61,8 +61,8 @@ module.exports = function(robot) {
 					
 					attachment.title = '';		
 					for (i=0; i<commits; i++){
-						let user_name	= payload.commits[i].author.name;
 						var user_login	= payload.commits[i].author.username;
+						let user_name	= payload.commits[i].author.name;
 						let commit_id 	= payload.commits[i].id.substr(0,7);		 // get the first 7 chars of the commit id
 						let commit_msg	= payload.commits[i].message.split('\n',1); // get only the commit msg, not the description
 						let commit_url  = payload.commits[i].url;			
