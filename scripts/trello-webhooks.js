@@ -9,8 +9,9 @@ module.exports = function (robot) {
         console.logger.info("trello-webhooks.js");
         try {
             res.status(200).end(); // best practice to respond with 200 status           
+            res.sendStatus(200);
+            res.status(200);
             res.send(200);
-            res.send('OK');
             robot.emit("trello-webhook-event", req.body, res);
         } catch (e) {
             robot.logger.error("trello-hooks.js error: " + e.stack + "**" + "\n");
