@@ -1,6 +1,6 @@
 module.exports = function(robot)  {
-  robot.router.post('/hubot/trello-hooks', function(req, res) {
-    res.send(200);
-  })
+    robot.router.post('/hubot/trello-hooks', function(req, res) {
+        res.status(200).end()  
+    })
 
 }
