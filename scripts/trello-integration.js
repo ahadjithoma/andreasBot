@@ -42,6 +42,10 @@ module.exports = function(robot) {
         })
     })
 
+	robot.on('github-webhook-event', function(data){
+        room = "random";
+        robot.messageRoom(room, `github-webhook-event`);	
+    })
 
     // trello board
     robot.hear(/trello board/i, function(res_r){

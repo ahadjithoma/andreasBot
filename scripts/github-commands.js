@@ -178,6 +178,7 @@ module.exports = function(robot) {
 				break;
 			
 			default: 
+				let room = "random";
 				robot.messageRoom(room, `event: ${data.eventType}`);	
 				break;
 		}
