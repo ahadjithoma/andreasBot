@@ -28,7 +28,5 @@ module.exports = function(robot)  {
 	      robot.logger.error("github-hooks.js error: " + error.stack + "**" + "\n");
 	    }
 	    return res.end("");
-
-
   });
 }
