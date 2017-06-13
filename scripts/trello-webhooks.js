@@ -1,22 +1,20 @@
-url = require('url');
-querystring = require('querystring');
-
-debug = true;
-
-module.exports = function (robot) {
-    robot.router.post('/hubot/trello-webhooks', function (req, res) {
-        res.status(200).send('OK');
-        res.status(200).end() // best practice to respond with empty 200 status code
-        res.sendStatus(200);
-        res.writeHead(200);
-        
-        
-        robot.emit("trello-webhook-event", req.body, res);
+debug = false;
 
 
-        robot.messageRoom("random", "trello-webhooks.js");	
-        console.logger.info("trello-webhooks.js");
-
-    })
-
+module.exports = function(robot) {
+  robot.router.post('/hubot/trello-webhooks', function(req, res) {
+	var error;
+	    try {
+	      if (debug) {
+	        robot.logger.info("trello post received: ", req);
+	      }
+	      res.send(200);
+	      robot.emit("trello-webhook-event", req);
+	    } catch (e) {
+		  // res.send('You supplied invalid JSON to this endpoint.');
+	      error = e;
+	      robot.logger.error("trello-hooks.js error: " + error.stack + "**" + "\n");
+	    }
+	    return res.end("");
+  });
 }
