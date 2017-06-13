@@ -8,7 +8,7 @@ module.exports = function (robot) {
         robot.messageRoom("random", "trello-webhooks.js");	
         console.logger.info("trello-webhooks.js");
         try {
-            res.status(200).end(); // best practice to respond with 200 status           
+            res.status(200).send(); // best practice to respond with 200 status           
             res.sendStatus(200);
             res.status(200);
             res.send(200);
