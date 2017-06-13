@@ -4,7 +4,7 @@ module.exports = function(robot) {
     var slackmsg = require("./slackMsgs.js");
     var request = require('request');
     var Trello = require('node-trello');
-    var $ = require("jquery");
+    var $ = require('jquery');
 
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
