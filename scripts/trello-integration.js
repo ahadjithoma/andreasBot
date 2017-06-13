@@ -5,7 +5,7 @@ module.exports = function(robot) {
     var request = require('request');
     var Trello = require('node-trello');
 
-    require("jsdom").env("", function(err, window) {
+    require('jsdom').env("", function(err, window) {
         if (err) {
             console.error(err);
             return;
@@ -13,7 +13,7 @@ module.exports = function(robot) {
     
         var $ = require("jquery")(window);
     });
-    
+
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
