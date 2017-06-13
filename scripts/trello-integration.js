@@ -54,9 +54,9 @@ module.exports = function(robot) {
 
 
 
-	robot.on('github-webhook-event', function(data, res){
-        room = "random";
-        robot.messageRoom(room, `github-webhook-event`);	
+	robot.on('trello-webhook-event', function(data, res){
+        var room = "random";
+        robot.messageRoom(room, `trello-webhook-event`);	
         res.status(200).end(); // best practice to respond with 200 status           
         res.sendStatus(200);
         res.status(200);
