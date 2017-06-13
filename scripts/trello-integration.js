@@ -29,9 +29,17 @@ module.exports = function(robot) {
 
 
     // Associate a board with a specific Channel 
-    robot.hear(/trello board (.*)/i, function(res_r) {
-        let board = res_r.match[1];
-        // TODO!
+    robot.hear(/trello hooks/i, function(res_r) {
+        let boardId = 'BE7seI7e';
+        let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-hooks';
+        let args = {description:"my test webhook", callbackURL:cb_url, idModel:boardId};
+        trello.post('/1/webhooks', args, function(err, data){
+            if (err){
+                robot.logger.error(err);
+                return 0;
+            }
+            console.log(data);
+        })
     })
 
 

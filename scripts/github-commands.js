@@ -119,7 +119,7 @@ module.exports = function(robot) {
 		if (adapter == 'slack'){
 			let msg = slackMsgs.githubEvent();
 			if (action == 'opened'){
-				msg.attachments[0].pretext = `[${repo}] Issue ${action} by <www.github.com/${user}|${user}>`;
+				msg.attachments[0].pretext = `[${repo}] Issue *created* by <www.github.com/${user}|${user}>`;
 				msg.attachments[0].title = `<${issue_url}|#${issue_num} ${issue_title}>`;
 				msg.attachments[0].text = `${issue_body}`;				
 				msg.attachments[0].color = '#00ff00'; // set color = green
@@ -158,11 +158,9 @@ module.exports = function(robot) {
 			case 'push': 
 				pushEvent(data.payload);
 				break;
-			
 			case 'deployment': 
 				developmentEvent(data.payload);	
 				break;
-			
 			case 'deployment_status': 
 				developmentStatusEvent(data.payload);
 				break;
@@ -172,9 +170,9 @@ module.exports = function(robot) {
 			case 'issue_comment':
 				issueCommentEvent(data.payload);
 				break;
-			case '':
+			case 'fork':
 				break;
-			case '':
+			case 'pull':
 				break;
 			case '':
 				break;

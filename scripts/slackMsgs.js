@@ -132,7 +132,7 @@ module.exports = {
             ]
         }
     },
-
+    
     // only visible to the user involved 
     ephemeralMsg: function(){
         return {
