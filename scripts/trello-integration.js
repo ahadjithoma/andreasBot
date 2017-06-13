@@ -58,10 +58,10 @@ module.exports = function(robot) {
 
         rp(options)
             .then(function (parsedBody) {
-                console.logger.info(parsedBody);
+                robot.logger.info(parsedBody);
             })
             .catch(function (err) {
-                console.logger.error(err);
+                robot.logger.error(err);
             });
 
     })
