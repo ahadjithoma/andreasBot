@@ -5,6 +5,8 @@ debug = true;
 
 module.exports = function (robot) {
     robot.router.post('/hubot/trello-hooks', function (req, res) {
+        robot.messageRoom("random", "trello-webhooks.js");	
+        console.logger.info("trello-webhooks.js");
         try {
             res.send(200);
             res.send('OK');

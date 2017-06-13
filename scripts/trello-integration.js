@@ -36,7 +36,7 @@ module.exports = function(robot) {
         trello.post('/1/webhooks', args, function(err, data){
             if (err){
                 robot.logger.error(err);
-                //return 0;
+                return 0;
             }
             robot.logger.info(data);
         })
