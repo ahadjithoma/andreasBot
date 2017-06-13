@@ -10,9 +10,9 @@ module.exports = function(robot) {
             console.error(err);
             return;
         }
-            var $ = require('./jquery-3.2.1.min')(window);
+            var $ = require('jquery')(window);
     });
-    
+
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
