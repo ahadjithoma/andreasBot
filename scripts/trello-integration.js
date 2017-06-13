@@ -4,7 +4,8 @@ module.exports = function(robot) {
     var slackmsg = require("./slackMsgs.js");
     var request = require('request');
     var Trello = require('node-trello');
-require("jsdom").env("", function(err, window) {
+    var k = require("jsdom");
+    k.env("", function(err, window) {
     if (err) {
         console.log(err);
         return;
