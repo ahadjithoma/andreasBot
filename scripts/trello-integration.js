@@ -32,7 +32,7 @@ module.exports = function(robot) {
     robot.hear(/trello hooks/i, function(res_r) {
         let boardId = 'BE7seI7e';
         let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-hooks';
-        let args = {description:"my test webhook", callbackURL:cb_url, idModel:'zUOcqRrl'};
+        let args = {description:"my test webhook", callbackURL:cb_url, idModel:'59245663c76f54b975558854'};
         trello.post('/1/webhooks', args, function(err, data){
             if (err){
                 robot.logger.error(err);
