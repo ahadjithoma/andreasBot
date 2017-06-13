@@ -11,7 +11,7 @@ module.exports = function (robot) {
             res.status(200).end(); // best practice to respond with 200 status           
             res.send(200);
             res.send('OK');
-            robot.emit("trello-webhook-event", req.body);
+            robot.emit("trello-webhook-event", req.body, res);
         } catch (e) {
             robot.logger.error("trello-hooks.js error: " + e.stack + "**" + "\n");
         }

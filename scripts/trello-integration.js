@@ -4,6 +4,7 @@ module.exports = function(robot) {
     var slackmsg = require("./slackMsgs.js");
     var request = require('request');
     var Trello = require('node-trello');
+    var $ = require("jquery");
 
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
@@ -33,7 +34,7 @@ module.exports = function(robot) {
         let boardId = 'BE7seI7e';
         let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
         let args = {description:"my test webhook", callbackURL:cb_url, idModel:'59245663c76f54b975558854'};
-        trello.put('/1/webhooks', args, function(err, data){
+        trello.post('/1/webhooks', args, function(err, data){
             if (err){
                 robot.logger.error(err);
                 return 0;
@@ -42,9 +43,12 @@ module.exports = function(robot) {
         })
     })
 
-	robot.on('github-webhook-event', function(data){
+	robot.on('github-webhook-event', function(data, res){
         room = "random";
         robot.messageRoom(room, `github-webhook-event`);	
+        res.status(200).end(); // best practice to respond with 200 status           
+        res.send(200);
+
     })
 
     // trello board
@@ -107,7 +111,7 @@ module.exports = function(robot) {
           case 'star':
                 break;
           case 'lists':
-            res.status(200).end() // best practice to respond with 200 status           
+            res.status(200).end(); // best practice to respond with 200 status           
             // get board info to fetch lists
             let boardId = 'BE7seI7e';
             let args = {lists:"all"};
