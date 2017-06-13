@@ -4,7 +4,7 @@ querystring   = require('querystring');
 debug = false;
 
 
-module.exports = function(robot)  {
+module.exports = function(robot) {
   robot.router.post('/hubot/github-hooks', function(req, res) {
 	var error, eventBody, data;
 
