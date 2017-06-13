@@ -3,16 +3,9 @@ module.exports = function(robot) {
 
     var slackmsg = require("./slackMsgs.js");
     var request = require('request');
+    var rp = require('request-promise');
     var Trello = require('node-trello');
-    var k = require("jsdom");
-    k.env("", function(err, window) {
-    if (err) {
-        console.log(err);
-        return;
-    }
- 
-    var $ = require("jquery")(window);
-});
+    
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
@@ -52,11 +45,25 @@ module.exports = function(robot) {
 
 
     robot.hear(/trello h2/, function(res_r) {
-        $.post(`https://api.trello.com/1/tokens/${token}/webhooks/?key=${key}`, {
-            description: "My first webhook",
-            callbackURL: "https://andreasbot.herokuapp.com/hubot/trello-webhooks",
-            idModel: "59245663c76f54b975558854",
-        });
+        var options = {
+            method: 'POST',
+            uri: `https://api.trello.com/1/tokens/${token}/webhooks/?key=${key}`,
+            body: {
+                description: "My first webhook",
+                callbackURL: "https://andreasbot.herokuapp.com/hubot/trello-webhooks",
+                idModel: "59245663c76f54b975558854",
+            },
+            json: true // Automatically stringifies the body to JSON 
+        };
+
+        rp(options)
+            .then(function (parsedBody) {
+                console.logger.info(parsedBody);
+            })
+            .catch(function (err) {
+                console.logger.error(err);
+            });
+
     })
 
 
