@@ -32,7 +32,7 @@ module.exports = function(robot) {
     // Associate a board with a specific Channel 
     robot.hear(/trello hooks/, function(res_r) {
         let boardId = 'BE7seI7e';
-        let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
+        let cb_url = 'https://andreasbot.herokuapp.com/hubot/github-hooks';
         let args = {description:"my test webhook", callbackURL:cb_url, idModel:'59245663c76f54b975558854'};
         trello.post('/1/webhooks', args, function(err, data){
             if (err){

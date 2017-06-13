@@ -7,6 +7,7 @@ debug = false;
 module.exports = function(robot) {
   robot.router.post('/hubot/github-hooks', function(req, res) {
 	var error, eventBody, data;
+    res.status(200).end() // best practice to respond with empty 200 status code
 
 	    try {
 	      if (debug) {
