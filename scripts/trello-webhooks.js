@@ -8,7 +8,7 @@ module.exports = function (robot) {
         res.status(200).send('OK');
         res.status(200).end() // best practice to respond with empty 200 status code
         res.sendStatus(200);
-
+        res.writeHead(200);
         
         
         robot.emit("trello-webhook-event", req.body, res);
