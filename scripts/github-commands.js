@@ -59,7 +59,7 @@ module.exports = function(robot) {
 				commit_id = "`" + commit_id + "`"; // add slack's msg format 	
 				msg.attachments[0].text = msg.attachments[0].text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
 			}	
-			msg.attachments[0].pretext = `<${repo_url}|[${repo_name}:${branch}]> <${compare_url}|${commits} new commit(s)> by <www.github.com/${user_login}|${user_name}>:`;
+			msg.attachments[0].pretext = `<${repo_url}|[${repo_name}:${branch}]> ${commits} new <${compare_url}|commit(s)> by <www.github.com/${user_login}|${user_name}>:`;
 			msg.attachments[0].color = '#0000ff'; // set color = blue
 			robot.messageRoom(room, msg);
 

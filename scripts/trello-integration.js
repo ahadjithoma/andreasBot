@@ -6,8 +6,9 @@ module.exports = function(robot) {
     var rp = require('request-promise');
     var Trello = require('node-trello');
     var Promise = require('bluebird');
-
-    Promise.promisifyAll(require("node-trello"));
+    
+    var TrelloP = require('node-trello');
+    Promise.promisifyAll(require(TrelloP));
 // var throwAwayInstance = ParanoidLib.createInstance();
 // Promise.promisifyAll(Object.getPrototypeOf(throwAwayInstance));
 
@@ -16,6 +17,7 @@ module.exports = function(robot) {
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
     var trello = new Trello(key, token);
+    var trelloP = new TrelloP(key, token);
 
     function sendMessageToSlackResponseURL(responseURL, JSONmessage){
       var postOptions = {
