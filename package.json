@@ -5,6 +5,7 @@
   "author": "andreash92 <andreas_h92@outlook.com>",
   "description": "hubot - heroku - slack ",
   "dependencies": {
+    "bluebird": "^3.5.0",
     "express": "^4.15.2",
     "github": "^9.2.0",
     "http": "^0.0.0",
