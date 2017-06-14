@@ -8,6 +8,9 @@ module.exports = function(robot) {
     var Promise = require('bluebird');
 
     Promise.promisifyAll(require("node-trello"));
+// var throwAwayInstance = ParanoidLib.createInstance();
+// Promise.promisifyAll(Object.getPrototypeOf(throwAwayInstance));
+
 
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
@@ -37,14 +40,22 @@ module.exports = function(robot) {
         let boardId = 'BE7seI7e';
         let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
         let args = {description:"my test webhook", callbackURL:cb_url, idModel:'59245663c76f54b975558854'};
-        trello.post('/1/webhooks', args, function(err, data){
-            if (err){
-                robot.logger.error('error')
-                //robot.logger.error(err);
-                return 0;
-            }
-            robot.logger.info('NO error');
+
+        trello.postAsync('/1/webhooks', args).then(function(data){
+            robot.logger.info(' NO error')
+        }).catch(function(err){
+            robot.logger.error('error')
+            robot.logger.error(err);
         })
+
+        // trello.post('/1/webhooks', args, function(err, data){
+        //     if (err){
+        //         robot.logger.error('error')
+        //         //robot.logger.error(err);
+        //         return 0;
+        //     }
+        //     robot.logger.info('NO error');
+        // })
     })
 
 
