@@ -72,10 +72,6 @@ module.exports = function(robot) {
 	robot.on('trello-webhook-event', function(data, res){
         var room = "random";
         robot.messageRoom(room, `trello-webhook-event`);	
-        res.status(200).end(); // best practice to respond with 200 status           
-        res.sendStatus(200);
-        res.status(200);
-        res.send(200);
     })
 
     // trello board
