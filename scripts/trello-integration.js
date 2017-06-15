@@ -17,7 +17,7 @@ module.exports = function(robot) {
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
     var trello = new Trello(key, token);
-    var trelloP = new TrelloPAsync(key, token);
+    var trelloP = new TrelloP(key, token);
 
     function sendMessageToSlackResponseURL(responseURL, JSONmessage){
       var postOptions = {
@@ -43,7 +43,7 @@ module.exports = function(robot) {
         let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
         let args = {description:"my test webhook", callbackURL:cb_url, idModel:'59245663c76f54b975558854'};
 
-        trelloP.postAsync('/1/webhooks', args).then(function(data){
+        TrelloP.postAsync('/1/webhooks', args).then(function(data){
             robot.logger.info(' NO error')
         }).catch(function(err){
             robot.logger.error('error')
