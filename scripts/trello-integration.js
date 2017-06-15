@@ -9,13 +9,20 @@ module.exports = function(robot) {
 
     const Promise = require("bluebird");
     const TrelloP = Promise.promisifyAll(require("node-trello"));
-// this automatically adds `Async` postfixed methods to `fs`.
+
+var ParanoidLib = require("trello-node");
+var throwAwayInstance = ParanoidLib.createInstance();
+Promise.promisifyAll(Object.getPrototypeOf(throwAwayInstance));
+// Like before, from this point on, all new instances + even the throwAwayInstance suddenly support promises
+
+
+
 
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
     var trello = new Trello(key, token);
-    var trelloP = new TrelloP(key, token);
+    var trelloP = new throwAwayInstance(key, token);
 
     function sendMessageToSlackResponseURL(responseURL, JSONmessage){
       var postOptions = {

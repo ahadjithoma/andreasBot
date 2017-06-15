@@ -80,7 +80,7 @@ module.exports = function(robot) {
 			let creator		= payload.deployment_status.creator.login;
 			let repo 		= payload.repository.full_name; 
 			let environment = payload.deployment.environment;
-			msg.attachments[0].pretext = `<${repo_url}|[${repo}]> created by ${creator}`;
+			msg.text = `<${repo_url}|[${repo}]> created by ${creator}`;
 			msg.attachments[0].title = `Deployment ${state}`;
 			msg.attachments[0].text = `<${target_url}|${environment}>`;
 			if (state == 'pending'){
