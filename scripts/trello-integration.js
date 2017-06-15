@@ -10,10 +10,6 @@ module.exports = function(robot) {
     const Promise = require("bluebird");
     const TrelloP = Promise.promisifyAll(require("node-trello"));
 
-var ParanoidLib = require("node-trello");
-var throwAwayInstance = ParanoidLib.createInstance();
-Promise.promisifyAll(Object.getPrototypeOf(throwAwayInstance));
-// Like before, from this point on, all new instances + even the throwAwayInstance suddenly support promises
 
 
 
