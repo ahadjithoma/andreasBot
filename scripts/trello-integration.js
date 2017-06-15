@@ -64,7 +64,7 @@ module.exports = function(robot) {
 
     robot.hear(/trello h2/, function(res_r) {
         var options = {
-            method: 'POST',
+            method: 'PUT',
             uri: `https://api.trello.com/1/tokens/${token}/webhooks/?key=${key}`,
             body: {
                 description: "My first webhook",
