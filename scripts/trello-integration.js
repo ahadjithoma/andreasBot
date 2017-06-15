@@ -5,13 +5,11 @@ module.exports = function(robot) {
     var request = require('request');
     var rp = require('request-promise');
     var Trello = require('node-trello');
-    var Promise = require('bluebird');
     
-    var TrelloP = require('node-trello');
-    Promise.promisifyAll(TrelloP);
-// var throwAwayInstance = ParanoidLib.createInstance();
-// Promise.promisifyAll(Object.getPrototypeOf(throwAwayInstance));
 
+    const Promise = require("bluebird");
+    const TrelloP = Promise.promisifyAll(require("node-trello"));
+// this automatically adds `Async` postfixed methods to `fs`.
 
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
@@ -43,7 +41,7 @@ module.exports = function(robot) {
         let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
         let args = {description:"my test webhook", callbackURL:cb_url, idModel:'59245663c76f54b975558854'};
 
-        TrelloP.post('/1/webhooks', args).then(function(data){
+        trelloP.postAsync('/1/webhooks', args).then(function(data){
             robot.logger.info(' NO error')
         }).catch(function(err){
             robot.logger.error('error')
