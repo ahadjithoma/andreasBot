@@ -96,7 +96,8 @@ module.exports = {
     },
 
     githubEvent: function(){
-        return {
+        return { 
+                  "text":"",
                   "attachments": [
                     {
                       "title": "",
