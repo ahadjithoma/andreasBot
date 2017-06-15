@@ -8,7 +8,7 @@ module.exports = function(robot) {
     var Promise = require('bluebird');
     
     var TrelloP = require('node-trello');
-    p = Promise.promisifyAll(require("node-trllo"));
+    p = Promise.promisifyAll(require("node-trello"));
 // var throwAwayInstance = ParanoidLib.createInstance();
 // Promise.promisifyAll(Object.getPrototypeOf(throwAwayInstance));
 
