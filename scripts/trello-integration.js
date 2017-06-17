@@ -36,7 +36,7 @@ module.exports = function(robot) {
         let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
         let args = {description:"my test webhook", callbackURL:cb_url, idModel:'59245663c76f54b975558854'};
 
-        tr.postAsync('/1/webhooks', args).then(function(data){
+        trello.postAsync('/1/webhooks', args).then(function(data){
             robot.logger.info(' NO error')
         }).catch(function(err){
             robot.logger.error('error')
