@@ -18,8 +18,11 @@ module.exports = function(robot) {
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
     var trello = new Trello(key, token);
-    var trelloP = new TrelloPAsync(key, token);
+    var trelloP = new TrelloP(key, token);
+    const tr = Promise.promisifyAll(trelloP);
 
+  
+  
     function sendMessageToSlackResponseURL(responseURL, JSONmessage){
       var postOptions = {
           uri: responseURL,
