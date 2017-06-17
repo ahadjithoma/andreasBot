@@ -6,22 +6,14 @@ module.exports = function(robot) {
     var rp = require('request-promise');
     var Trello = require('node-trello');
     
-
-    const Promise = require("bluebird");
-    const TrelloP = Promise.promisifyAll(require("node-trello"));
-
-
-
-
-
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
-    var trello = new Trello(key, token);
-    var trelloP = new TrelloP(key, token);
-    const tr = Promise.promisifyAll(trelloP);
-
+    var trelloAuth = new Trello(key, token);
   
+    // convert node-trello callbacks to promises
+    const Promise = require("bluebird");
+    var trello = Promise.promisifyAll(trelloAuth);
   
     function sendMessageToSlackResponseURL(responseURL, JSONmessage){
       var postOptions = {
@@ -48,7 +40,7 @@ module.exports = function(robot) {
             robot.logger.info(' NO error')
         }).catch(function(err){
             robot.logger.error('error')
-            robot.logger.error(err);
+            //robot.logger.error(err);
         })
 
         // trello.post('/1/webhooks', args, function(err, data){
