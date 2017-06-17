@@ -18,7 +18,7 @@ module.exports = function(robot) {
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
     var trello = new Trello(key, token);
-    var trelloP = new TrelloP(key, token);
+    var trelloP = new TrelloPAsync(key, token);
 
     function sendMessageToSlackResponseURL(responseURL, JSONmessage){
       var postOptions = {
@@ -36,9 +36,6 @@ module.exports = function(robot) {
       })
     }
 
-
-
-    // Associate a board with a specific Channel 
     robot.hear(/trello hooks/, function(res_r) {
         let boardId = 'BE7seI7e';
         let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
