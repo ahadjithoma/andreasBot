@@ -15,20 +15,16 @@ module.exports = function(robot) {
     const Promise = require("bluebird");
     var trello = Promise.promisifyAll(trelloAuth);
 
-    robot.hear(/trello hooks/, function(res_r) {
+    robot.hear(/trello hooks/, function(res) {
         let boardId = 'BE7seI7e';
         let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
         let args = {description:"my test webhook", callbackURL:cb_url, idModel:'59245663c76f54b975558854'};
 
-        trello.postAsync('/1/webhooks', args, function(err, data){
-            console.log(data)
+        trello.postAsync('/1/webhooks', args).then(function(data){
+            res.send(data)
+        }).catch(function(err){
+            robot.logger.error(err)
         })
-        
-        // trello.postAsync('/1/webhooks', args).then(function(data){
-        //     console.log(data)
-        // }).catch(function(err){
-        //     robot.logger.error(err)
-        // })
     })
 
 	robot.on('trello-webhook-event', function(data, res){
