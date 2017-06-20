@@ -21,7 +21,7 @@ module.exports = function(robot) {
         let args = {description:"my test webhook", callbackURL:cb_url, idModel:'59245663c76f54b975558854'};
 
         trello.postAsync('/1/webhooks', args).then(function(data){
-            robot.logger.info(' NO error')
+            robot.logger.info(data)
         }).catch(function(err){
             robot.logger.error(err)
         })
