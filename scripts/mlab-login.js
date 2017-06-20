@@ -15,6 +15,6 @@ Object.keys(mongo).forEach(function (key) {
 Promise.promisifyAll(mongo);
 
 // connect to mLab database
-var db = mongo.MongoClient.connect(uri);
+// var db = mongo.MongoClient.connect(uri);
 
-module.exports.db = function(){return db;}
+// module.exports.db = function(){return db;}
