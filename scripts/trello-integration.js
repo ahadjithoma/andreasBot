@@ -14,7 +14,28 @@ module.exports = function(robot) {
     // convert node-trello callbacks to promises
     const Promise = require("bluebird");
     var trello = Promise.promisifyAll(trelloAuth);
-  
+
+    robot.hear(/trello hooks/, function(res_r) {
+        let boardId = 'BE7seI7e';
+        let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
+        let args = {description:"my test webhook", callbackURL:cb_url, idModel:'59245663c76f54b975558854'};
+
+        trello.postAsync('/1/webhooks', args).then(function(data){
+            robot.logger.info(' NO error')
+        }).catch(function(err){
+            robot.logger.error(error)
+        })
+    })
+
+	robot.on('trello-webhook-event', function(data, res){
+        var room = "random";
+        robot.messageRoom(room, `trello-webhook-event`);	
+    })
+
+    /*******************************************************************/
+    /*                   Slack Buttons Implementation                  */
+    /*******************************************************************/
+
     function sendMessageToSlackResponseURL(responseURL, JSONmessage){
       var postOptions = {
           uri: responseURL,
@@ -30,59 +51,7 @@ module.exports = function(robot) {
           };
       })
     }
-
-    robot.hear(/trello hooks/, function(res_r) {
-        let boardId = 'BE7seI7e';
-        let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
-        let args = {description:"my test webhook", callbackURL:cb_url, idModel:'59245663c76f54b975558854'};
-
-        trello.postAsync('/1/webhooks', args).then(function(data){
-            robot.logger.info(' NO error')
-        }).catch(function(err){
-            robot.logger.error('error')
-            //robot.logger.error(err);
-        })
-
-        // trello.post('/1/webhooks', args, function(err, data){
-        //     if (err){
-        //         robot.logger.error('error')
-        //         //robot.logger.error(err);
-        //         return 0;
-        //     }
-        //     robot.logger.info('NO error');
-        // })
-    })
-
-
-    robot.hear(/trello h2/, function(res_r) {
-        var options = {
-            method: 'PUT',
-            uri: `https://api.trello.com/1/tokens/${token}/webhooks/?key=${key}`,
-            body: {
-                description: "My first webhook",
-                callbackURL: "https://andreasbot.herokuapp.com/hubot/trello-webhooks",
-                idModel: "59245663c76f54b975558854",
-            },
-            json: true // Automatically stringifies the body to JSON 
-        };
-
-        rp(options)
-            .then(function (parsedBody) {
-                robot.logger.info(parsedBody);
-            })
-            .catch(function (err) {
-                robot.logger.error(err);
-            });
-
-    })
-
-
-
-	robot.on('trello-webhook-event', function(data, res){
-        var room = "random";
-        robot.messageRoom(room, `trello-webhook-event`);	
-    })
-
+    
     // trello board
     robot.hear(/trello board/i, function(res_r){
         // TODO: fetch the board id from other source (env, redis or mongodb)
@@ -118,12 +87,6 @@ module.exports = function(robot) {
             res_r.send(msg);
         }) 
     })
-
-
-    
-    /*******************************************************************/
-    /*                        robot.on listeners                       */
-    /*******************************************************************/
 
     var slackCB = 'slack:msg_action:';
 
@@ -221,47 +184,4 @@ module.exports = function(robot) {
             sendMessageToSlackResponseURL(response_url, msg);
         })
     })
-
-
-
-
-
-    
-    /*  TODO: add more functionality */ 
-
-
 }
-
-
-
-
-
-
-
-
-    /* developer's personal notes */
-
-    /* template */
-
-    // robot.respond(/trello /i, function(res_r) {
-    //     t.post("/1/", function(err, data){
-    //         if (err){
-    //             res_r.send('Error Encountered: '+ err['responseBody']);
-    //         }
-    //     })
-    // })
-
-
-
-
-
-/* An example of using slack's response_url. ~For future use */
-/* Add this snippet inside robot.on that u want to trigger   */
-
-    // var response_url = data.response_url;
-    // var slackMsg = require('./slackMsgs');
-    // var response = slackMsg.ephemeralMsg();
-
-    // sendMessageToSlackResponseURL(response_url, response);
-
-
