@@ -22,9 +22,10 @@ module.exports = function(robot) {
 
         trello.postAsync('/1/webhooks', args).then(function(data){
             res.send(data)
-        }).catch(function(err){
-            robot.logger.error(err)
-        })
+        });
+        // .catch(function(err){
+        //     robot.logger.error(err)
+        // })
     })
 
 	robot.on('trello-webhook-event', function(data, res){
