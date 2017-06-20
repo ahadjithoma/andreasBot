@@ -2,7 +2,7 @@ var mongo = require('mongoskin');
 var Promise = require("bluebird");
 
 // mLab connection URI
-var uri = process.env.HEROKU_MLAB_URI; 
+var uri = process.env.MONGODB_URI; 
 
 // promisify mongoskin with bluebird
 Object.keys(mongo).forEach(function (key) {
