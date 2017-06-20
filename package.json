@@ -6,9 +6,11 @@
   "description": "hubot - heroku - slack ",
   "dependencies": {
     "apollo-client": "^1.4.2",
+    "bcryptjs": "^2.4.3",
     "bluebird": "^3.5.0",
     "express": "^4.15.2",
     "github": "^9.2.0",
+    "graphql": "^0.10.3",
     "graphql-tag": "^2.4.0",
     "http": "^0.0.0",
     "hubot": "^2.19.0",
@@ -27,15 +29,15 @@
     "hubot-slack": "^4.3.4",
     "jquery": "^3.2.1",
     "jsdom": "^11.0.0",
+    "mongodb": "^2.2.29",
+    "mongoskin": "^2.1.0",
     "node-trello": "^1.1.2",
     "oauth": "^0.9.15",
     "q": "^1.5.0",
     "query-string": "^4.3.4",
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
-    "url": "^0.11.0",
-    "mongodb": "^2.1.16",
-    "mongoskin": "^2.1.0"
+    "url": "^0.11.0"
   },
   "engines": {
     "node": "6.x"
