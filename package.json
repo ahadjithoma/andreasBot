@@ -5,9 +5,11 @@
   "author": "andreash92 <andreas_h92@outlook.com>",
   "description": "hubot - heroku - slack ",
   "dependencies": {
+    "apollo-client": "^1.4.2",
     "bluebird": "^3.5.0",
     "express": "^4.15.2",
     "github": "^9.2.0",
+    "graphql-tag": "^2.4.0",
     "http": "^0.0.0",
     "hubot": "^2.19.0",
     "hubot-diagnostics": "0.0.1",
