@@ -23,7 +23,7 @@ module.exports = function(robot) {
         trello.postAsync('/1/webhooks', args).then(function(data){
             robot.logger.info(' NO error')
         }).catch(function(err){
-            robot.logger.error(error)
+            robot.logger.error(err)
         })
     })
 
@@ -51,7 +51,7 @@ module.exports = function(robot) {
           };
       })
     }
-    
+
     // trello board
     robot.hear(/trello board/i, function(res_r){
         // TODO: fetch the board id from other source (env, redis or mongodb)
