@@ -5,6 +5,7 @@ module.exports = function (robot) {
     var request = require('request');
     var rp = require('request-promise');
     var Trello = require('node-trello');
+<<<<<<< HEAD
 
     const Promise = require("bluebird");
     const TrelloP = Promise.promisifyAll(require("node-trello"));
@@ -33,15 +34,48 @@ module.exports = function (robot) {
 
     // Associate a board with a specific Channel 
     robot.hear(/trello hooks/, function (res_r) {
+=======
+    
+    // auth
+    var key = process.env.HUBOT_TRELLO_KEY;
+    var token = process.env.HUBOT_TRELLO_TOKEN;
+    var trelloAuth = new Trello(key, token);
+  
+    // convert node-trello callbacks to promises
+    const Promise = require("bluebird");
+    var trello = Promise.promisifyAll(trelloAuth);
+  
+    function sendMessageToSlackResponseURL(responseURL, JSONmessage){
+      var postOptions = {
+          uri: responseURL,
+          method: 'POST',
+          headers: {
+              'Content-type': 'application/json'
+          },
+          json: JSONmessage
+      };
+      request(postOptions, (error, response, body) => {
+          if (error){
+              // handle errors as you see fit
+          };
+      })
+    }
+
+    robot.hear(/trello hooks/, function(res_r) {
+>>>>>>> e517fb97e5704cc98984aa81023cd3593eb0867e
         let boardId = 'BE7seI7e';
         let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
         let args = { description: "my test webhook", callbackURL: cb_url, idModel: '59245663c76f54b975558854' };
 
+<<<<<<< HEAD
         trelloP.post('/1/webhooks', args).then(function (data) {
+=======
+        trello.postAsync('/1/webhooks', args).then(function(data){
+>>>>>>> e517fb97e5704cc98984aa81023cd3593eb0867e
             robot.logger.info(' NO error')
         }).catch(function (err) {
             robot.logger.error('error')
-            robot.logger.error(err);
+            //robot.logger.error(err);
         })
     })
 
