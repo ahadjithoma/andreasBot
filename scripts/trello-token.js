@@ -10,7 +10,7 @@ module.exports = function (robot) {
 		let scope = 'read,write,account';
 		let name = 'Hubot';
 		let expr = '30days';
-		let cb_method = 'postMessage';
+		let cb_method = 'fragment';
 		let return_url = 'https://andreasbot.herokuapp.com/hubot/trello-token';
 		let url = `https://trello.com/1/authorize?expiration=${expr}&name=${name}&scope=${scope}&key=${key}&response_type=token&callback_method=${cb_method}&return_url=${return_url}`;
 		var msg = slackMsgs.basicMessage();
@@ -32,9 +32,7 @@ module.exports = function (robot) {
 
 
 		res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
-		<form>
-<input type="button" value="Click to Close" onclick="window.close()'" />
-</form>`);
+					<button onclick=window.close()>close</button>`)
 	});
 
 	robot.respond(/trello add token (.*)/i, function (res_r) {
@@ -48,10 +46,10 @@ module.exports = function (robot) {
 
 
 	var html = `
-<button onclick=window.open("${url}")>open</button>
+<button onclick=window.open("https://trello.com/1/authorize?expiration=never&name=SinglePurposeToken&key=51def9cb08cf171cd0970d8607ad8f97&type=popup&=callback_method=fragment&response_type=token&return_url=https://andreasbot.herokuapp.com/hubot/trello-token")>open</button>
 <button onclick=window.close()>close</button>  
 `;
 	robot.router.get('/hubot/html', function (req, res) {
-        res.send(html);
-    })
+		res.send(html);
+	})
 }
