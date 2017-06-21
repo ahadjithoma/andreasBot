@@ -32,8 +32,9 @@ module.exports = function (robot) {
 
         var room = "random";
         let payload = data.body;
-
-        switch (payload.type) {
+        let type = payload.action.type;
+        robot.logger.info(type);
+        switch (type) {
             case 'updateList':
                 robot.messageRoom(room, `updateList`);
                 break;
