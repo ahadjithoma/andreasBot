@@ -52,13 +52,14 @@ module.exports = function (robot) {
 				let user_login = payload.commits[i].author.username;
 				var user_url = `https://www.github.com/${user_login}`;
 				var user_name = payload.commits[i].author.name;
-				let commit_id = payload.commits[i].id.substr(0, 7);		 // get the first 7 chars of the commit id
-				let commit_msg = payload.commits[i].message.split('\n', 1); // get only the commit msg, not the description
-				let commit_url = payload.commits[i].url;
+				var commit_id = payload.commits[i].id.substr(0, 7);		 // get the first 7 chars of the commit id
+				var commit_msg = payload.commits[i].message.split('\n', 1); // get only the commit msg, not the description
+				var commit_url = payload.commits[i].url;
 				commit_id = "`" + commit_id + "`"; // add slack's msg format 	
-				msg.attachments[0].text = msg.attachments[0].text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
 			}
+			msg.attachments[0].text = msg.attachments[0].text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
 			msg.text = `<${repo_url}|[${repo_name}:${branch}]> ${commits} new <${compare_url}|commit(s)> by <${user_url}|${user_name}>:`;
+			menu.attachments[0].fallback = '[${repo_name}] ${commits} new commit(s)';
 			msg.attachments[0].color = '#0000ff'; // set color = blue
 			robot.messageRoom(room, msg);
 
@@ -82,6 +83,7 @@ module.exports = function (robot) {
 			msg.text = `<${repo_url}|[${repo}]> created by ${creator}`;
 			msg.attachments[0].title = `Deployment ${state}`;
 			msg.attachments[0].text = `<${target_url}|${environment}>`;
+			menu.attachments[0].fallback = menu.attachments[0].text;
 			if (state == 'pending') {
 				msg.attachments[0].color = '#ff8533' // set color = orange
 			} else if (state == 'success') {

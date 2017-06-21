@@ -104,14 +104,14 @@ module.exports = {
                     "title": "",
                     "pretext": "",
                     "attachment_type": "default",
+                    "fallback": "Github Event",
                     "color": "#bdc3c7",
                     "text": "",
                     "mrkdwn_in": [
                         "text",
                         "pretext",
                         "fields"
-                    ],
-
+                    ]
                 }
             ]
         }
