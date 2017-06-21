@@ -216,7 +216,7 @@ module.exports = function (robot) {
 				menu.attachments[0].actions[0]['options'].push({ "text": login, "value": login });
 			}
 			menu.attachments[0].text = "Followers of " + "*" + username + "*";
-			menu.attachments[0].fallback = '';
+			menu.attachments[0].fallback = 'Github followers of ' + username;
 			menu.attachments[0].callback_id = 'followers_cb_id';
 			menu.attachments[0].actions[0].name = ' ';
 			menu.attachments[0].actions[0].text = ' ';
