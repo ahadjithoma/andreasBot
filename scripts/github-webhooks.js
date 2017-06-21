@@ -1,5 +1,5 @@
-url = require('url');
-querystring = require('querystring');
+var url = require('url');
+var querystring = require('querystring');
 
 // for debugging purposes  
 debug = false;

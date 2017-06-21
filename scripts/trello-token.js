@@ -1,10 +1,11 @@
+var slackMsgs = require('./slackMsgs.js');
+var url = require('url');
+var key = process.env.HUBOT_TRELLO_KEY;
+
 module.exports = function (robot) {
 
 	robot.respond(/trello get token/i, function (res_r) {
 
-		var slackMsgs = require('./slackMsgs.js');
-
-		var key = process.env.HUBOT_TRELLO_KEY;
 
 		let scope = 'read,write,account';
 		let name = 'Hubot';
@@ -26,10 +27,12 @@ module.exports = function (robot) {
 
 	robot.router.get('/hubot/trello-token', function (req, res) {
 		// TODO: do something with the token 
-		robot.logger.info(res); // undefined
 		// robot.logger.info(res.fragment);	// undefined
 		// var type = window.location.hash.substr(1);
 		// robot.logger.info(type);
+		const urlObj = url.parse(req.url)
+		console.log(urlObj.hash) // #some/url
+		console.log(urlObj) // #some/url
 
 		res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
 		<form>
