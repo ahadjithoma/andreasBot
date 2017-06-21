@@ -30,9 +30,7 @@ module.exports = function (robot) {
 		// robot.logger.info(res.fragment);	// undefined
 		// var type = window.location.hash.substr(1);
 		// robot.logger.info(type);
-		const urlObj = url.parse(req.url)
-		console.log(urlObj.hash) // #some/url
-		console.log(urlObj) // #some/url
+
 
 		res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
 		<form>

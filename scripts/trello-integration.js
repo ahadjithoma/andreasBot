@@ -10,6 +10,7 @@ module.exports = function (robot) {
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
     var trelloAuth = new Trello(key, token);
+    console.log(trelloAuth);
 
     // convert node-trello callbacks to promises
     const Promise = require("bluebird");
