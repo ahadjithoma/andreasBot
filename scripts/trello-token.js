@@ -24,7 +24,7 @@ module.exports = function(robot) {
 		res_r.send(msg);
 	})
 
-    robot.router.post('/hubot/trello-token', function (req, res) {
+    robot.router.get('/hubot/trello-token', function (req, res) {
         let headers = JSON.stringify(req.headers);  
         robot.logger.info(`trello-webhook POST. Status Code: ${res.statusCode}\nHeaders: ${headers}`);
         robot.logger.info(res);
@@ -35,8 +35,8 @@ module.exports = function(robot) {
   	robot.respond(/trello add token (.*)/i, function(res_r) {
   		var token = res_r.match[1];
   		//***IMPORTANT*** 
-  		//the next .env assignment doesnt work with HEROKU!
+  		// the .env assignment doesnt work with HEROKU!
+		// must set up a heroku client and communicate through their api 
   		process.env['HUBOT_TRELLO_TOKEN'] = token;
-  		//TODO: add tokens based on user
   	})
 }
