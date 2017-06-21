@@ -48,7 +48,7 @@ module.exports = function (robot) {
 
 
 	var html = `
-<button onclick=window.open(${url})>open</button>
+<button onclick=window.open("${url}")>open</button>
 <button onclick=window.close()>close</button>  
 `;
 	robot.router.get('/hubot/html', function (req, res) {
