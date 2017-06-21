@@ -26,11 +26,14 @@ module.exports = function (robot) {
 
 	robot.router.get('/hubot/trello-token', function (req, res) {
 		// TODO: do something with the token 
-		robot.logger.info('req body: '+req.body);
-		robot.logger.info('res body: '+res.body);
-		robot.logger.info('REQ: '+req);
-		robot.logger.info('RES: '+res);
-		res.send(`<h2>Token succesfuly received. You can now close the window.</h2>`);
+		robot.logger.info(`req body: ${req.body}`);
+		robot.logger.info(`res body: ${res.body}`);
+		robot.logger.info(`REQ: ${req}`);
+		robot.logger.info(`RES: ${res}`);
+		res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n<button type="button" 
+        onclick="window.open('', '_self', ''); window.close();">Close</button>\n
+<button type="button" onclick="javascript:window.close()">Discard</button>
+`);
 	});
 
 	robot.respond(/trello add token (.*)/i, function (res_r) {
