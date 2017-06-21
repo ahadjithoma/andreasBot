@@ -19,7 +19,6 @@ module.exports = function (robot) {
                 query: querystring.parse(url.parse(req.url).query)
             };
             res.send('json received');
-            robot.logger.info(eventBody.query);
             robot.emit("github-webhook-event", eventBody);
         } catch (e) {
             // res.send('You supplied invalid JSON to this endpoint.');

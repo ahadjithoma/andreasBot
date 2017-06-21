@@ -26,7 +26,7 @@ module.exports = function (robot) {
 
 	robot.router.get('/hubot/trello-token', function (req, res) {
 		// TODO: do something with the token 
-		// robot.logger.info(res.body); // undefined
+		robot.logger.info(res); // undefined
 		// robot.logger.info(res.fragment);	// undefined
 		// var type = window.location.hash.substr(1);
 		// robot.logger.info(type);
