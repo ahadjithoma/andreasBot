@@ -10,10 +10,9 @@ module.exports = function (robot) {
 		let scope = 'read,write,account';
 		let name = 'Hubot';
 		let expr = '30days';
-		let cb_method = '';
-		let return_url = '';
-		let url = `https://trello.com/1/authorize?expiration=${expr}&name=${name}&scope=${scope}&key=${key}&response_type=token`;
-		//https://trello.com/1/authorize?expiration=never&name=SinglePurposeToken&key=51def9cb08cf171cd0970d8607ad8f97&callback_method=fragment&return_url=https://andreasbot.herokuapp.com/hubot/trello-token
+		let cb_method = 'postMessage';
+		let return_url = 'https://andreasbot.herokuapp.com/hubot/trello-token';
+		let url = `https://trello.com/1/authorize?expiration=${expr}&name=${name}&scope=${scope}&key=${key}&response_type=token&callback_method=${cb_method}&return_url=${return_url}`;
 		var msg = slackMsgs.basicMessage();
 
 		msg.attachments[0].pretext = "Please get a token to authorize your Trello account";
@@ -45,4 +44,14 @@ module.exports = function (robot) {
 		// must set up a heroku client and communicate through their api 
 		process.env['HUBOT_TRELLO_TOKEN'] = token;
 	})
+
+
+
+	var html = `
+<button onclick=window.open(${url})>open</button>
+<button onclick=window.close()>close</button>  
+`;
+	robot.router.get('/hubot/html', function (req, res) {
+        res.send(html);
+    })
 }
