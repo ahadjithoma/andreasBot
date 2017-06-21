@@ -6,7 +6,6 @@ module.exports = function (robot) {
     var rp = require('request-promise');
     var Trello = require('node-trello');
     
-    Trello.request('method','uri','query',function(err,res){console.log(err)})
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
@@ -15,6 +14,8 @@ module.exports = function (robot) {
     // convert node-trello callbacks to promises
     const Promise = require("bluebird");
     var trello = Promise.promisifyAll(trelloAuth);
+    
+    trello.request('method','uri','query',function(err,res){console.log(err)})
 
     robot.hear(/trello hooks/, function (res) {
         let boardId = 'BE7seI7e';
