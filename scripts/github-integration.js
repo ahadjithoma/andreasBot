@@ -124,6 +124,7 @@ module.exports = function (robot) {
 				msg.attachments[0].title = `<${issue_url}|#${issue_num} ${issue_title}>`;
 				msg.attachments[0].text = `${issue_body}`;
 				msg.attachments[0].color = '#00ff00'; // set color = green
+				msg.attachments[0].fallback = msg.attachments[0].pretext;
 			} else {
 				msg = `[${repo}] Issue <${issue_url}|#${issue_num} ${issue_title}>: *${action}* by <www.github.com/${user}|${user}>`;
 			}
