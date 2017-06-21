@@ -121,7 +121,7 @@ module.exports = function (robot) {
 				msg.attachments[0].pretext = `[${repo}] Issue *created* by <www.github.com/${user}|${user}>`;
 				msg.attachments[0].fallback = `[${repo}] Issue created: ${issue_title}`;
 				msg.attachments[0].title = `<${issue_url}|#${issue_num} ${issue_title}>`;
-				msg.attachments[0].text = '```'+issue_body+'```';
+				msg.attachments[0].text = issue_body;
 				msg.attachments[0].color = '#00ff00'; // set color = green
 			} else {
 				msg = `[${repo}] Issue <${issue_url}|#${issue_num} ${issue_title}>: *${action}* by <www.github.com/${user}|${user}>`;
