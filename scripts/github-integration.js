@@ -59,7 +59,6 @@ module.exports = function (robot) {
 			}
 			msg.attachments[0].text = msg.attachments[0].text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
 			msg.text = `<${repo_url}|[${repo_name}:${branch}]> ${commits} new <${compare_url}|commit(s)> by <${user_url}|${user_name}>:`;
-			msg.attachments[0].fallback = `[${repo_name}] ${commits} new commit(s)`;
 			msg.attachments[0].color = '#0000ff'; // set color = blue
 			robot.messageRoom(room, msg);
 
@@ -83,7 +82,6 @@ module.exports = function (robot) {
 			msg.text = `<${repo_url}|[${repo}]> created by ${creator}`;
 			msg.attachments[0].title = `Deployment ${state}`;
 			msg.attachments[0].text = `<${target_url}|${environment}>`;
-			msg.attachments[0].fallback = msg.attachments[0].text;
 			if (state == 'pending') {
 				msg.attachments[0].color = '#ff8533' // set color = orange
 			} else if (state == 'success') {
@@ -124,7 +122,6 @@ module.exports = function (robot) {
 				msg.attachments[0].title = `<${issue_url}|#${issue_num} ${issue_title}>`;
 				msg.attachments[0].text = `${issue_body}`;
 				msg.attachments[0].color = '#00ff00'; // set color = green
-				msg.attachments[0].fallback = msg.attachments[0].pretext;
 			} else {
 				msg = `[${repo}] Issue <${issue_url}|#${issue_num} ${issue_title}>: *${action}* by <www.github.com/${user}|${user}>`;
 			}
