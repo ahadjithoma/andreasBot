@@ -26,11 +26,14 @@ module.exports = function (robot) {
 
 	robot.router.get('/hubot/trello-token', function (req, res) {
 		// TODO: do something with the token 
-		robot.logger.info(res.body);
-		robot.logger.info(res.fragment);
+		robot.logger.info(res);
+		// robot.logger.info(res.body); // undefined
+		// robot.logger.info(res.fragment);	// undefined
+		// var type = window.location.hash.substr(1);
+		
 		res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
 		<form>
-<input type="button" value="Put Your Text Here" onclick="window.location.href='http://www.hyperlinkcode.com/button-links.php'" />
+<input type="button" value="window.location.hash.substr(1)" onclick="window.location.href='http://www.hyperlinkcode.com/button-links.php'" />
 </form>`);
 	});
 
