@@ -29,8 +29,8 @@ module.exports = function (robot) {
 		// robot.logger.info(res.fragment);	// undefined
 		// var type = window.location.hash.substr(1);
 		// robot.logger.info(type);
-
-
+		robot.logger.warning(res);
+		res.status(200).end();
 		res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
 					<button onclick=window.close()>close</button>`)
 	});
