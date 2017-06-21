@@ -49,15 +49,16 @@ module.exports = function (robot) {
 			let i;
 
 			for (i = 0; i < commits; i++) {
-				var user_login = payload.commits[i].author.username;
-				var user_name = payload.commits[i].author.name;
+				let user_login = payload.commits[i].author.username;
+				let user_url = `https://www.github.com/${user_login}`;
+				let user_name = payload.commits[i].author.name;
 				let commit_id = payload.commits[i].id.substr(0, 7);		 // get the first 7 chars of the commit id
 				let commit_msg = payload.commits[i].message.split('\n', 1); // get only the commit msg, not the description
 				let commit_url = payload.commits[i].url;
 				commit_id = "`" + commit_id + "`"; // add slack's msg format 	
 				msg.attachments[0].text = msg.attachments[0].text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
 			}
-			msg.text = `<${repo_url}|[${repo_name}:${branch}]> ${commits} new <${compare_url}|commit(s)> by <www.github.com/${user_login}|${user_name}>:`;
+			msg.text = `<${repo_url}|[${repo_name}:${branch}]> ${commits} new <${compare_url}|commit(s)> by <${user_url}|${user_name}>:`;
 			msg.attachments[0].color = '#0000ff'; // set color = blue
 			robot.messageRoom(room, msg);
 
@@ -125,7 +126,7 @@ module.exports = function (robot) {
 				msg = `[${repo}] Issue <${issue_url}|#${issue_num} ${issue_title}>: *${action}* by <www.github.com/${user}|${user}>`;
 			}
 
-			/* assign attachement color - CURRENTLY I AM NOT USING ATTACHEMENTS FOR ALL ISSUES
+			/* assign attachement color - CURRENTLY WE ARE NOT USING ATTACHEMENTS FOR ALL ISSUES
 			if (action.includes('open')){
 				msg.attachments[0].color = '#00ff00'; // set color = green
 			} else if (action.includes('close')){

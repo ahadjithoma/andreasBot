@@ -6,7 +6,8 @@ module.exports = function (robot) {
     });
 
     robot.router.post('/hubot/trello-webhooks', function (req, res) {
-        robot.logger.info(`trello-webhook POST. Status Code: ${res.statusCode}`);
+        let headers = req.headers;  
+        robot.logger.info(`trello-webhook POST. Status Code: ${res.statusCode}\nHeaders: ${headers}0`);
         robot.emit("trello-webhook-event", req, res);
         res.send(200);
     });

@@ -98,6 +98,7 @@ module.exports = {
     githubEvent: function () {
         return {
             "text": "",
+            "unfurl_links": false,
             "attachments": [
                 {
                     "title": "",
