@@ -15,7 +15,7 @@ module.exports = function (robot) {
     const Promise = require("bluebird");
     var trello = Promise.promisifyAll(trelloAuth);
     
-    trello.request('method','uri','query',function(err,res){console.log(err)})
+    trello.request('method','uri','query')
 
     robot.hear(/trello hooks/, function (res) {
         let boardId = 'BE7seI7e';
