@@ -30,6 +30,7 @@ module.exports = function(robot) {
 
 	robot.on('trello-webhook-event', function(data, res){
         var room = "random";
+        console.log(data);
         robot.messageRoom(room, `trello-webhook-event`);	
     })
 
