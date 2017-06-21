@@ -6,8 +6,7 @@ module.exports = function (robot) {
     var rp = require('request-promise');
     var Trello = require('node-trello');
     
-    Trello.getRequestToken();
-
+    Trello.request('method','uri','query',function(err,res){console.log(err)})
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
     var token = process.env.HUBOT_TRELLO_TOKEN;
