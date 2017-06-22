@@ -39,7 +39,8 @@
     "query-string": "^4.3.4",
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
-    "url": "^0.11.0"
+    "url": "^0.11.0",
+    "window": "^3.1.6"
   },
   "engines": {
     "node": "6.x"
