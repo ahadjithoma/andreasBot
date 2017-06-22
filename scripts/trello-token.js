@@ -60,27 +60,4 @@ module.exports = function (robot) {
 				// API call failed... 
 			});
 	})
-	robot.respond(/trello request 2/, function (res_r) {
-		var options = {
-			uri: 'https://trello.com/1/authorize',
-			name: 'AnBot',
-			scope: 'read',
-			key: process.env.HUBOT_TRELLO_KEY,
-			callback_method: 'postMessage',
-			return_url: 'https://andreasbot.herokuapp.com/hubot/trello-token',
-			// headers: {
-			// 	'User-Agent': 'Request-Promise'
-			// },
-			// json: true // Automatically parses the JSON string in the response 
-		};
-
-		rp(options)
-			.then(function (res) {
-				robot.logger.info(res);
-			})
-			.catch(function (err) {
-				robot.logger.error(err)
-				// API call failed... 
-			});
-	})
 }

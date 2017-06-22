@@ -8,6 +8,8 @@ var k = `<html><body><h2>Hello Human! My name is Hubot</h2><p>Feel free to look 
 document.getElementById("demo").innerHTML = 
 "The full URL of this page is:<br>" + window.location.href;
 </script>
+<a href="https://www.w3schools.com" target="_blank">Visit W3Schools.com!</a> 
+
 </body></html>`
 return k;
 }
