@@ -2,10 +2,11 @@ var slackMsgs = require('./slackMsgs.js');
 var url = require('url');
 var key = process.env.HUBOT_TRELLO_KEY;
 
+var request = require(request - promise);
+
 module.exports = function (robot) {
 
 	robot.respond(/trello get token/i, function (res_r) {
-
 
 		let scope = 'read,write,account';
 		let name = 'Hubot';
@@ -29,8 +30,6 @@ module.exports = function (robot) {
 		// robot.logger.info(res.fragment);	// undefined
 		// var type = window.location.hash.substr(1);
 		// robot.logger.info(type);
-		robot.logger.warning(res);
-		res.status(200).end();
 		res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
 					<button onclick=window.close()>close</button>`)
 	});
@@ -43,19 +42,22 @@ module.exports = function (robot) {
 		process.env['HUBOT_TRELLO_TOKEN'] = token;
 	})
 
+	robot.respond(/trello request/, function (res_r) {
+		var options = {
+			uri: 'https://trello.com/1/authorize?expiration=30days&name=Hubot&scope=read,write,account&key=51def9cb08cf171cd0970d8607ad8f97&response_type=token&callback_method=postMessage&return_url=https://andreasbot.herokuapp.com/hubot/trello-token',
+			headers: {
+				'User-Agent': 'Request-Promise'
+			},
+			json: true // Automatically parses the JSON string in the response 
+		};
 
-	var url2 = `"${url}"`;
-	var html = `
-<button onclick=window.open(${url2})>open</button>
-<button onclick=window.close()>close</button>  
-`;
-const Window = require('window');
-
-const window = new Window();
-
-	robot.router.get('/hubot/html', function (req, res) {
-		var href = window.location.href;
-		console.log(href)
-		res.send(html);
+		request(options)
+			.then(function (res) {
+				robot.logger.info(res);
+			})
+			.catch(function (err) {
+				robot.logger.error(err)
+				// API call failed... 
+			});
 	})
 }
