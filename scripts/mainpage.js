@@ -1,4 +1,5 @@
-<html>
+module.exports = function (){
+`<html>
 <body>
 <h2>Hello Human! My name is Hubot</h2>
 <p>Feel free to look around</p>
@@ -9,4 +10,4 @@
 <button onClick=window.close()>Close</button>
 
 </body>
-</html>
+</html>`}
