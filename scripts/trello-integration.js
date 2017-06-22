@@ -25,8 +25,8 @@ module.exports = function (robot) {
     })
 
     robot.router.get('/hubot/trello-token', function (req, res) {
-         robot.logger.warning(res);
-         if (res==req){
+         robot.logger.warning(res.ServerResponse.req.query);
+         if (res.ServerResponse.req==req){
              robot.logger.warning('SAME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1')
          }
         // t.getAccessToken(res, function (err, data) {
