@@ -16,8 +16,10 @@ module.exports = function (robot) {
 
     var cb = `https://andreasbot.herokuapp.com/hubot/trello-token`;
     var t = new Trello.OAuth(key, secret, cb, 'App Name'); 
-    robot.logger.warning(t.getRequestToken());
-
+    robot.logger.warning(t);
+    t.getRequestToken(function(err, data){
+        robot.logger.warningt(data)
+    })
     // convert node-trello callbacks to promises
     const Promise = require("bluebird");
     var trello = Promise.promisifyAll(trelloAuth);
