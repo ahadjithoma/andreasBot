@@ -2,7 +2,7 @@ var slackMsgs = require('./slackMsgs.js');
 var url = require('url');
 var key = process.env.HUBOT_TRELLO_KEY;
 
-var request = require(request-promise);
+var rp = require('request-promise');
 
 module.exports = function (robot) {
 
@@ -51,7 +51,7 @@ module.exports = function (robot) {
 			json: true // Automatically parses the JSON string in the response 
 		};
 
-		request(options)
+		rp(options)
 			.then(function (res) {
 				robot.logger.info(res);
 			})
@@ -69,7 +69,7 @@ module.exports = function (robot) {
 			json: true // Automatically parses the JSON string in the response 
 		};
 
-		request(options)
+		rp(options)
 			.then(function (res) {
 				robot.logger.info(res);
 			})
