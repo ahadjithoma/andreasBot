@@ -26,7 +26,7 @@ module.exports = function (robot) {
 
     robot.router.get('/hubot/trello-token', function (req, res) {
         t.getAccessToken(res, function (err, data) {
-            robot.logger.warning(data)
+            robot.logger.warning(data.query)
         })
         res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
 					<button onclick=window.close()>close</button>`)
