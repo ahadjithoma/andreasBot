@@ -1,4 +1,5 @@
 module.exports = function (){
+    return
 `<html>
 <body>
 <h2>Hello Human! My name is Hubot</h2>
