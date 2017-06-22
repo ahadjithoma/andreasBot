@@ -2,7 +2,7 @@ var slackMsgs = require('./slackMsgs.js');
 var url = require('url');
 var key = process.env.HUBOT_TRELLO_KEY;
 
-var request = require(request - promise);
+var request = require(request-promise);
 
 module.exports = function (robot) {
 
@@ -45,6 +45,24 @@ module.exports = function (robot) {
 	robot.respond(/trello request/, function (res_r) {
 		var options = {
 			uri: 'https://trello.com/1/authorize?expiration=30days&name=Hubot&scope=read,write,account&key=51def9cb08cf171cd0970d8607ad8f97&response_type=token&callback_method=postMessage&return_url=https://andreasbot.herokuapp.com/hubot/trello-token',
+			headers: {
+				'User-Agent': 'Request-Promise'
+			},
+			json: true // Automatically parses the JSON string in the response 
+		};
+
+		request(options)
+			.then(function (res) {
+				robot.logger.info(res);
+			})
+			.catch(function (err) {
+				robot.logger.error(err)
+				// API call failed... 
+			});
+	})
+		robot.respond(/trello request 2/, function (res_r) {
+		var options = {
+			uri: 'https://trello.com/1/authorize',
 			headers: {
 				'User-Agent': 'Request-Promise'
 			},
