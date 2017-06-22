@@ -8,13 +8,15 @@ module.exports = function (robot) {
     
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
-    var oauth = process.env.HUBOT_TRELLO_OAUTH;
+    var secret = process.env.HUBOT_TRELLO_OAUTH;
     var token = process.env.HUBOT_TRELLO_TOKEN;
     var trelloAuth = new Trello(key, token);
     
+    var tauth = require('node-trello').OAuth;
+    
     var cb = `https://andreasbot.herokuapp.com/hubot/trello-token`;
-    var t = Trello.OAuth(key, oauth, cb, 'Damn'); 
-    robot.logger.warning(trelloAuth);
+    var t = new Trello.OAuth(key, secret, cb, 'Damn'); 
+    robot.logger.warning(t);
 
     // convert node-trello callbacks to promises
     const Promise = require("bluebird");
