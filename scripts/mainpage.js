@@ -8,8 +8,8 @@ var k = `<html><body><h2>Hello Human! My name is Hubot</h2><p>Feel free to look 
 document.getElementById("demo").innerHTML = 
 "The full URL of this page is:<br>" + window.location.href;
 </script>
-<a href="https://www.w3schools.com" target="_blank">Visit W3Schools.com!</a> 
-
+<a href="https://trello.com/1/authorize?expiration=30days&name=Hubot&scope=read,write,account&key=51def9cb08cf171cd0970d8607ad8f97&response_type=token&callback_method=postMessage&return_url=https://andreasbot.herokuapp.com/hubot/trello-token" target="popup">Auth here!</a> 
+<a href="../html-link.htm" target="popup" onclick="window.open('https://trello.com/1/authorize?expiration=30days&name=Hubot&scope=read,write,account&key=51def9cb08cf171cd0970d8607ad8f97&response_type=token&callback_method=postMessage&return_url=https://andreasbot.herokuapp.com/hubot/trello-token','name','width=600,height=400')">auth popup</a>
 </body></html>`
 return k;
 }
