@@ -5,25 +5,45 @@ module.exports = function (robot) {
     var request = require('request');
     var rp = require('request-promise');
     var Trello = require('node-trello');
-    
+
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
     var secret = process.env.HUBOT_TRELLO_OAUTH;
     var token = process.env.HUBOT_TRELLO_TOKEN;
     var trelloAuth = new Trello(key, token);
-    
-    var tauth = require('node-trello').OAuth;
+
+
+
+
+
 
     var cb = `https://andreasbot.herokuapp.com/hubot/trello-token`;
-    var t = new Trello.OAuth(key, secret, cb, 'App Name'); 
+    var t = new Trello.OAuth(key, secret, cb, 'App Name');
     // robot.logger.warning(t);
-    t.getRequestToken(function(err, data){
+    t.getRequestToken(function (err, data) {
         robot.logger.warning(data)
     })
+
+    robot.router.get('/hubot/trello-token', function (req, res) {
+        t.getAccessToken(res, function (err, data) {
+            robot.logger.warning(data)
+        })
+        res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
+					<button onclick=window.close()>close</button>`)
+    });
+
+
+
+
+
+
+
+
+
     // convert node-trello callbacks to promises
     const Promise = require("bluebird");
     var trello = Promise.promisifyAll(trelloAuth);
-    
+
     robot.hear(/trello hooks/, function (res) {
         let boardId = 'BE7seI7e';
         let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';

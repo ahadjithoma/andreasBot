@@ -25,14 +25,14 @@ module.exports = function (robot) {
 		res_r.send(msg);
 	})
 
-	robot.router.get('/hubot/trello-token', function (req, res) {
-		// TODO: do something with the token 
-		// robot.logger.info(res.fragment);	// undefined
-		// var type = window.location.hash.substr(1);
-		robot.logger.info(req);
-		res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
-					<button onclick=window.close()>close</button>`)
-	});
+	// robot.router.get('/hubot/trello-token', function (req, res) {
+	// 	// TODO: do something with the token 
+	// 	// robot.logger.info(res.fragment);	// undefined
+	// 	// var type = window.location.hash.substr(1);
+	// 	// robot.logger.info(req);
+	// 	res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
+	// 				<button onclick=window.close()>close</button>`)
+	// });
 
 	robot.respond(/trello add token (.*)/i, function (res_r) {
 		var token = res_r.match[1];
