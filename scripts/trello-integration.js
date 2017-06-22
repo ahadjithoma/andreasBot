@@ -25,7 +25,7 @@ module.exports = function (robot) {
     })
 
     robot.router.get('/hubot/trello-token', function (req, res) {
-        robot.logger.warning(res.ServerResponse);
+        robot.logger.warning(res.domain);
         //  if (res.ServerResponse.req==req){
         //      robot.logger.warning('SAME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1')
         //  }
@@ -37,10 +37,10 @@ module.exports = function (robot) {
     });
 
     robot.router.get('/hubot/t', function (req, res) {
-        robot.logger.warning(res.ServerResponse);
-        robot.logger.info(req.IncomingMessage);
-        robot.logger.warning(res.route);
-        robot.logger.info(req.ReadableState);
+        // robot.logger.warning(res.ServerResponse);
+        // robot.logger.info(req.IncomingMessage);
+        // robot.logger.warning(res.route);
+        // robot.logger.info(req.ReadableState);
     })
 
 
