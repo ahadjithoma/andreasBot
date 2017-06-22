@@ -1,4 +1,4 @@
-module.exports = function (){
+module.exports = { html: function (){
     return
 `<html>
 <body>
@@ -11,4 +11,6 @@ module.exports = function (){
 <button onClick=window.close()>Close</button>
 
 </body>
-</html>`}
+</html>`
+}
+}
