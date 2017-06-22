@@ -29,7 +29,7 @@ module.exports = function (robot) {
 		// TODO: do something with the token 
 		// robot.logger.info(res.fragment);	// undefined
 		// var type = window.location.hash.substr(1);
-		robot.logger.info(res);
+		robot.logger.info(req);
 		res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
 					<button onclick=window.close()>close</button>`)
 	});
