@@ -37,8 +37,10 @@ module.exports = function (robot) {
     });
 
     robot.router.get('/hubot/t', function (req, res) {
-        robot.logger.warning(res);
-        robot.logger.info(req);
+        robot.logger.warning(res.ServerResponse);
+        robot.logger.info(req.IncomingMessage);
+        robot.logger.warning(res.route);
+        robot.logger.info(req.ReadableState);
     })
 
 
