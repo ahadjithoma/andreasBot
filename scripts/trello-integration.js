@@ -32,7 +32,7 @@ module.exports = function (robot) {
         robot.logger.info(args);
         t.getAccessToken(args, function (err, data) {
             if (err){
-                robot.logger.err(err);
+                robot.logger.error(err);
                 return 0;    
             }
             robot.logger.info(data);
