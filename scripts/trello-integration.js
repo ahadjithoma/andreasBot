@@ -33,7 +33,6 @@ module.exports = function (robot) {
     robot.router.get('/hubot/trello-token', function (req, res) {
         let args = req.query;
         robot.logger.info(args);
-<<<<<<< HEAD
         collection.findOne(function (err, result) {
             if (err) throw err;
             console.log(result);
@@ -47,7 +46,6 @@ module.exports = function (robot) {
             })
         });
 
-=======
         t.getAccessToken(args, function (err, data) {
             if (err){
                 robot.logger.error(err);
@@ -55,7 +53,6 @@ module.exports = function (robot) {
             }
             robot.logger.info(data);
         })
->>>>>>> fb3f025e0b9ad9cc56f5dd40be2b537fe94f91bd
         res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
 					<button onclick=window.close()>close</button>`)
     });
