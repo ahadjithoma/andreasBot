@@ -29,7 +29,7 @@ module.exports = function (robot) {
         args['oauth_token_secret'] = '8852d39c4874774eb737c77fe1ccef0e';
         robot.logger.info(args);
         t.getAccessToken(args, function (err, data) {
-            robot.logger.warning(data)
+            robot.logger.warning(err)
         })
         res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
 					<button onclick=window.close()>close</button>`)
