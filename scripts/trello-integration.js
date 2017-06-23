@@ -24,24 +24,18 @@ module.exports = function (robot) {
         robot.logger.warning(data)
     })
 
-    robot.router.get('/hubot/trello-token', function (req) {
-        robot.logger.warning(req.query);
-        //  if (res.req==req){
-        //      robot.logger.warning('SAME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1')
-        //  }
-        // t.getAccessToken(res, function (err, data) {
-        //     robot.logger.warning(data)
-        // })
+    robot.router.get('/hubot/trello-token', function (req, res) {
+        let args = req.query;
+        args['oauth_token_secret'] = '8852d39c4874774eb737c77fe1ccef0e';
+        robot.logger.info(args);
+        t.getAccessToken(args, function (err, data) {
+            robot.logger.warning(data)
+        })
         res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
 					<button onclick=window.close()>close</button>`)
     });
 
-    robot.router.get('/hubot/t', function (req, res) {
-        // robot.logger.warning(res.ServerResponse);
-        // robot.logger.info(req.IncomingMessage);
-        // robot.logger.warning(res.route);
-        // robot.logger.info(req.ReadableState);
-    })
+
 
 
 
