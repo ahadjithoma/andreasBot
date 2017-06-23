@@ -17,26 +17,35 @@ module.exports = function (robot) {
 
 
 
+    var collection = db.collection('trello')
 
     var cb = `https://andreasbot.herokuapp.com/hubot/trello-token`;
     var t = new Trello.OAuth(key, secret, cb, 'App Name');
     // robot.logger.warning(t);
     var tgr = t.getRequestToken(function (err, data) {
         robot.logger.warning(data)
-
+        collection.insertAsync({ oauth_token: data.oauth_token, oauth_verifier: data.oauth_verifier })
+            .then(result => robot.logger.info(result))
+            .catch(error => robot.logger.error(error));
     })
 
 
     robot.router.get('/hubot/trello-token', function (req, res) {
         let args = req.query;
         robot.logger.info(args);
-        t.getAccessToken(args, function (err, data) {
-            if (err){
-                robot.logger.err(err);
-                return 0;    
-            }
-            robot.logger.info(data);
-        })
+        collection.findOne(function (err, result) {
+            if (err) throw err;
+            console.log(result);
+            //args['oauth_token_secret'] = '8852d39c4874774eb737c77fe1ccef0e';
+            t.getAccessToken(args, function (err, data) {
+                if (err) {
+                    robot.logger.err(err);
+                    return 0;
+                }
+                robot.logger.info(data);
+            })
+        });
+
         res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
 					<button onclick=window.close()>close</button>`)
     });
