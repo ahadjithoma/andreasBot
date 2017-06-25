@@ -24,7 +24,7 @@ module.exports = function (robot) {
     // robot.logger.warning(t);
     var tgr = t.getRequestToken(function (err, data) {
         robot.logger.warning(data)
-        collection.insertAsync({ oauth_token: data.oauth_token, oauth_verifier: data.oauth_verifier })
+        collection.insertAsync(data)
             .then(result => robot.logger.info(result))
             .catch(error => robot.logger.error(error));
     })
