@@ -18,12 +18,14 @@ module.exports = function (robot) {
 
 
     var collection = db.collection('trello')
+    const oauth_secrets = {};
 
     var cb = `https://andreasbot.herokuapp.com/hubot/trello-token`;
     var t = new Trello.OAuth(key, secret, cb, 'App Name');
     // robot.logger.warning(t);
     var tgr = t.getRequestToken(function (err, data) {
         robot.logger.warning(data)
+        oauth_secrets = data;
         collection.insertAsync(data)
             .then(result => robot.logger.info(result))
             .catch(error => robot.logger.error(error));
@@ -32,7 +34,7 @@ module.exports = function (robot) {
 
     robot.router.get('/hubot/trello-token', function (req, res) {
         let args = req.query;
-        robot.logger.info(args);
+        robot.logger.info(oauth_secrets);
         collection.find().toArray(function (err, result) {
             if (err) throw err;
             let index = Object.keys(result).length;
