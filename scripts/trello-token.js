@@ -48,6 +48,8 @@ module.exports = function(robot) {
             t = result;
         })
 
+		console.log(t);
+
         let boardId = 'BE7seI7e';
         let args = { fields: "name,url,prefs" };
 
