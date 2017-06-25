@@ -18,37 +18,6 @@ module.exports = function(robot) {
 
 
 
-    var collection = db.collection('trello')
-    var oauth_secrets = {};
-
-    var cb = `https://andreasbot.herokuapp.com/hubot/trello-token`;
-    var t = new Trello.OAuth(key, secret, cb, 'App Name');
-    // robot.logger.warning(t);
-    t.getRequestToken(function(err, data) {
-        robot.logger.warning(data)
-        oauth_secrets[data.oauth_token] = data.oauth_token_secret;
-    })
-
-
-    robot.router.get('/hubot/trello-token', function(req, res) {
-        let args = req.query;
-        let query = url.parse(req.url, true).query;
-        let token = query.oauth_token;
-        args['oauth_token_secret'] = oauth_secrets[token];
-        robot.logger.info(args);
-        t.getAccessToken(args, function(err, data) {
-            if (err) throw err;
-            robot.logger.warning(data);
-        })
-        res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
-					<button onclick=window.close()>close</button>`)
-    });
-
-
-
-
-
-
 
 
 
