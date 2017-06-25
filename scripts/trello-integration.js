@@ -36,7 +36,8 @@ module.exports = function (robot) {
         collection.find().toArray(function (err, result) {
             if (err) throw err;
             let index = Object.keys(result).length;
-            console.log(`Result[${index}]: ${result[index]}`);
+            args = result[index];
+            console.log(`Result[${index}]: ${args}`);
             //args['oauth_token_secret'] = '8852d39c4874774eb737c77fe1ccef0e';
             t.getAccessToken(args, function (err, data) {
                 if (err) throw err;
