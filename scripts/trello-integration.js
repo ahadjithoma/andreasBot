@@ -1,4 +1,4 @@
-module.exports = function (robot) {
+module.exports = function(robot) {
     // 'use strict'
 
     var slackmsg = require("./slackMsgs.js");
@@ -23,29 +23,20 @@ module.exports = function (robot) {
     var cb = `https://andreasbot.herokuapp.com/hubot/trello-token`;
     var t = new Trello.OAuth(key, secret, cb, 'App Name');
     // robot.logger.warning(t);
-    var tgr = t.getRequestToken(function (err, data) {
+    t.getRequestToken(function(err, data) {
         robot.logger.warning(data)
         oauth_secrets[data.oauth_token] = data.oauth_token_secret;
-        collection.insertAsync(data)
-            .then(result => robot.logger.info(result))
-            .catch(error => robot.logger.error(error));
     })
 
 
-    robot.router.get('/hubot/trello-token', function (req, res) {
+    robot.router.get('/hubot/trello-token', function(req, res) {
         let args = req.query;
-        robot.logger.info(oauth_secrets);
-        collection.find().toArray(function (err, result) {
+        args['token'] = oauth_secrets.token;
+        robot.logger.info(args);
+        t.getAccessToken(args, function(err, data) {
             if (err) throw err;
-            let index = Object.keys(result).length;
-            //args = result[index];
-            console.log(`Result[${index}]: ${args}`);
-            //args['oauth_token_secret'] = '8852d39c4874774eb737c77fe1ccef0e';
-            t.getAccessToken(args, function (err, data) {
-                if (err) throw err;
-                robot.logger.info(`getAccessToken: ${data}`);
-            })
-        });
+            robot.logger.info(`getAccessToken: ${data}`);
+        })
         res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
 					<button onclick=window.close()>close</button>`)
     });
@@ -63,20 +54,20 @@ module.exports = function (robot) {
     const Promise = require("bluebird");
     var trello = Promise.promisifyAll(trelloAuth);
 
-    robot.hear(/trello hooks/, function (res) {
+    robot.hear(/trello hooks/, function(res) {
         let boardId = 'BE7seI7e';
         let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
         let args = { description: "my test webhook", callbackURL: cb_url, idModel: '59245663c76f54b975558854' };
 
-        trello.postAsync('/1/webhooks', args).then(function (data) {
+        trello.postAsync('/1/webhooks', args).then(function(data) {
             res.send(data)
-        }).catch(function (err) {
+        }).catch(function(err) {
             res.send();
             robot.logger.error(err.Error)
         })
     })
 
-    robot.on('trello-webhook-event', function (data, res) {
+    robot.on('trello-webhook-event', function(data, res) {
 
         var room = "random";
         let payload = data.body;
@@ -113,12 +104,12 @@ module.exports = function (robot) {
     }
 
     // trello board
-    robot.hear(/trello board/i, function (res_r) {
+    robot.hear(/trello board/i, function(res_r) {
         // TODO: fetch the board id from other source (env, redis or mongodb)
         let boardId = 'BE7seI7e';
         let args = { fields: "name,url,prefs" };
 
-        trello.get("/1/board/" + boardId, args, function (err, data) {
+        trello.get("/1/board/" + boardId, args, function(err, data) {
             if (err) {
                 res.send('Error: ' + err);
                 robot.logger.error(err);
@@ -151,7 +142,7 @@ module.exports = function (robot) {
     var slackCB = 'slack:msg_action:';
 
     // responding to 'trello_board' interactive message
-    robot.on(slackCB + 'trello_board', function (data, res) {
+    robot.on(slackCB + 'trello_board', function(data, res) {
         robot.logger.info(`robot.on: ${slackCB}trello_board`);
         let btnId = data.actions[0].value;
         let btnName = data.actions[0].name;
@@ -170,7 +161,7 @@ module.exports = function (robot) {
                 // get board info to fetch lists
                 let boardId = 'BE7seI7e';
                 let args = { lists: "all" };
-                trello.get("1/board/" + boardId, args, function (err, data) {
+                trello.get("1/board/" + boardId, args, function(err, data) {
                     if (err) {
                         res.send(err);
                         robot.logger.error(err);
@@ -208,7 +199,7 @@ module.exports = function (robot) {
     })
 
     // responding to 'trello_list' interactive message
-    robot.on(slackCB + 'trello_list', function (data_board, res) {
+    robot.on(slackCB + 'trello_list', function(data_board, res) {
         let response_url = data_board.response_url;
 
         res.status(200).end() // best practice to respond with 200 status
@@ -218,7 +209,7 @@ module.exports = function (robot) {
 
         // call function to fetch list - provide list id
         let args = { cards: "all" };
-        trello.get("/1/lists/" + listId, args, function (err, data) {
+        trello.get("/1/lists/" + listId, args, function(err, data) {
             if (err) {
                 robot.logger.error(err);
                 res.send(`Error: ${err}`)
