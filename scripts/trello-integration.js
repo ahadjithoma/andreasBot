@@ -38,7 +38,7 @@ module.exports = function(robot) {
         robot.logger.info(args);
         t.getAccessToken(args, function(err, data) {
             if (err) throw err;
-            robot.logger.info(`getAccessToken: ${data}`);
+            robot.logger.warning(data);
         })
         res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
 					<button onclick=window.close()>close</button>`)
