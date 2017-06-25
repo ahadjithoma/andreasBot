@@ -30,20 +30,36 @@ module.exports = function(robot) {
             if (err) throw err;
             let token = data['oauth_access_token'];
             let t = new Trello(app_key, token);
-			db.collection('trello').insert(t, function(err, result){
-				if (err) throw err;
-				if (result) console.log('Added!');
-			})
+            db.collection('trello').insert(t, function(err, result) {
+                if (err) throw err;
+                if (result) console.log('Added!');
+            })
         })
-        res.send(`
-<script>
-    window.close();
-</script>
-`)
+        res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
+    				<button onclick=window.close()>close</button>`)
     });
 
 
+    robot.hear('trello object', function(req, res) {
+        var t = {};
 
+        db.collection('trello').insert(t, function(err, result) {
+            if (err) throw err;
+            t = result;
+        })
+
+        let boardId = 'BE7seI7e';
+        let args = { fields: "name,url,prefs" };
+
+        t.get("/1/board/" + boardId, args, function(err, data) {
+            if (err) {
+                res.send('Error: ' + err);
+                robot.logger.error(err);
+                return 0;
+            }
+            robot.logger.info(data);
+        })
+    })
 
 
 
@@ -76,39 +92,11 @@ module.exports = function(robot) {
         res_r.send(msg);
     })
 
-    // robot.router.get('/hubot/trello-token', function (req, res) {
-    // 	// TODO: do something with the token 
-    // 	// robot.logger.info(res.fragment);	// undefined
-    // 	// var type = window.location.hash.substr(1);
-    // 	// robot.logger.info(req);
-    // 	res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
-    // 				<button onclick=window.close()>close</button>`)
-    // });
-
     robot.respond(/trello add token (.*)/i, function(res_r) {
         var token = res_r.match[1];
         //***IMPORTANT*** 
         // the .env assignment doesnt work with HEROKU!
         // must set up a heroku client and communicate through their api 
         process.env['HUBOT_TRELLO_TOKEN'] = token;
-    })
-
-    robot.respond(/trello request/, function(res_r) {
-        var options = {
-            uri: 'https://trello.com/1/authorize?expiration=30days&name=Hubot&scope=read,write,account&key=51def9cb08cf171cd0970d8607ad8f97&response_type=token&callback_method=postMessage&return_url=https://andreasbot.herokuapp.com/hubot/trello-token',
-            headers: {
-                'User-Agent': 'Request-Promise'
-            },
-            json: true // Automatically parses the JSON string in the response 
-        };
-
-        rp(options)
-            .then(function(res) {
-                robot.logger.info(res);
-            })
-            .catch(function(err) {
-                robot.logger.error(err)
-                // API call failed... 
-            });
     })
 }
