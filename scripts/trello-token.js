@@ -46,11 +46,11 @@ module.exports = function(robot) {
         db.collection('trello').find().toArray(function(err, result) {
             if (err) throw err;
             t['key'] = result.key;
-			t['token'] = result.token;
-			t['host'] = result.host;
+            t['token'] = result.token;
+            t['host'] = result.host;
+            console.log(t);
 
         })
-        console.log(t);
 
 
         let boardId = 'BE7seI7e';
