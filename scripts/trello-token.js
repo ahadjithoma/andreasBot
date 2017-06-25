@@ -45,7 +45,9 @@ module.exports = function(robot) {
 
         db.collection('trello').find().toArray(function(err, result) {
             if (err) throw err;
-            t = result;
+            t['key'] = result.key;
+			t['token'] = result.token;
+			t['host'] = result.host;
 
         })
         console.log(t);
