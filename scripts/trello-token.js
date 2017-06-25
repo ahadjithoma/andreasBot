@@ -29,7 +29,7 @@ module.exports = function(robot) {
         tOAuth.getAccessToken(args, function(err, data) {
             if (err) throw err;
             let token = data['oauth_access_token'];
-            let t = new Trello(key, token);
+            let t = new Trello(app_key, token);
 			db.collection['trello'].insert(t, function(err, result){
 				if (err) throw err;
 				if (result) console.log('Added!');
