@@ -6,6 +6,7 @@ module.exports = function(robot) {
     var rp = require('request-promise');
     var Trello = require('node-trello');
     var db = require("./mlab-login").db();
+    var url = require('url')
 
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
@@ -31,8 +32,10 @@ module.exports = function(robot) {
 
     robot.router.get('/hubot/trello-token', function(req, res) {
         let args = req.query;
-        args['token'] = oauth_secrets.token;
-        robot.logger.info(oauth_secrets);
+        let query = url.parse(request.url, true).query;
+        let token = query.oauth_token;
+        args['token'] = oauth_secrets[token];
+        robot.logger.info(args);
         t.getAccessToken(args, function(err, data) {
             if (err) throw err;
             robot.logger.info(`getAccessToken: ${data}`);
