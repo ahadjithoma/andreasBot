@@ -32,7 +32,7 @@ module.exports = function(robot) {
     robot.router.get('/hubot/trello-token', function(req, res) {
         let args = req.query;
         args['token'] = oauth_secrets.token;
-        robot.logger.info(args);
+        robot.logger.info(oauth_secrets);
         t.getAccessToken(args, function(err, data) {
             if (err) throw err;
             robot.logger.info(`getAccessToken: ${data}`);
