@@ -38,10 +38,7 @@ module.exports = function (robot) {
             console.log(result);
             //args['oauth_token_secret'] = '8852d39c4874774eb737c77fe1ccef0e';
             t.getAccessToken(args, function (err, data) {
-                if (err) {
-                    robot.logger.error(err);
-                    return 0;
-                }
+                if (err) throw err;
                 robot.logger.info(data);
             })
         });
