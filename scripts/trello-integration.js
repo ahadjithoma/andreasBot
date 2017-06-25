@@ -1,5 +1,5 @@
 module.exports = function (robot) {
-    'use strict'
+    // 'use strict'
 
     var slackmsg = require("./slackMsgs.js");
     var request = require('request');
