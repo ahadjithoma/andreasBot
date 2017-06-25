@@ -41,14 +41,14 @@ module.exports = function(robot) {
 
 
     robot.hear('trello object', function(req, res) {
-        var t = {};
+        const t = {};
 
         db.collection('trello').find().toArray(function(err, result) {
             if (err) throw err;
             t = result;
-			            console.log(t);
 
         })
+        console.log(t);
 
 
         let boardId = 'BE7seI7e';
