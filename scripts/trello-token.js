@@ -29,7 +29,7 @@ module.exports = function(robot) {
             if (err) throw err;
             robot.logger.warning(data);
         })
-        res.redirect('www.google.com')
+        res.close();
     });
 
 
