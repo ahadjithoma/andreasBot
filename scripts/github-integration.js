@@ -67,8 +67,7 @@ module.exports = function (robot) {
 			robot.messageRoom(room, "push event");
 		}
 	}
-	
-	
+
 	function getCommits(){
 
 	}
