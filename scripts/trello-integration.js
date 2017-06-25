@@ -18,7 +18,7 @@ module.exports = function (robot) {
 
 
     var collection = db.collection('trello')
-    const oauth_secrets = {};
+    const oauth_secrets;
 
     var cb = `https://andreasbot.herokuapp.com/hubot/trello-token`;
     var t = new Trello.OAuth(key, secret, cb, 'App Name');
