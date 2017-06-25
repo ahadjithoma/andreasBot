@@ -2,17 +2,18 @@ var slackMsgs = require('./slackMsgs.js');
 var url = require('url');
 var Trello = require('node-trello');
 var rp = require('request-promise');
-var key = process.env.HUBOT_TRELLO_KEY;
-var secret = process.env.HUBOT_TRELLO_OAUTH;
+var app_key = process.env.HUBOT_TRELLO_KEY;
+var oauth_secret = process.env.HUBOT_TRELLO_OAUTH;
+var db = require("./mlab-login").db();
 
 module.exports = function(robot) {
 
     var oauth_secrets = {};
     var loginCallback = `https://andreasbot.herokuapp.com/hubot/trello-token`;
-    var t = new Trello.OAuth(key, secret, loginCallback, 'App Name');
-    
-	robot.respond(/trello auth/, function(res) {
-        t.getRequestToken(function(err, data) {
+    var tOAuth = new Trello.OAuth(app_key, oauth_secret, loginCallback, 'Hubot');
+
+    robot.respond(/trello auth/, function(res) {
+        tOAuth.getRequestToken(function(err, data) {
             robot.logger.warning(data)
             oauth_secrets[data.oauth_token] = data.oauth_token_secret;
             res.send(data.redirect);
@@ -25,15 +26,21 @@ module.exports = function(robot) {
         let token = query.oauth_token;
         args['oauth_token_secret'] = oauth_secrets[token];
         robot.logger.info(args);
-        t.getAccessToken(args, function(err, data) {
+        tOAuth.getAccessToken(args, function(err, data) {
             if (err) throw err;
-            robot.logger.warning(data);
+            let token = data['oauth_access_token'];
+            let t = new Trello(key, token);
+			db.collection['trello'].insert(t, function(err, result){
+				if (err) throw err;
+				if (result) console.log('Added!');
+			})
         })
-  res.send(`
+        res.send(`
 <script>
     window.close();
 </script>
-`)      });
+`)
+    });
 
 
 
