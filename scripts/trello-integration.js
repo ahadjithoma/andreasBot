@@ -33,7 +33,7 @@ module.exports = function (robot) {
     robot.router.get('/hubot/trello-token', function (req, res) {
         let args = req.query;
         robot.logger.info(args);
-        collection.findOne(function (err, result) {
+        collection.find(function (err, result) {
             if (err) throw err;
             console.log(result);
             //args['oauth_token_secret'] = '8852d39c4874774eb737c77fe1ccef0e';
