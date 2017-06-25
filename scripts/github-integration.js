@@ -1,5 +1,5 @@
 'use strict';
-
+var Q = require('q');
 module.exports = function (robot) {
 
 	var slackMsgs = require('./slackMsgs.js');
@@ -55,9 +55,9 @@ module.exports = function (robot) {
 				var commit_id = payload.commits[i].id.substr(0, 7);		 // get the first 7 chars of the commit id
 				var commit_msg = payload.commits[i].message.split('\n', 1); // get only the commit msg, not the description
 				var commit_url = payload.commits[i].url;
-				commit_id = "`" + commit_id + "`"; // add slack's msg format 	
+				commit_id = "`" + commit_id + "`"; // add slack's msg format 
+				msg.attachments[0].text = msg.attachments[0].text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
 			}
-			msg.attachments[0].text = msg.attachments[0].text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
 			msg.text = `<${repo_url}|[${repo_name}:${branch}]> ${commits} new <${compare_url}|commit(s)> by <${user_url}|${user_name}>:`;
 			msg.attachments[0].color = '#0000ff'; // set color = blue
 			robot.messageRoom(room, msg);
@@ -66,6 +66,10 @@ module.exports = function (robot) {
 			//TODO: send a msg in plain text for other chat platforms or add any other specific formats than slack's
 			robot.messageRoom(room, "push event");
 		}
+	}
+
+	function getCommits(){
+
 	}
 
 	function developmentStatusEvent(payload) {
