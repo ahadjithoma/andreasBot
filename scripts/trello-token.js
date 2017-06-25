@@ -43,13 +43,12 @@ module.exports = function(robot) {
     robot.hear('trello object', function(req, res) {
         var t = {};
 
-        db.collection('trello').insert(t, function(err, result) {
+        db.collection('trello').find().toArray(function(err, result) {
             if (err) throw err;
             t = result;
-					console.log(t);
-
         })
 
+            console.log(t);
 
         let boardId = 'BE7seI7e';
         let args = { fields: "name,url,prefs" };
