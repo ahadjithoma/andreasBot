@@ -35,7 +35,7 @@ module.exports = function (robot) {
         robot.logger.info(args);
         collection.find().toArray(function (err, result) {
             if (err) throw err;
-            console.log(result);
+            console.log(result[0]);
             //args['oauth_token_secret'] = '8852d39c4874774eb737c77fe1ccef0e';
             t.getAccessToken(args, function (err, data) {
                 if (err) throw err;
