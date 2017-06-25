@@ -36,21 +36,13 @@ module.exports = function (robot) {
         collection.find().toArray(function (err, result) {
             if (err) throw err;
             let index = Object.keys(result).length;
-            console.log(result[index]);
+            console.log(`Result[${index}]: ${result[index]}`);
             //args['oauth_token_secret'] = '8852d39c4874774eb737c77fe1ccef0e';
             t.getAccessToken(args, function (err, data) {
                 if (err) throw err;
-                robot.logger.info(data);
+                robot.logger.info(`getAccessToken: ${data}`);
             })
         });
-
-        t.getAccessToken(args, function (err, data) {
-            if (err){
-                robot.logger.error(err);
-                return 0;    
-            }
-            robot.logger.info(data);
-        })
         res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
 					<button onclick=window.close()>close</button>`)
     });
