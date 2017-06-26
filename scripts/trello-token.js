@@ -14,8 +14,8 @@ function getHash(token) {
         bcrypt.hash(token, salt).then(function(hash) {
             returnhash = hash;
             return hash;
-        })
-    }).catch(error => robot.logger.error(error));
+        }).catch(error => robot.logger.error(error));
+    })
 	console.log(returnhash);
 }
 
