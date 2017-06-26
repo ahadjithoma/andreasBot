@@ -60,6 +60,7 @@ module.exports = function(robot) {
 			bcrypt.compare(result.token, result.hash, function(err, res) {
 				if (res) {robot.logger.info('MATCHED!')}
 				else {robot.logger.error('NOT Matched!')}
+			})
 		})
     })
 
