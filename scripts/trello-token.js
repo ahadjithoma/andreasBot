@@ -40,8 +40,22 @@ module.exports = function(robot) {
         res.send
 		(`
         <html><body>
-<a href="javascript:window.open('', '_self', '');
-window.close();">click here</a>
+
+<script language="javascript">
+
+function quitBox(cmd) 
+{      
+    if (cmd=='quit')    
+    {
+       open(location, '_self').close();    
+    }     
+    return false;   
+}
+
+</script>
+
+<input type="button" onclick="return quitBox('quit');" value="Close This Window/Tab" /> 
+
         </body></html>
         `);
     });
