@@ -37,7 +37,7 @@ module.exports = function(robot) {
                 if (result) robot.logger.info('Token Added to DB!');
             })
         })
-        res.redirect('/a');
+        res.close();//('/a');
     });
 
     robot.respond(/trello get token/i, function(res_r) {
