@@ -16,7 +16,7 @@ module.exports = function(robot) {
 
     robot.respond(/trello auth/, function(res) {
         let userId = res.message.user.id;
-        db.trelloTokens.findOneAsync({id: userId}).then(function(result) {
+        db.trelloTokens.findOne({id: userId}).then(function(result) {
             robot.logger.info(result);
         }).catch(function(err) {
 
