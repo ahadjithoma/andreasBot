@@ -15,6 +15,8 @@ module.exports = function(robot) {
     robot.respond(/trello auth/, function(res) {
         tOAuth.getRequestToken(function(err, data) {
             robot.logger.warning(data)
+			oauth_secrets['username'] = res.message.user.name;
+			oauth_secrets['id'] = res.message.user.id;
             oauth_secrets[data.oauth_token] = data.oauth_token_secret;
             res.send(data.redirect);
         })
@@ -29,9 +31,8 @@ module.exports = function(robot) {
         tOAuth.getAccessToken(args, function(err, data) {
             if (err) throw err;
             let token = data['oauth_access_token'];
-			// let userName = res_r.message.user.name;
-			// let userId = res_r.message.user.id;
-			robot.logger.info(res_r);
+			let userName = oauth_secrets['username'];
+			let userId = oauth_secrets['id'];
 			// BCRYPT!!!!!!!!!!
             db.collection('trello').insert({username: userName, id: userId, token: token}, function(err, result) {
                 if (err) throw err;
