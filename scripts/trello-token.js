@@ -1,20 +1,14 @@
 var slackMsgs = require('./slackMsgs.js');
 var url = require('url');
 var Trello = require('node-trello');
-var rp = require('request-promise');
-var app_key = process.env.HUBOT_TRELLO_KEY;
-var oauth_secret = process.env.HUBOT_TRELLO_OAUTH;
 var db = require("./mlab-login").db();
 var bcrypt = require('bcryptjs');
 db.bind('trelloTokens');
 
-module.exports = function(robot) {
+var app_key = process.env.HUBOT_TRELLO_KEY;
+var oauth_secret = process.env.HUBOT_TRELLO_OAUTH;
 
-    robot.respond(/bcrypt test/, function(res) {
-        var t = 'testtoken';
-        var k = getHash(t);
-        res.send(k);
-    })
+module.exports = function(robot) {
 
     var oauth_secrets = {};
     var loginCallback = `https://andreasbot.herokuapp.com/hubot/trello-token`;
@@ -69,7 +63,7 @@ module.exports = function(robot) {
         let expr = '30days';
         let cb_method = 'fragment';
         let return_url = 'https://andreasbot.herokuapp.com/hubot/trello-token';
-        let url = `https://trello.com/1/authorize?expiration=${expr}&name=${name}&scope=${scope}&key=${key}&response_type=token&callback_method=${cb_method}&return_url=${return_url}`;
+        let url = `https://trello.com/1/authorize?expiration=${expr}&name=${name}&scope=${scope}&key=${app_key}&response_type=token&callback_method=${cb_method}&return_url=${return_url}`;
         var msg = slackMsgs.basicMessage();
 
         msg.attachments[0].pretext = "Please get a token to authorize your Trello account";
