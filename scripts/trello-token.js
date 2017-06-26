@@ -37,7 +37,7 @@ module.exports = function(robot) {
                 if (result) robot.logger.info('Token Added to DB!');
             })
         })
-        res.redirect
+        res.send
 		(`
         <html><body>
 <a href="javascript:window.close();">click here</a>
