@@ -37,27 +37,7 @@ module.exports = function(robot) {
                 if (result) robot.logger.info('Token Added to DB!');
             })
         })
-        res.send
-		(`
-        <html><body>
-
-<script language="javascript">
-
-function quitBox(cmd) 
-{      
-    if (cmd=='quit')    
-    {
-       open(location, '_self').close();    
-    }     
-    return false;   
-}
-
-</script>
-
-<input type="button" onclick="return quitBox('quit');" value="Close This Window/Tab" /> 
-
-        </body></html>
-        `);
+        res.redirect('/a');
     });
 
     robot.respond(/trello get token/i, function(res_r) {
