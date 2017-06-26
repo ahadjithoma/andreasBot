@@ -9,15 +9,17 @@ module.exports = function (robot) {
 
         response.send(`
         <html><body>
-        
-<script>
-    window.close();
-</script>
+         <button onclick=window.close()>close</button>
+
         
         </body></html>
         `);
 //  response.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
     				// <button onclick=window.close()>close</button>`)
+
+// <script>
+//     window.close();
+// </script>
 
 });
 }
