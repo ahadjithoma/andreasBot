@@ -9,7 +9,7 @@ var bcrypt = require('bcryptjs');
 db.bind('trelloToken');
 
 function getHash(token) {
-    var returnhash = null;
+    let returnhash = null;
     bcrypt.genSalt(10, function(err, salt) {
         bcrypt.hash(token, salt).then(function(hash) {
             returnhash = hash;
