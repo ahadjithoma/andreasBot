@@ -8,10 +8,8 @@ var rp = require('request-promise');
 var key = process.env.HUBOT_TRELLO_KEY;
 var token = process.env.HUBOT_TRELLO_TOKEN;
 
-var t = new trello(key, token);
-
 module.exports = function (robot) {
-	robot.hear('', function (req, res) {
+	robot.hear('opa', function (req, res) {
 
 
 		var options = {
