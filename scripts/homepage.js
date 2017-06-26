@@ -10,9 +10,9 @@ module.exports = function (robot) {
         response.send(`
         <html><body>
         
-        <script type="text/javascript">
-            window.parent.close();
-        </script>
+<script>
+    window.close();
+</script>
         
         </body></html>
         `);
