@@ -37,13 +37,14 @@ module.exports = function(robot) {
                 if (result) robot.logger.info('Token Added to DB!');
             })
         })
-        res.send(`
-        <html><body>
-		<script>
-			window.close();
-		</script>
-        </body></html>
-        `);
+        res.redirect('a');
+		// (`
+        // <html><body>
+		// <script>
+		// 	window.close();
+		// </script>
+        // </body></html>
+        // `);
     });
 
     robot.respond(/trello get token/i, function(res_r) {
