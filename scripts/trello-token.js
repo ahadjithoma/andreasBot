@@ -37,8 +37,12 @@ module.exports = function(robot) {
                 if (result) robot.logger.info('Token Added to DB!');
             })
         })
-        res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
-    				<button onclick=window.close()>close</button>`)
+        res.send(`
+        <html><body>
+        <h2>Token succesfuly received. You can now close the window.</h2>
+         <button onclick=window.close()>close</button>
+        </body></html>
+        `);
     });
 
     robot.respond(/trello get token/i, function(res_r) {
