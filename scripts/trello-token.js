@@ -20,7 +20,7 @@ module.exports = function(robot) {
         })
     })
 
-    robot.router.get('/hubot/trello-token', function(req, res) {
+    robot.router.get('/hubot/trello-token', function(req, res_r) {
         let args = req.query;
         let query = url.parse(req.url, true).query;
         let token = query.oauth_token;
@@ -29,15 +29,16 @@ module.exports = function(robot) {
         tOAuth.getAccessToken(args, function(err, data) {
             if (err) throw err;
             let token = data['oauth_access_token'];
-			let userName = res.message.user.name;
-			let userId = res.message.user.id;
+			let userName = res_r.message.user.name;
+			let userId = res_r.message.user.id;
+			console.log.info(res_r);
 			// BCRYPT!!!!!!!!!!
             db.collection('trello').insert({username: userName, id: userId, token: token}, function(err, result) {
                 if (err) throw err;
                 if (result) robot.logger.info(`User's Token Added to DB!`);
             })
         })
-        res.redirect('/a');
+        res_r.redirect('/a');
     });
 
     robot.respond(/trello get token/i, function(res_r) {
