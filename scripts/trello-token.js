@@ -29,8 +29,8 @@ module.exports = function(robot) {
         tOAuth.getAccessToken(args, function(err, data) {
             if (err) throw err;
             let token = data['oauth_access_token'];
-			let userName = res_r.message.user.name;
-			let userId = res_r.message.user.id;
+			// let userName = res_r.message.user.name;
+			// let userId = res_r.message.user.id;
 			console.log.info(res_r);
 			// BCRYPT!!!!!!!!!!
             db.collection('trello').insert({username: userName, id: userId, token: token}, function(err, result) {
