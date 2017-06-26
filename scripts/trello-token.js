@@ -16,8 +16,12 @@ module.exports = function(robot) {
 
     robot.respond(/trello auth/, function(res) {
         let userId = res.message.user.id;
-        db.trelloTokens.findOne({id: userId}).then(function(result) {
+        db.trelloTokens.findOneAsync({ id: userId }).then(function(result) {
             robot.logger.info(result);
+            Trello.get(`/1/tokens/${result.token}`, function(err, data) {
+                if (err) throw err;
+                console.log(data);
+            })
         }).catch(function(err) {
 
         })
