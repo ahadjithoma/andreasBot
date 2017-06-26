@@ -3,6 +3,7 @@ var url = require('url');
 var Trello = require('node-trello');
 var db = require("./mlab-login").db();
 var bcrypt = require('bcryptjs');
+var request = require('request-promise')
 db.bind('trelloTokens');
 
 var app_key = process.env.HUBOT_TRELLO_KEY;
@@ -17,11 +18,18 @@ module.exports = function(robot) {
     robot.respond(/trello auth/, function(res) {
         let userId = res.message.user.id;
         db.trelloTokens.findOneAsync({ id: userId }).then(function(result) {
-            robot.logger.info(result);
-            Trello.get(`/1/tokens/${result.token}`, function(err, data) {
-                if (err) throw err;
-                console.log(data);
-            })
+            var options = {
+                uri: `https://api.trello.com/1/tokens/${result.token}`,
+                json: true // Automatically parses the JSON string in the response
+            };
+
+            rp(options)
+                .then(function(data) {
+                    console.log(data);
+                })
+                .catch(function(err) {
+                    console.log(err);
+                });
         }).catch(function(err) {
 
         })
