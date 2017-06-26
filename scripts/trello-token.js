@@ -39,8 +39,9 @@ module.exports = function(robot) {
         })
         res.send(`
         <html><body>
-        <h2>Token succesfuly received. You can now close the window.</h2>
-         <button onclick=window.close()>close</button>
+		<script>
+			window.close();
+		</script>
         </body></html>
         `);
     });
