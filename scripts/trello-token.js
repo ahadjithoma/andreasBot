@@ -6,17 +6,38 @@ var app_key = process.env.HUBOT_TRELLO_KEY;
 var oauth_secret = process.env.HUBOT_TRELLO_OAUTH;
 var db = require("./mlab-login").db();
 var bcrypt = require('bcryptjs');
+db.bind('trelloToken');
 
-// IMPORTANT:SHOULD STORE IT SOMEWHERE SAFER !!!! ⬋⬋⬋
-const myPlaintextPassword = 's0/\/\Tr3L!0_/\/\T0k3N';
+function getHash(token) {
+    var returnhash = null;
+    bcrypt.genSalt(10, function(err, salt) {
+        bcrypt.hash(token, salt).then(function(hash) {
+            returnhash = hash;
+            return hash;
+        })
+    }).catch(error => robot.logger.error(error));
+	console.log(returnhash);
+}
 
 module.exports = function(robot) {
+
+    robot.respond(/bcrypt test/, function(res) {
+        var t = 'testtoken';
+        var k = getHash(t);
+        res.send(k);
+    })
 
     var oauth_secrets = {};
     var loginCallback = `https://andreasbot.herokuapp.com/hubot/trello-token`;
     var tOAuth = new Trello.OAuth(app_key, oauth_secret, loginCallback, 'Hubot');
 
     robot.respond(/trello auth/, function(res) {
+        let userId = res.message.user.id;
+        db.trelloTokens.findOne({ id: userId }).then(function(result) {
+
+        }).catch(function(err) {
+
+        })
         tOAuth.getRequestToken(function(err, data) {
             robot.logger.warning(data)
             oauth_secrets['username'] = res.message.user.name;
@@ -40,8 +61,8 @@ module.exports = function(robot) {
             // BCRYPT!!!!!!!!!!
             bcrypt.genSalt(10, function(err, salt) {
                 bcrypt.hash(token, salt).then(function(hash) {
-					db.bind('trelloTokens');
-                    db.trelloTokens.insert({ username: userName, id: userId, token: token, hash: hash }, function(err, result) {
+                    db.bind('trelloTokens');
+                    db.trelloTokens.insert({ username: userName, id: userId, token: hash }, function(err, result) {
                         if (err) throw err;
                         if (result) robot.logger.info(`User's Token Added to DB!`);
                     })
@@ -51,19 +72,6 @@ module.exports = function(robot) {
         })
         res_r.redirect('/a');
     });
-
-    robot.respond(/check token/, function(res) {
-		let userId = res.message.user.id;
-		db.bind('trelloTokens');
-		db.trelloTokens.findOne({id: userId}, function(err, result){
-			if (err) throw err;
-			bcrypt.compare(result.token, result.hash, function(err, res) {
-				if (res) {robot.logger.info('MATCHED!')}
-				else {robot.logger.error('NOT Matched!')}
-			})
-		})
-    })
-
 
     robot.respond(/trello get token/i, function(res_r) {
 
