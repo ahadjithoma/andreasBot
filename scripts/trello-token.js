@@ -29,10 +29,12 @@ module.exports = function(robot) {
         tOAuth.getAccessToken(args, function(err, data) {
             if (err) throw err;
             let token = data['oauth_access_token'];
+			// ADD ONLY THR TOKEN and USERNAME
+			// BCRYPT!!!!!!!!!!
             let t = new Trello(app_key, token);
             db.collection('trello').insert(t, function(err, result) {
                 if (err) throw err;
-                if (result) console.log('Added!');
+                if (result) robot.logger.info('Token Added to DB!');
             })
         })
         res.send(`<h2>Token succesfuly received. You can now close the window.</h2>\n
