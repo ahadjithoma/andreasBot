@@ -29,15 +29,15 @@ module.exports = function(robot) {
         tOAuth.getAccessToken(args, function(err, data) {
             if (err) throw err;
             let token = data['oauth_access_token'];
-			// ADD ONLY THR TOKEN and USERNAME
+			let userName = res.message.user.name;
+			let userId = res.message.user.id;
 			// BCRYPT!!!!!!!!!!
-            let t = new Trello(app_key, token);
-            db.collection('trello').insert(t, function(err, result) {
+            db.collection('trello').insert({username: userName, id: userId, token: token}, function(err, result) {
                 if (err) throw err;
-                if (result) robot.logger.info('Token Added to DB!');
+                if (result) robot.logger.info(`User's Token Added to DB!`);
             })
         })
-        res.finish();//('/a');
+        res.redirect('/a');
     });
 
     robot.respond(/trello get token/i, function(res_r) {
