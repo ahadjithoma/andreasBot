@@ -39,45 +39,6 @@ module.exports = function(robot) {
     				<button onclick=window.close()>close</button>`)
     });
 
-
-    robot.hear('trello object', function(req, res) {
-        const t = {};
-
-        db.collection('trello').find().toArray(function(err, result) {
-            if (err) throw err;
-            t['key'] = result.key;
-            t['token'] = result.token;
-            t['host'] = result.host;
-            console.log(t);
-
-        })
-
-
-        let boardId = 'BE7seI7e';
-        let args = { fields: "name,url,prefs" };
-
-        t.get("/1/board/" + boardId, args, function(err, data) {
-            if (err) {
-                res.send('Error: ' + err);
-                robot.logger.error(err);
-                return 0;
-            }
-            robot.logger.info(data);
-        })
-    })
-
-
-
-
-
-
-
-
-
-
-
-
-
     robot.respond(/trello get token/i, function(res_r) {
 
         let scope = 'read,write,account';
