@@ -17,24 +17,12 @@ module.exports = function(robot) {
 
     robot.respond(/trello auth/, function(res) {
         let userId = res.message.user.id;
-        db.trelloTokens.findOneAsync({ id: userId }).then(function(result) {
-            var options = {
-                uri: `https://api.trello.com/1/tokens/${result.token}`,
-                json: true // Automatically parses the JSON string in the response
-            };
-
-            rp(options)
-                .then(function(data) {
-                    console.log(data);
-                })
-                .catch(function(err) {
-                    console.log(err);
-                });
-        }).catch(function(err) {
-
-        })
+        db.trelloTokens.findOneAsync({ id: userId })
+            .then(function(result) {
+            })
+            .catch(function(err) {
+            })
         tOAuth.getRequestToken(function(err, data) {
-            robot.logger.warning(data)
             oauth_secrets['username'] = res.message.user.name;
             oauth_secrets['id'] = res.message.user.id;
             oauth_secrets[data.oauth_token] = data.oauth_token_secret;
@@ -47,7 +35,6 @@ module.exports = function(robot) {
         let query = url.parse(req.url, true).query;
         let token = query.oauth_token;
         args['oauth_token_secret'] = oauth_secrets[token];
-        robot.logger.info(args);
         tOAuth.getAccessToken(args, function(err, data) {
             if (err) throw err;
             let token = data['oauth_access_token'];
