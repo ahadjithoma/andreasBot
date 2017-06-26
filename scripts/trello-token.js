@@ -40,7 +40,8 @@ module.exports = function(robot) {
         res.send
 		(`
         <html><body>
-<a href="javascript:window.close();">click here</a>
+<a href="javascript:window.open('', '_self', '');
+window.close();">click here</a>
         </body></html>
         `);
     });
