@@ -5,14 +5,14 @@ var Promise = require("bluebird");
 var uri = process.env.MONGODB_URI; 
 
 // promisify mongoskin with bluebird
-Object.keys(mongo).forEach(function (key) {
-    var value = mongo[key];
-    if (typeof value === "function") {
-        Promise.promisifyAll(value);
-        Promise.promisifyAll(value.prototype);
-    }
-});
-Promise.promisifyAll(mongo);
+// Object.keys(mongo).forEach(function (key) {
+//     var value = mongo[key];
+//     if (typeof value === "function") {
+//         Promise.promisifyAll(value);
+//         Promise.promisifyAll(value.prototype);
+//     }
+// });
+// Promise.promisifyAll(mongo);
 
 // connect to mLab database
 var db = mongo.MongoClient.connect(uri);

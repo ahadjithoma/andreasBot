@@ -75,7 +75,7 @@ module.exports = function(robot) {
 
         trello.get("/1/board/" + boardId, args, function(err, data) {
             if (err) {
-                res_r.send('Error: ' + err);
+                res_r.send(err);
                 robot.logger.error(err);
                 return 0;
             }
