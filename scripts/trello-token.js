@@ -8,17 +8,6 @@ var db = require("./mlab-login").db();
 var bcrypt = require('bcryptjs');
 db.bind('trelloToken');
 
-function getHash(token) {
-    let returnhash = null;
-    bcrypt.genSalt(10, function(err, salt) {
-        bcrypt.hash(token, salt).then(function(hash) {
-            returnhash = hash;
-            return hash;
-        }).catch(error => robot.logger.error(error));
-    })
-	console.log(returnhash);
-}
-
 module.exports = function(robot) {
 
     robot.respond(/bcrypt test/, function(res) {
@@ -34,7 +23,7 @@ module.exports = function(robot) {
     robot.respond(/trello auth/, function(res) {
         let userId = res.message.user.id;
         db.trelloTokens.findOne({ id: userId }).then(function(result) {
-
+			robot.logger.info(result);
         }).catch(function(err) {
 
         })
