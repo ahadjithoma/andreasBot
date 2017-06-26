@@ -6,6 +6,7 @@ var app_key = process.env.HUBOT_TRELLO_KEY;
 var oauth_secret = process.env.HUBOT_TRELLO_OAUTH;
 var db = require("./mlab-login").db();
 var bcrypt = require('bcryptjs');
+db.bind('trelloTokens');
 
 module.exports = function(robot) {
 
@@ -21,8 +22,7 @@ module.exports = function(robot) {
 
     robot.respond(/trello auth/, function(res) {
         let userId = res.message.user.id;
-        db.bind('trelloToken');
-        db.trelloTokens.findOneAsync({id: userId}).then(function(result) {
+        db.trelloTokens.findOne({id: userId}).then(function(result) {
             robot.logger.info(result);
         }).catch(function(err) {
 
