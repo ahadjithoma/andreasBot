@@ -52,7 +52,7 @@ module.exports = function(robot) {
         res_r.redirect('/a');
     });
 
-    robot.respond(/check token/, function(res_r) {
+    robot.respond(/check token/, function(res) {
 		let userId = res.message.user.id;
 		db.bind('trelloTokens');
 		db.trelloTokens.findOne({id: userId}, function(err, result){
