@@ -13,10 +13,10 @@ module.exports = function (robot) {
 
 	robot.hear('trello login', function (res) {
 		console.log(t);
-		    t['U514U4XDF'][get('/1/members/me', function (err, data) {
-                if (err) throw err;
-                console.log(data);
-            })
+		t['U514U4XDF'].get('/1/members/me', function (err, data) {
+			if (err) throw err;
+			console.log(data);
+		})
 	})
 
 	robot.hear('trello token check', function (res) {
