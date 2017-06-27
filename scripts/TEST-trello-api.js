@@ -11,7 +11,7 @@ var token = process.env.HUBOT_TRELLO_TOKEN;
 module.exports = function (robot) {
 	robot.hear('opa', function (req, res) {
 
-		var t - new trello(key, token)
+		var t = new trello(key, token)
 	})
 }
 
