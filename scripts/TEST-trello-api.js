@@ -18,11 +18,31 @@ module.exports = function (robot) {
 					res.send('Your Token is Invalid. Please authorize your account to get you a new one.')
 				}
 				robot.logger.error(err);
-				return 0;			
+				return 0;
 			};
 			console.log(data)
 		})
 	})
+
+
+	var encryption = require('./encryption.js');
+
+	robot.hear('encrypt (.*)', function (res) {
+		var str = res.match[1];
+		var k = encryption.encrypt(str)
+		res.send(k);
+	})
+
+
+
+	robot.hear('decrypt (.*)', function (res) {
+		var str = res.match[1];
+		var k = encryption.encrypt(str)
+		res.send(k);
+	})
+
+
+
 }
 
 
