@@ -5,6 +5,7 @@ var Promise = require("bluebird");
 
 var key = process.env.HUBOT_TRELLO_KEY;
 var trello = {};
+var tP = {};
 
 db.bind('trelloTokens');
 db.trelloTokens.find().toArrayAsync()
@@ -15,6 +16,7 @@ db.trelloTokens.find().toArrayAsync()
             let token = encryption.decrypt(records[i].token);
             let userId = records[i].id;
             trello[userId] = new Trello(key, token)
+            tP = Promise.promisifyAll(trello[userId])
             trello[userId].get('/1/members/me', function (err, data) {
                 if (err) throw err;
                 console.log(data);
@@ -25,4 +27,4 @@ db.trelloTokens.find().toArrayAsync()
         console.log(error)
     })
 
-module.exports = Promise.promisifyAll(trello);
+module.exports = tP
