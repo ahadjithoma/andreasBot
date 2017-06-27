@@ -9,12 +9,12 @@ var key = process.env.HUBOT_TRELLO_KEY;
 var token = process.env.HUBOT_TRELLO_TOKEN;
 
 module.exports = function (robot) {
-	robot.hear('opa', function (req, res) {
+	robot.respond('opa', function (req, res) {
 
 		var t = new trello(key, token)
 		t.get(`/1/tokens/${token}`, function (err, data) {
 			if (err) {
-				res.reply(err)
+				res.send(err)
 				throw err;
 			};
 			console.log(data)
