@@ -13,7 +13,7 @@ db.trelloTokens.find().toArrayAsync()
         for (i = 0; i < length; i++) {
             let token = encryption.decrypt(records[i].token);
             let userId = records[i].id;    
-            trello[id]= new Trello(key, token)
+            trello[userId]= new Trello(key, token)
         }
     })
     .catch(error => {
