@@ -14,7 +14,9 @@ module.exports = function (robot) {
 		var t = new trello(key, token)
 		t.get(`/1/tokens/${token}`, function (err, data) {
 			if (err) {
-				res.send(err.responseBody)
+				if (err.responseBody = 'invalid token') {
+					res.send('Your Token is Invalid. Please authorize your account to get you a new one.')
+				}
 				robot.logger.error(err);
 				return 0;			
 			};
