@@ -3,7 +3,8 @@ var url = require('url');
 var Trello = require('node-trello');
 var db = require("./mlab-login").db();
 var bcrypt = require('bcryptjs');
-var request = require('request-promise')
+var request = require('request-promise');
+var encryption = require('./encryption.js');
 db.bind('trelloTokens');
 
 var app_key = process.env.HUBOT_TRELLO_KEY;
@@ -37,19 +38,13 @@ module.exports = function(robot) {
         args['oauth_token_secret'] = oauth_secrets[token];
         tOAuth.getAccessToken(args, function(err, data) {
             if (err) throw err;
-            let token = data['oauth_access_token'];
             let userName = oauth_secrets['username'];
             let userId = oauth_secrets['id'];
-            // BCRYPT!!!!!!!!!!
-            bcrypt.genSalt(10, function(err, salt) {
-                bcrypt.hash(token, salt).then(function(hash) {
-                    db.bind('trelloTokens');
-                    db.trelloTokens.insert({ username: userName, id: userId, token: hash }, function(err, result) {
-                        if (err) throw err;
-                        if (result) robot.logger.info(`User's Token Added to DB!`);
-                    })
-                }).catch(error => robot.logger.error(error));
-            });
+            let token = encryption.encrypt(data['oauth_access_token']); // encrypt token before storing it
+            db.trelloTokens.insert({username: userName, id: userId, token: token}, function(err, result) {
+                if (err) throw err;
+                if (result) robot.logger.info(`User's Token Added to DB!`);
+            })
 
         })
         res_r.redirect('/a');
