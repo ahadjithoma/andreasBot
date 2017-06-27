@@ -7,7 +7,7 @@ var key = process.env.HUBOT_TRELLO_KEY;
 var trello = {};
 
 var cnt = 0;
-console('***********CNT NUM: '+cnt)
+console.log('***********CNT NUM: '+cnt)
 cnt = cnt + 1;
 
 db.bind('trelloTokens');
