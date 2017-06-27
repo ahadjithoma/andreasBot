@@ -5,7 +5,10 @@ var Promise = require("bluebird");
 
 var key = process.env.HUBOT_TRELLO_KEY;
 var trello = {};
-var tP = {};
+
+var cnt = 0;
+console('***********CNT NUM: '+cnt)
+cnt = cnt + 1;
 
 db.bind('trelloTokens');
 db.trelloTokens.find().toArrayAsync()
