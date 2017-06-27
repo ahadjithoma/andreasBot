@@ -12,8 +12,11 @@ module.exports = function (robot) {
 	robot.hear('opa', function (req, res) {
 
 		var t = new trello(key, token)
-		t.get(`/1/tokens/${token}`, function(err, data){
-			if (err) throw err;
+		t.get(`/1/tokens/${token}`, function (err, data) {
+			if (err) {
+				res.send(err)
+				throw err;
+			};
 			console.log(data)
 		})
 	})
