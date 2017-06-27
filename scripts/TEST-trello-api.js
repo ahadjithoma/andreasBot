@@ -13,7 +13,7 @@ module.exports = function (robot) {
 
 	robot.hear('trello login', function (res) {
 		console.log(t);
-		    t[t[0].userId].get('/1/members/me', function (err, data) {
+		    t['U514U4XDF'][get('/1/members/me', function (err, data) {
                 if (err) throw err;
                 console.log(data);
             })
