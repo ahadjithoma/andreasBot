@@ -1,6 +1,7 @@
 var Trello = require('node-trello');
 var encryption = require('./encryption.js');
 var db = require('./mlab-login.js').db();
+var Promise = require("bluebird");
 
 var key = process.env.HUBOT_TRELLO_KEY;
 var trello = {};
@@ -24,4 +25,4 @@ db.trelloTokens.find().toArrayAsync()
         console.log(error)
     })
 
-module.exports = trello;
+module.exports = Promise.promisifyAll(trello);

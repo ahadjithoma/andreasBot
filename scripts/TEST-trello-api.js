@@ -18,6 +18,11 @@ module.exports = function (robot) {
 			if (err) throw err;
 			res.send(data.fullName);
 		})
+		t[userId].getAsync('/1/members/me').then(data => {
+			res.send('promise'+data.fullName);
+		}).catch(err => {
+			res.send(err.Error)
+		})
 	})
 
 	robot.hear('trello token check', function (res) {
