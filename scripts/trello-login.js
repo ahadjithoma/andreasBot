@@ -15,8 +15,8 @@ db.trelloTokens.find().toArrayAsync()
         for (i = 0; i < length; i++) {
             let token = encryption.decrypt(records[i].token);
             let userId = records[i].id;
-            trello[userId] = new Trello(key, token)
-            tP[userId] = Promise.promisifyAll(trello[userId])
+            let t = new Trello(key, token)
+            trello[userId] = Promise.promisifyAll(t)
             trello[userId].get('/1/members/me', function (err, data) {
                 if (err) throw err;
                 console.log(data);
@@ -27,4 +27,4 @@ db.trelloTokens.find().toArrayAsync()
         console.log(error)
     })
 
-module.exports = tP
+module.exports = trello
