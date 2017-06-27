@@ -15,9 +15,11 @@ db.trelloTokens.find().toArrayAsync()
         for (i = 0; i < length; i++) {
             let token = encryption.decrypt(records[i].token);
             let userId = records[i].id;
-            let t = new Trello(key, token)
-            trello[userId] = Promise.promisifyAll(t)
-            trello[userId].get('/1/members/me', function (err, data) {
+            let t = new Trello(key, token);
+            trello[userId] = Promise.promisifyAll(t);
+
+            // in some way CHECK TOKEN VALIDATION
+            trello[userId].get('/1/tokens/'+token, function (err, data) {
                 if (err) throw err;
                 console.log(data);
             })
