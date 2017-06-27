@@ -8,14 +8,15 @@ var rp = require('request-promise');
 var key = process.env.HUBOT_TRELLO_KEY;
 var token = process.env.HUBOT_TRELLO_TOKEN;
 var t = require('./trello-login.js');
-
+var msg = require('./messages-info.js');
 module.exports = function (robot) {
 
 	robot.hear('trello login', function (res) {
 		console.log(t);
-		t['U514U4XDF'].get('/1/members/me', function (err, data) {
+		let userId = msg.getUserId(res);
+		t[userId].get('/1/members/me', function (err, data) {
 			if (err) throw err;
-			console.log(data);
+			res.send(data.fullName);
 		})
 	})
 
