@@ -37,7 +37,7 @@ module.exports = function (robot) {
 
 	robot.hear('decrypt (.*)', function (res) {
 		var str = res.match[1];
-		var k = encryption.encrypt(str)
+		var k = encryption.decrypt(str)
 		res.send(k);
 	})
 
