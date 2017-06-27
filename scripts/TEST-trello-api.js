@@ -9,6 +9,8 @@ var key = process.env.HUBOT_TRELLO_KEY;
 var token = process.env.HUBOT_TRELLO_TOKEN;
 var t = require('./trello-login.js');
 var msg = require('./messages-info.js');
+var Promise = require('bluebird');
+var tPromise = Promise.promisifyAll(t);
 module.exports = function (robot) {
 
 	robot.hear('trello login', function (res) {
@@ -18,7 +20,7 @@ module.exports = function (robot) {
 			if (err) throw err;
 			res.send(data.fullName);
 		})
-		t[userId].getAsync('/1/members/me').then(data => {
+		tPromise[userId].getAsync('/1/members/me').then(data => {
 			res.send('promise'+data.fullName);
 		}).catch(err => {
 			res.send(err.Error)
