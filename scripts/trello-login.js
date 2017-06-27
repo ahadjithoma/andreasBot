@@ -12,8 +12,12 @@ db.trelloTokens.find().toArrayAsync()
         let i = 0;
         for (i = 0; i < length; i++) {
             let token = encryption.decrypt(records[i].token);
-            let userId = records[i].id;    
-            trello[userId]= new Trello(key, token)
+            let userId = records[i].id;
+            trello[userId] = new Trello(key, token)
+            trello[userId].get('/1/members/me', function (err, data) {
+                if (err) throw err;
+                console.log(data);
+            })
         }
     })
     .catch(error => {
