@@ -15,7 +15,8 @@ module.exports = function (robot) {
 		t.get(`/1/tokens/${token}`, function (err, data) {
 			if (err) {
 				res.send(err)
-				throw err;
+				robot.logger.error(err);
+				return 0;			
 			};
 			console.log(data)
 		})
