@@ -7,9 +7,15 @@ var rp = require('request-promise');
 // auth
 var key = process.env.HUBOT_TRELLO_KEY;
 var token = process.env.HUBOT_TRELLO_TOKEN;
+var t = require('./trello-login.js');
 
 module.exports = function (robot) {
-	robot.hear('opa', function (res) {
+
+	robot.hear('trello login', function (res) {
+		console.log(t);
+	})
+
+	robot.hear('trello token check', function (res) {
 
 		var t = new trello(key, token)
 		t.get(`/1/tokens/${token}`, function (err, data) {
