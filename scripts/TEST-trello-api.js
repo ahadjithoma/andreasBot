@@ -11,19 +11,7 @@ var token = process.env.HUBOT_TRELLO_TOKEN;
 module.exports = function (robot) {
 	robot.hear('opa', function (req, res) {
 
-
-		var options = {
-			uri: `https://api.trello.com/1/tokens/${token}`,
-			json: true // Automatically parses the JSON string in the response
-		};
-
-		rp(options)
-			.then(function (data) {
-				robot.logger.info(data);
-			})
-			.catch(function (err) {
-				robot.logger.error(err);
-			});
+		var t - new trello(key, token)
 	})
 }
 
