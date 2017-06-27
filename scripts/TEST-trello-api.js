@@ -14,7 +14,7 @@ module.exports = function (robot) {
 		var t = new trello(key, token)
 		t.get(`/1/tokens/${token}`, function (err, data) {
 			if (err) {
-				res.send(err.Error)
+				res.send(err.responseBody)
 				robot.logger.error(err);
 				return 0;			
 			};
