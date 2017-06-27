@@ -17,6 +17,14 @@ module.exports = function(robot) {
     var tOAuth = new Trello.OAuth(app_key, oauth_secret, loginCallback, 'Hubot');
 
     robot.respond(/trello auth/, function(res) {
+        trelloOAuthRedirect(res);
+    })
+
+    robot.on('trello_OAuth', res => {
+        trelloOAuthRedirect(res);
+    })
+
+    function trelloOAuthRedirect(res) {
         let userId = res.message.user.id;
         db.trelloTokens.findOneAsync({ id: userId })
             .then(function(result) {
@@ -27,9 +35,11 @@ module.exports = function(robot) {
             oauth_secrets['username'] = res.message.user.name;
             oauth_secrets['id'] = res.message.user.id;
             oauth_secrets[data.oauth_token] = data.oauth_token_secret;
-            res.send(data.redirect);
+            robot.messageRoom(userId, data.redirect);
+
+//            res.reply(data.redirect);
         })
-    })
+    }
 
     robot.router.get('/hubot/trello-token', function(req, res_r) {
         let args = req.query;
@@ -41,7 +51,7 @@ module.exports = function(robot) {
             let userName = oauth_secrets['username'];
             let userId = oauth_secrets['id'];
             let token = encryption.encrypt(data['oauth_access_token']); // encrypt token before storing it
-            db.trelloTokens.insert({username: userName, id: userId, token: token}, function(err, result) {
+            db.trelloTokens.insert({ username: userName, id: userId, token: token }, function(err, result) {
                 if (err) throw err;
                 if (result) robot.logger.info(`User's Token Added to DB!`);
             })
