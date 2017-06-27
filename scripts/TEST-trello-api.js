@@ -12,12 +12,7 @@ var msg = require('./messages-info.js');
 module.exports = function (robot) {
 
 	robot.hear('trello login', function (res) {
-		console.log(t);
 		let userId = msg.getUserId(res);
-		t[userId].get('/1/members/me', function (err, data) {
-			if (err) throw err;
-			res.send(data.fullName);
-		})
 		t[userId].getAsync('/1/members/me').then(data => {
 			res.send('promise'+data.fullName);
 		}).catch(err => {
