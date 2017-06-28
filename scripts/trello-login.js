@@ -1,3 +1,4 @@
+moduel.exports = function(robot){
 var Trello = require('node-trello');
 var encryption = require('./encryption.js');
 var db = require('./mlab-login.js').db();
@@ -19,20 +20,17 @@ db.trelloTokens.find().toArrayAsync()
             trello[userId] = Promise.promisifyAll(t);
             module.exports = function (robot) {
 
-                robot.hear(/trellos/i, function (res) {
+                // in some way CHECK TOKEN VALIDATION
+                trello[userId].getAsync('/1/tokens/' + token)
+                    .then(data => {
+                        console.log(data);
+                    })
+                    .catch(err => {
+                        console.log(err)
+                        robot.logger.warning(err)
+                        robot.messageRoom("general", 'error trello-login ' + token)
 
-                    // in some way CHECK TOKEN VALIDATION
-                    trello[userId].getAsync('/1/tokens/' + token)
-                        .then(data => {
-                            console.log(data);
-                        })
-                        .catch(err => {
-                            console.log(err)
-                            robot.logger.warning(err)
-                            robot.messageRoom("general", 'error trello-login ' + token)
-
-                        })
-                })
+                    })
             }
         }
     })
@@ -40,4 +38,5 @@ db.trelloTokens.find().toArrayAsync()
         console.log(error)
     })
 
-module.exports = trello;
+},trello=trello,
+trello;
