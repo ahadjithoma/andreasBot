@@ -26,6 +26,7 @@ db.trelloTokens.find().toArrayAsync()
                 .catch(err => {
                     module.exports = function(robot){
                         robot.logger.warning(err)
+                        robot.messageRoom("general", 'error trello-login '+token)
                     }
                 })
         }
