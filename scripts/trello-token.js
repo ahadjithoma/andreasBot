@@ -49,8 +49,6 @@ module.exports = function (robot) {
                 if (err) throw err;
                 if (result) {
                     robot.logger.info(`User's Token Added to DB!`)
-                    dbRefresh;
-                    trelloRefresh;
                 };
             })
         })
