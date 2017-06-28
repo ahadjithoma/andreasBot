@@ -1,3 +1,5 @@
+module.exports = function trelloLogin(userID) {
+
 var Trello = require('node-trello');
 var encryption = require('./encryption.js');
 var db = require('./mlab-login.js').db();
@@ -26,7 +28,6 @@ var trello = {};
 //         console.log(error)
 //     })
 
-module.exports = function trelloLogin(userID) {
     var trello = {};
 
     db.bind('trelloTokens');
