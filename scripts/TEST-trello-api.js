@@ -27,14 +27,13 @@ module.exports = function (robot) {
 		// let username = records[i].username;
 	}
 
-
-	t[userId].getAsync('/1/tokens/' + token)
-		.then(data => {
-			console.log(data);
-		})
-		.catch(err => {
-			robot.messageRoom('andreas_h92', 'not auth dude');
-		})
+	// t[userId].getAsync('/1/tokens/' + token)
+	// 	.then(data => {
+	// 		console.log(data);
+	// 	})
+	// 	.catch(err => {
+	// 		robot.messageRoom('andreas_h92', 'not auth dude');
+	// 	})
 
 	robot.hear('trello login', function (res) {
 		let userId = msg.getUserId(res);
