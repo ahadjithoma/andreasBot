@@ -1,4 +1,4 @@
-module.exports = function (userID) {
+module.exports = {trelloLogin: function (userID) {
 
     var Trello = require('node-trello');
     var encryption = require('./encryption.js');
@@ -56,4 +56,5 @@ module.exports = function (userID) {
     //         console.log(error)
     //     })
             return trello;
+}
 }
