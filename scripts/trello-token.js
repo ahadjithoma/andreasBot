@@ -44,7 +44,7 @@ module.exports = function(robot) {
             oauth_secrets['id'] = res.userId;
             oauth_secrets[data.oauth_token] = data.oauth_token_secret;
 
-			robot.messageRoom('andreas_h92', data.redirect);
+			//robot.messageRoom('andreas_h92', data.redirect);
         })
     })
 

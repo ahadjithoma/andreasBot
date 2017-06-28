@@ -19,8 +19,8 @@ db.trelloTokens.find().toArrayAsync()
         let i = 0;
         for (i = 0; i < length; i++) {
             let token = encryption.decrypt(records[i].token);
-            let userId = records[i].id;
-            let username = records[i].username;
+            var userId = records[i].id;
+            var username = records[i].username;
             let t = new Trello(key, token);
             trello[userId] = Promise.promisifyAll(t);
 
