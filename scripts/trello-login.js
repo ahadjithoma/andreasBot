@@ -1,4 +1,3 @@
-module.exports = function(robot){
 var Trello = require('node-trello');
 var encryption = require('./encryption.js');
 var db = require('./mlab-login.js').db();
@@ -18,25 +17,10 @@ db.trelloTokens.find().toArrayAsync()
             let username = records[i].username;
             let t = new Trello(key, token);
             trello[userId] = Promise.promisifyAll(t);
-            module.exports = function (robot) {
-
-                // in some way CHECK TOKEN VALIDATION
-                trello[userId].getAsync('/1/tokens/' + token)
-                    .then(data => {
-                        console.log(data);
-                    })
-                    .catch(err => {
-                        console.log(err)
-                        robot.logger.warning(err)
-                        robot.messageRoom("general", 'error trello-login ' + token)
-
-                    })
-            }
         }
     })
     .catch(error => {
         console.log(error)
     })
 
-},trello=trello,
-trello;
+module.exports = trello;

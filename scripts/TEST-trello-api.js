@@ -7,14 +7,39 @@ var rp = require('request-promise');
 // auth
 var key = process.env.HUBOT_TRELLO_KEY;
 var token = process.env.HUBOT_TRELLO_TOKEN;
-var t = require('./trello-login.js').trello;
+var t = require('./trello-login.js');
 var msg = require('./messages-info.js');
+var encryption = require('./encryption.js');
+var db = require('./mlab-login.js').db();
+
 module.exports = function (robot) {
+
+
+	// in some way CHECK TOKEN VALIDATION
+
+
+	let length = Object.keys(trello).length;
+	let i = 0;
+	console.log(length+'\n'+trello)
+	for (i = 0; i < length; i++) {
+		// let token = encryption.decrypt(records[i].token);
+		// let userId = trello[i].userId;
+		// let username = records[i].username;
+	}
+
+
+	t[userId].getAsync('/1/tokens/' + token)
+		.then(data => {
+			console.log(data);
+		})
+		.catch(err => {
+			robot.messageRoom('andreas_h92', 'not auth dude');
+		})
 
 	robot.hear('trello login', function (res) {
 		let userId = msg.getUserId(res);
 		t[userId].getAsync('/1/members/me').then(data => {
-			res.send('promise'+data.fullName);
+			res.send('promise' + data.fullName);
 		}).catch(err => {
 			res.send(err.Error)
 		})
