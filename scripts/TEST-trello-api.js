@@ -15,6 +15,7 @@ var msg = require('./messages-info.js');
 var encryption = require('./encryption.js');
 var db = require('./mlab-login.js').db();
 
+
 module.exports = function (robot) {
 
 
@@ -38,7 +39,9 @@ module.exports = function (robot) {
 	// 	})
 
 	robot.hear('trello login', function (res) {
-			console.log(t)
+		db;
+		t;
+		console.log(t)
 
 		let userId = msg.getUserId(res);
 		t[userId].getAsync('/1/members/me').then(data => {

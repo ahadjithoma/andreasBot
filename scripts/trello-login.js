@@ -6,6 +6,7 @@ var Promise = require("bluebird");
 var key = process.env.HUBOT_TRELLO_KEY;
 var trello = {};
 
+
 db.bind('trelloTokens');
 db.trelloTokens.find().toArrayAsync()
     .then(function (records) {
