@@ -16,30 +16,39 @@ module.exports = function(robot) {
     var loginCallback = `https://andreasbot.herokuapp.com/hubot/trello-token`;
     var tOAuth = new Trello.OAuth(app_key, oauth_secret, loginCallback, 'Hubot');
 
-    robot.hear(/trello auth/, function(res) {
-        trelloOAuthRedirect(res);
-    })
-
-    robot.on('trello_OAuth', res => {
-        trelloOAuthRedirect(res);
-    })
-
-    function trelloOAuthRedirect(res) {
-        let userId = res.message.user.id || res.userId;
+    robot.respond(/trello auth/, function(res) {
+        let userId = res.message.user.id;
         db.trelloTokens.findOneAsync({ id: userId })
             .then(function(result) {
             })
             .catch(function(err) {
             })
         tOAuth.getRequestToken(function(err, data) {
-            oauth_secrets['username'] = res.message.user.name || res.username;
-            oauth_secrets['id'] = res.message.user.id || res.userId;
+            oauth_secrets['username'] = res.message.user.name;
+            oauth_secrets['id'] = res.message.user.id;
             oauth_secrets[data.oauth_token] = data.oauth_token_secret;
-            robot.messageRoom(userId, data.redirect);
 
-//            res.reply(data.redirect);
+            res.reply(data.redirect);
         })
-    }
+    })
+
+    robot.on('trello_OAuth', res => {
+        let userId = res.userId;
+        db.trelloTokens.findOneAsync({ id: userId })
+            .then(function(result) {
+            })
+            .catch(function(err) {
+            })
+        tOAuth.getRequestToken(function(err, data) {
+            oauth_secrets['username'] = res.username;
+            oauth_secrets['id'] = res.userId;
+            oauth_secrets[data.oauth_token] = data.oauth_token_secret;
+
+			robot.messageRoom(userId, data.redirect);
+        })
+    })
+
+ 
 
     robot.router.get('/hubot/trello-token', function(req, res_r) {
         let args = req.query;
