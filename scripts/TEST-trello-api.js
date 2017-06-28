@@ -18,9 +18,9 @@ module.exports = function (robot) {
 	// in some way CHECK TOKEN VALIDATION
 
 
-	let length = Object.keys(trello).length;
+	let length = Object.keys(t).length;
 	let i = 0;
-	console.log(length+'\n'+trello)
+	console.log(length+'\n'+t)
 	for (i = 0; i < length; i++) {
 		// let token = encryption.decrypt(records[i].token);
 		// let userId = trello[i].userId;
