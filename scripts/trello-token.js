@@ -7,6 +7,9 @@ var request = require('request-promise');
 var encryption = require('./encryption.js');
 db.bind('trelloTokens');
 
+var dbRefresh = require('./mlab-login.js');
+var trelloRefresh = require('./trello-login.js');
+
 var app_key = process.env.HUBOT_TRELLO_KEY;
 var oauth_secret = process.env.HUBOT_TRELLO_OAUTH;
 
@@ -44,7 +47,11 @@ module.exports = function (robot) {
             let token = encryption.encrypt(data['oauth_access_token']); // encrypt token before storing it
             db.trelloTokens.insert({ username: userName, id: userId, token: token }, function (err, result) {
                 if (err) throw err;
-                if (result) robot.logger.info(`User's Token Added to DB!`);
+                if (result) {
+                    robot.logger.info(`User's Token Added to DB!`)
+                    dbRefresh;
+                    trelloRefresh;
+                };
             })
         })
         res_r.redirect('/a');

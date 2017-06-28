@@ -3,6 +3,9 @@
 var trello = require("node-trello");
 var q = require('q');
 var rp = require('request-promise');
+var Trello = require('node-trello');
+var encryption = require('./encryption.js');
+var db = require('./mlab-login.js').db();
 
 // auth
 var key = process.env.HUBOT_TRELLO_KEY;
