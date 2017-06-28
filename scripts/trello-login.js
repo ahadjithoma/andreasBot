@@ -6,12 +6,6 @@ var Promise = require("bluebird");
 var key = process.env.HUBOT_TRELLO_KEY;
 var trello = {};
 
-var cnt = 0;
-console.log('***********CNT NUM: '+cnt)
-cnt = cnt + 1;
-
-module.exports = function(robot){
-
 db.bind('trelloTokens');
 db.trelloTokens.find().toArrayAsync()
     .then(function (records) {
@@ -19,16 +13,13 @@ db.trelloTokens.find().toArrayAsync()
         let i = 0;
         for (i = 0; i < length; i++) {
             let token = encryption.decrypt(records[i].token);
-            var userId = records[i].id;
-            var username = records[i].username;
+            let userId = records[i].id;
             let t = new Trello(key, token);
             trello[userId] = Promise.promisifyAll(t);
 
             // in some way CHECK TOKEN VALIDATION
             trello[userId].get('/1/tokens/'+token, function (err, data) {
-                if (err){
-                    robot.emit('trello_OAuth', {id:userId, username:username});
-                };
+                if (err) throw err;
                 console.log(data);
             })
         }
@@ -37,5 +28,4 @@ db.trelloTokens.find().toArrayAsync()
         console.log(error)
     })
 
-,trello
-}
+module.exports = trello

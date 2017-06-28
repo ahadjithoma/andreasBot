@@ -32,24 +32,6 @@ module.exports = function(robot) {
         })
     })
 
-    robot.on('trello_OAuth', res => {
-        let userId = res.userId;
-        db.trelloTokens.findOneAsync({ id: userId })
-            .then(function(result) {
-            })
-            .catch(function(err) {
-            })
-        tOAuth.getRequestToken(function(err, data) {
-            oauth_secrets['username'] = res.username;
-            oauth_secrets['id'] = res.userId;
-            oauth_secrets[data.oauth_token] = data.oauth_token_secret;
-
-			//robot.messageRoom('andreas_h92', data.redirect);
-        })
-    })
-
- 
-
     robot.router.get('/hubot/trello-token', function(req, res_r) {
         let args = req.query;
         let query = url.parse(req.url, true).query;
