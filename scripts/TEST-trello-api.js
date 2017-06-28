@@ -20,8 +20,7 @@ module.exports = function (robot) {
 
 	let length = t.length;
 	let i = 0;
-	console.log(length)
-	console.log(t)
+	console.log(t[])
 	for (i = 0; i < length; i++) {
 		// let token = encryption.decrypt(records[i].token);
 		// let userId = trello[i].userId;
