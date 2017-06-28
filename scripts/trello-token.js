@@ -25,7 +25,7 @@ module.exports = function(robot) {
     })
 
     function trelloOAuthRedirect(res) {
-        let userId = res.message.user.id;
+        let userId = res.message.user.id || res.userId;
         db.trelloTokens.findOneAsync({ id: userId })
             .then(function(result) {
             })
@@ -33,7 +33,7 @@ module.exports = function(robot) {
             })
         tOAuth.getRequestToken(function(err, data) {
             oauth_secrets['username'] = res.message.user.name || res.username;
-            oauth_secrets['id'] = res.message.user.id || res.id;
+            oauth_secrets['id'] = res.message.user.id || res.userId;
             oauth_secrets[data.oauth_token] = data.oauth_token_secret;
             robot.messageRoom(userId, data.redirect);
 
