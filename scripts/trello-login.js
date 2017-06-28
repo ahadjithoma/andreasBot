@@ -31,7 +31,7 @@ var trello = {};
     var trello = {};
 
     db.bind('trelloTokens');
-    db.trelloTokens.findOne({ id: userID }).toArrayAsync()
+    db.trelloTokens.find({ id: userID }).toArrayAsync()
         .then(function (data) {
             let token = encryption.decrypt(data.token);
             let userId = data.id;
