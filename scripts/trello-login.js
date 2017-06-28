@@ -20,10 +20,9 @@ db.trelloTokens.find().toArrayAsync()
             let t = new Trello(key, token);
             trello[userId] = Promise.promisifyAll(t);
         }
-    }).then(function(){
-module.exports = trello;
-        
+    
     })
     .catch(error => {
         console.log(error)
     })
+module.exports = trello;
