@@ -1,3 +1,5 @@
+module.exports = {
+    function(robor){
 var Trello = require('node-trello');
 var encryption = require('./encryption.js');
 var db = require('./mlab-login.js').db();
@@ -14,18 +16,23 @@ db.trelloTokens.find().toArrayAsync()
         for (i = 0; i < length; i++) {
             let token = encryption.decrypt(records[i].token);
             let userId = records[i].id;
+            let username = records[i].username;
             let t = new Trello(key, token);
             trello[userId] = Promise.promisifyAll(t);
 
             // in some way CHECK TOKEN VALIDATION
-            trello[userId].get('/1/tokens/'+token, function (err, data) {
-                if (err) throw err;
-                console.log(data);
-            })
+            trello[userId].getAsync('/1/tokens/' + token)
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(err => {
+                    robot.emit('trello_OAuth', {id: userId, username:username});
+                })
         }
     })
     .catch(error => {
         console.log(error)
     })
-
-module.exports = trello
+    },
+trello
+}

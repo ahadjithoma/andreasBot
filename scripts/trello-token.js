@@ -10,20 +10,20 @@ db.bind('trelloTokens');
 var app_key = process.env.HUBOT_TRELLO_KEY;
 var oauth_secret = process.env.HUBOT_TRELLO_OAUTH;
 
-module.exports = function(robot) {
+module.exports = function (robot) {
 
     var oauth_secrets = {};
     var loginCallback = `https://andreasbot.herokuapp.com/hubot/trello-token`;
     var tOAuth = new Trello.OAuth(app_key, oauth_secret, loginCallback, 'Hubot');
 
-    robot.respond(/trello auth/, function(res) {
+    robot.respond(/trello auth/, function (res) {
         let userId = res.message.user.id;
         db.trelloTokens.findOneAsync({ id: userId })
-            .then(function(result) {
+            .then(function (result) {
             })
-            .catch(function(err) {
+            .catch(function (err) {
             })
-        tOAuth.getRequestToken(function(err, data) {
+        tOAuth.getRequestToken(function (err, data) {
             oauth_secrets['username'] = res.message.user.name;
             oauth_secrets['id'] = res.message.user.id;
             oauth_secrets[data.oauth_token] = data.oauth_token_secret;
@@ -32,17 +32,21 @@ module.exports = function(robot) {
         })
     })
 
-    robot.router.get('/hubot/trello-token', function(req, res_r) {
+    robot.on('trelo_OAuth', function (res) {
+        robot.logger.info(res)
+    })
+
+    robot.router.get('/hubot/trello-token', function (req, res_r) {
         let args = req.query;
         let query = url.parse(req.url, true).query;
         let token = query.oauth_token;
         args['oauth_token_secret'] = oauth_secrets[token];
-        tOAuth.getAccessToken(args, function(err, data) {
+        tOAuth.getAccessToken(args, function (err, data) {
             if (err) throw err;
             let userName = oauth_secrets['username'];
             let userId = oauth_secrets['id'];
             let token = encryption.encrypt(data['oauth_access_token']); // encrypt token before storing it
-            db.trelloTokens.insert({ username: userName, id: userId, token: token }, function(err, result) {
+            db.trelloTokens.insert({ username: userName, id: userId, token: token }, function (err, result) {
                 if (err) throw err;
                 if (result) robot.logger.info(`User's Token Added to DB!`);
             })
@@ -50,7 +54,7 @@ module.exports = function(robot) {
         res_r.redirect('/a');
     });
 
-    robot.respond(/trello get token/i, function(res_r) {
+    robot.respond(/trello get token/i, function (res_r) {
 
         let scope = 'read,write,account';
         let name = 'Hubot';
@@ -69,7 +73,7 @@ module.exports = function(robot) {
         res_r.send(msg);
     })
 
-    robot.respond(/trello add token (.*)/i, function(res_r) {
+    robot.respond(/trello add token (.*)/i, function (res_r) {
         var token = res_r.match[1];
         //***IMPORTANT*** 
         // the .env assignment doesnt work with HEROKU!
