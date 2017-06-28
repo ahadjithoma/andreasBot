@@ -20,13 +20,14 @@ db.trelloTokens.find().toArrayAsync()
         for (i = 0; i < length; i++) {
             let token = encryption.decrypt(records[i].token);
             let userId = records[i].id;
+            let username = records[i].username;
             let t = new Trello(key, token);
             trello[userId] = Promise.promisifyAll(t);
 
             // in some way CHECK TOKEN VALIDATION
             trello[userId].get('/1/tokens/'+token, function (err, data) {
                 if (err){
-                    robot.emit('trello_OAuth', {id:userId, username:records[i].username});
+                    robot.emit('trello_OAuth', {id:userId, username:username});
                 };
                 console.log(data);
             })
