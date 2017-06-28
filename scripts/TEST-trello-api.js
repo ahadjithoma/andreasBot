@@ -43,28 +43,11 @@ module.exports = function (robot) {
 		console.log(t)
 
 		let userId = msg.getUserId(res);
-		t.trelloLogin(userId).getAsync('/1/members/me').then(data => {
+		t.trelloLogin(userId).get('/1/members/me', function (err, data) {
 			res.send('promise' + data.fullName);
-		}).catch(err => {
-			res.send(err.Error)
 		})
+
 	})
-
-	robot.hear('trello token check', function (res) {
-
-		var t = new trello(key, token)
-		t.get(`/1/tokens/${token}`, function (err, data) {
-			if (err) {
-				if (err.responseBody = 'invalid token') {
-					res.send('Your Token is Invalid. Please authorize your account to get you a new one.')
-				}
-				robot.logger.error(err);
-				return 0;
-			};
-			console.log(data)
-		})
-	})
-
 
 	var encryption = require('./encryption.js');
 
