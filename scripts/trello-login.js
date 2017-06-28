@@ -1,4 +1,4 @@
-moduel.exports = function(robot){
+model.exports = function(robot){
 var Trello = require('node-trello');
 var encryption = require('./encryption.js');
 var db = require('./mlab-login.js').db();
