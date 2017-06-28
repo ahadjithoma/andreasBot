@@ -36,7 +36,7 @@ module.exports = function trelloLogin(userID) {
     var trello = {};
 
     // db.bind('trelloTokens');
-    db.collection('trelloTokens').findOne({ id: userID }).toArray(function (err, data) {
+    db.collection('trelloTokens').find({ id: userID }).toArray(function (err, data) {
         if (err) throw err;
         let token = encryption.decrypt(data.token);
         let userId = data.id;
