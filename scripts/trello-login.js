@@ -24,7 +24,9 @@ db.trelloTokens.find().toArrayAsync()
                     console.log(data);
                 })
                 .catch(err => {
-                    // DO SOMETHING TO RE-AUTH
+                    module.exports = function(robot){
+                        robot.logger.warning(err)
+                    }
                 })
         }
     })
