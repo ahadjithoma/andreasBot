@@ -1,17 +1,17 @@
 // module.exports = function trelloLogin(userID) {
 
-//     var Trello = require('node-trello');
-//     var encryption = require('./encryption.js');
-//     var Promise = require("bluebird");
-//     var mongo = require('mongoskin');
-//     // mLab connection URI
-//     var uri = process.env.MONGODB_URI;
-//     Promise.promisifyAll(mongo);
-//     // connect to mLab database
-//     var db = mongo.MongoClient.connect(uri);
+    var Trello = require('node-trello');
+    var encryption = require('./encryption.js');
+    var Promise = require("bluebird");
+    var mongo = require('mongoskin');
+    // mLab connection URI
+    var uri = process.env.MONGODB_URI;
+    Promise.promisifyAll(mongo);
+    // connect to mLab database
+    var db = mongo.MongoClient.connect(uri);
 
-//     var key = process.env.HUBOT_TRELLO_KEY;
-//     var trello = {};
+    var key = process.env.HUBOT_TRELLO_KEY;
+    var trello = {};
 
 
 //     // db.bind('trelloTokens');
