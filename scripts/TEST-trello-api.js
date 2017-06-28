@@ -20,7 +20,6 @@ module.exports = function (robot) {
 
 	let length = t.length;
 	let i = 0;
-	console.log(t)
 	for (i = 0; i < length; i++) {
 		// let token = encryption.decrypt(records[i].token);
 		// let userId = trello[i].userId;
@@ -36,6 +35,8 @@ module.exports = function (robot) {
 	// 	})
 
 	robot.hear('trello login', function (res) {
+			console.log(t)
+
 		let userId = msg.getUserId(res);
 		t[userId].getAsync('/1/members/me').then(data => {
 			res.send('promise' + data.fullName);
