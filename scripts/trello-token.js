@@ -32,10 +32,6 @@ module.exports = function (robot) {
         })
     })
 
-    robot.on('trelo_OAuth', function (res) {
-        robot.logger.info(res)
-    })
-
     robot.router.get('/hubot/trello-token', function (req, res_r) {
         let args = req.query;
         let query = url.parse(req.url, true).query;

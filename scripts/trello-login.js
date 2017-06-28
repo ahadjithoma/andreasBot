@@ -1,5 +1,4 @@
-module.exports = {
-    function(robor){
+module.exports = function(robot){
 var Trello = require('node-trello');
 var encryption = require('./encryption.js');
 var db = require('./mlab-login.js').db();
@@ -26,15 +25,13 @@ db.trelloTokens.find().toArrayAsync()
                     console.log(data);
                 })
                 .catch(err => {
-                    robot.emit('trello_OAuth', {id: userId, username:username});
+                    // DO SOMETHING TO RE-AUTH
                 })
         }
     })
     .catch(error => {
         console.log(error)
     })
-},
-trello: function(){
-    return trello;
-}
+
+module.exports = trello;
 }
