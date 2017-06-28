@@ -41,6 +41,7 @@ module.exports = {trelloLogin: function (userID) {
         let userId = data.id;
         let username = data.username;
         let t = new Trello(key, token);
+        trello = t;
         // trello = Promise.promisifyAll(t);
     })
 
@@ -56,6 +57,6 @@ module.exports = {trelloLogin: function (userID) {
     //     .catch(error => {
     //         console.log(error)
     //     })
-    return t;
+    return trello;
 }
 }
