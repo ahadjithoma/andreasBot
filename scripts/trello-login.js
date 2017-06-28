@@ -1,4 +1,4 @@
-// module.exports = 
+module.exports = 
 function trelloLogin(userID) {
 
     var Trello = require('node-trello');
