@@ -18,7 +18,7 @@ db.trelloTokens.find().toArrayAsync()
             let username = records[i].username;
             let t = new Trello(key, token);
             trello[userId] = Promise.promisifyAll(t);
-module.exports.trello = trello;
+module.exports.trello() = trello;
 
             // in some way CHECK TOKEN VALIDATION
             trello[userId].getAsync('/1/tokens/' + token)
