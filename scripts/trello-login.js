@@ -12,6 +12,7 @@ db.trelloTokens.find().toArrayAsync()
     .then(function (records) {
         let length = Object.keys(records).length;
         let i = 0;
+        console.log(`lenght = ${length}`);
         for (i = 0; i < length; i++) {
             let token = encryption.decrypt(records[i].token);
             let userId = records[i].id;
