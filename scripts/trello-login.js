@@ -33,5 +33,5 @@ db.trelloTokens.find().toArrayAsync()
         console.log(error)
     })
 
-module.exports = trello;
+module.exports.trello = trello;
 }
