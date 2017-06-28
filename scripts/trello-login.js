@@ -33,6 +33,8 @@ db.trelloTokens.find().toArrayAsync()
     .catch(error => {
         console.log(error)
     })
-    },
-trello
+},
+trello: function(){
+    return trello;
+}
 }
