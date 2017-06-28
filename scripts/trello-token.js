@@ -16,7 +16,7 @@ module.exports = function(robot) {
     var loginCallback = `https://andreasbot.herokuapp.com/hubot/trello-token`;
     var tOAuth = new Trello.OAuth(app_key, oauth_secret, loginCallback, 'Hubot');
 
-    robot.respond(/trello auth/, function(res) {
+    robot.hear(/trello auth/, function(res) {
         trelloOAuthRedirect(res);
     })
 
@@ -32,8 +32,8 @@ module.exports = function(robot) {
             .catch(function(err) {
             })
         tOAuth.getRequestToken(function(err, data) {
-            oauth_secrets['username'] = res.message.user.name;
-            oauth_secrets['id'] = res.message.user.id;
+            oauth_secrets['username'] = res.message.user.name || res.username;
+            oauth_secrets['id'] = res.message.user.id || res.id;
             oauth_secrets[data.oauth_token] = data.oauth_token_secret;
             robot.messageRoom(userId, data.redirect);
 

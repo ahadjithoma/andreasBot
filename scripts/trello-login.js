@@ -24,7 +24,7 @@ db.trelloTokens.find().toArrayAsync()
             // in some way CHECK TOKEN VALIDATION
             trello[userId].get('/1/tokens/'+token, function (err, data) {
                 if (err){
-                    robot.emit('trello_OAuth', userId);
+                    robot.emit('trello_OAuth', {id:userId, username:records[i].username});
                 };
                 console.log(data);
             })
