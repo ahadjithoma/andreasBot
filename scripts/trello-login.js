@@ -10,6 +10,8 @@ var cnt = 0;
 console.log('***********CNT NUM: '+cnt)
 cnt = cnt + 1;
 
+module.exports = function(robot){
+
 db.bind('trelloTokens');
 db.trelloTokens.find().toArrayAsync()
     .then(function (records) {
@@ -33,5 +35,5 @@ db.trelloTokens.find().toArrayAsync()
     .catch(error => {
         console.log(error)
     })
-
+}
 module.exports = trello
