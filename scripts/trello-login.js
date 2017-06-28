@@ -10,7 +10,6 @@ module.exports = {trelloLogin: function (userID) {
     var db = mongo.MongoClient.connect(uri);
 
     var key = process.env.HUBOT_TRELLO_KEY;
-    var trello = {};
 
 
     // db.bind('trelloTokens');
@@ -32,7 +31,7 @@ module.exports = {trelloLogin: function (userID) {
     //         console.log(error)
     //     })
 
-    var trello = {};
+    var trello = null;
 
     // db.bind('trelloTokens');
     db.collection('trelloTokens').find({ id: userID }).toArray(function (err, data) {
@@ -40,8 +39,7 @@ module.exports = {trelloLogin: function (userID) {
         let token = encryption.decrypt(data.token);
         let userId = data.id;
         let username = data.username;
-        var t = new Trello(key, token);
-        trello = t;
+        trello = new Trello(key, token);
         // trello = Promise.promisifyAll(t);
     })
 
@@ -57,6 +55,6 @@ module.exports = {trelloLogin: function (userID) {
     //     .catch(error => {
     //         console.log(error)
     //     })
-    return t;
+    return trello;
 }
 }
