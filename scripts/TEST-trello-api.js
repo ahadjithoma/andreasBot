@@ -50,7 +50,9 @@ module.exports = function (robot) {
 	robot.hear('trello2login', function (res) {
 
 		var t = require('./trello-login.js').trello();
-		console.log(t);
+		t
+		.then(data => console.log(data))
+		.catch(err => console.log(err))
 	})
 
 	robot.hear('trello login', function (res) {
