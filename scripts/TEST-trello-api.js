@@ -48,10 +48,10 @@ module.exports = function (robot) {
 		let t = new Trello(key, token);
 		t.get('/1/members/me', function (err, data) {
 			if (err) {
-				res.send(err.Error);
+				res.send('error');
 				return 0;
 			}
-			res.send(data.fullName);
+			res.send('not');
 		})
 
 	})
