@@ -13,7 +13,7 @@ var token = process.env.HUBOT_TRELLO_TOKEN;
 // var t = require('./trello-login.js');
 var msg = require('./messages-info.js');
 var encryption = require('./encryption.js');
-var db = require('./mlab-login.js').db();
+var db = require('./mlab-login.js')();
 
 
 module.exports = function (robot) {
