@@ -47,9 +47,9 @@ module.exports = function (robot) {
 
 	// in some way CHECK TOKEN VALIDATION
 
-	robot.hear('trello login 2', function (res) {
+	robot.hear('trello2login', function (res) {
 
-		var t = require('./trello-login.js');
+		var t = require('./trello-login.js').trello();
 		console.log(t);
 	})
 

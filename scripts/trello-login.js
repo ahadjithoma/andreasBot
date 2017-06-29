@@ -1,3 +1,5 @@
+
+module.exports = {trello: function(){  
 var Trello = require('node-trello');
 var encryption = require('./encryption.js');
 var Promise = require("bluebird");
@@ -35,7 +37,7 @@ db.trelloTokens.find().toArrayAsync()
             trello[userId] = Promise.promisifyAll(t);
 
             // in some way CHECK TOKEN VALIDATION
-            trello[userId].getAsync('/1/tokens/' + token)
+            trello[userId].getAsync('/1/tokens/' + token)   
                 .then(data => {
                     // console.log(data);
                 })
@@ -47,5 +49,5 @@ db.trelloTokens.find().toArrayAsync()
     .catch(error => {
         console.log(error)
     })
-
-module.exports = trello;    
+  return trello;
+}}
