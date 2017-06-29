@@ -27,7 +27,11 @@ module.exports = function (robot) {
 		db.bind('trelloTokens');
 		db.trelloTokens.findOneAsync({ id: userId }).then(function (data) {
 			// t['token'] = data.token;
-			deferred.resolve(new Trello(key, token))
+			var t = 1;
+			t = 5;
+			t = 9;
+			deferred.resolve(t);
+			// deferred.resolve(new Trello(key, token))
 		}).catch(function (err) {
 			deferred.reject(err);
 		})
