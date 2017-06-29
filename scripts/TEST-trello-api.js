@@ -23,16 +23,16 @@ module.exports = function (robot) {
 	var t = {};
 
 	function trelloLogin(userId) {
-		// var deferred = q.defer();
+		var deferred = q.defer();
 		db.bind('trelloTokens');
 		db.trelloTokens.findOneAsync({ id: userId }).then(function (data) {
-			t['token'] = data.token;
-			// deferred.resolve(new Trello(key, token))
+			// t['token'] = data.token;
+			deferred.resolve(new Trello(key, token))
 		}).catch(function (err) {
-			// deferred.reject(err);
+			deferred.reject(err);
 		})
-		// return deferred.promise; // don't forget to send the promise!!
-		return new Trello(key, t['token']);
+		return deferred.promise; // don't forget to send the promise!!
+		// return new Trello(key, t['token']);
 	}
 	
 	// 	getBoard: function(id, pars, callback){
@@ -70,12 +70,12 @@ module.exports = function (robot) {
 
 	robot.hear('trello login', function (res) {
 		let userId = msg.getUserId(res);
-		robot.logger.info(trelloLogin(userId));
-		// trelloLogin(userId).then(data => {
-		// 	robot.logger.info(data);
-		// }).catch(err => {
-		// 	robot.logger.error(err);
-		// })
+		// robot.logger.info(trelloLogin(userId));
+		trelloLogin(userId).then(data => {
+			robot.logger.info(data);
+		}).catch(err => {
+			robot.logger.error(err);
+		})
 		// trelloLogin(userId).get('/1/members/me', function (err, data) {
 		// 	if (err) {
 		// 		res.send('error');
