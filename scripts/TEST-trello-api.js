@@ -42,10 +42,10 @@ module.exports = function (robot) {
 	// 	})
 
 	robot.hear('trello login', function (res) {
-		let userId = msg.getUserId(res);
-		var trello = trelloLogin(userId);
-		console.log(trello);
-		trello.get('/1/members/me', function (err, data) {
+		// let userId = msg.getUserId(res);
+		// var trello = trelloLogin(userId);
+		// console.log(trello);
+		Trello(key, token).get('/1/members/me', function (err, data) {
 			res.send(data.fullName);
 		})
 
