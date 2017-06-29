@@ -24,10 +24,10 @@ module.exports = function (robot) {
 		db.bind('trelloTokens');
 		db.trelloTokens.find({id:userId}).toArray(function(err, data){
 			console.log(data);
-			t[0] = data.token;
-			console.log(t);
+			t['token'] = data.token;
+			console.log(t['token']);
 		})
-		console.log(t[0]);
+		console.log(t['token']);
 		return new Trello(key, token);
 	}
 
