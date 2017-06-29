@@ -17,4 +17,4 @@ Promise.promisifyAll(mongo);
 // connect to mLab database
 var db = mongo.MongoClient.connect(uri);
 
-module.exports = db;// db = function(){return db;}
+module.exports.db = function(){return db;}
