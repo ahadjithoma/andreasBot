@@ -1,3 +1,5 @@
+
+function db(){}
 var mongo = require('mongoskin');
 var Promise = require("bluebird");
 
