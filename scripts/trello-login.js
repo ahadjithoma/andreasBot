@@ -21,7 +21,7 @@ db.trelloTokens.find().toArrayAsync()
             // in some way CHECK TOKEN VALIDATION
             trello[userId].getAsync('/1/tokens/' + token)
                 .then(data => {
-                    console.log(data);
+                    // console.log(data);
                 })
                 .catch(err => {
                     // DO SOMETHING TO RE-AUTH
