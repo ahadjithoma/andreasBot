@@ -17,19 +17,21 @@ var db = require('./mlab-login.js').db();
 
 
 module.exports = function (robot) {
-		var t = {};
+	var t = {};
 
 	function trelloLogin(userId) {
 		// db get token based on userId
 		db.bind('trelloTokens');
-		db.trelloTokens.find({id:userId}).toArray(function(err, data){
+		db.trelloTokens.findOneAsync({ id: userId }).then(function (result) {
 			console.log(data);
 			t['token'] = data.token;
 			console.log(t['token']);
-					return new Trello(key, token);
-
+		}).catch(function (err) {
 		})
+
 		console.log(t['token']);
+		return new Trello(key, token);
+
 	}
 
 	// in some way CHECK TOKEN VALIDATION
@@ -38,9 +40,9 @@ module.exports = function (robot) {
 	// let length = t.length;
 	// let i = 0;
 	// for (i = 0; i < length; i++) {
-		// let token = encryption.decrypt(records[i].token);
-		// let userId = trello[i].userId;
-		// let username = records[i].username;
+	// let token = encryption.decrypt(records[i].token);
+	// let userId = trello[i].userId;
+	// let username = records[i].username;
 	// }
 
 	// t[userId].getAsync('/1/tokens/' + token)
