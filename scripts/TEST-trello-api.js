@@ -20,7 +20,7 @@ module.exports = function (robot) {
 
 	function trelloLogin(userId) {
 		// db get token based on userId
-		var t = null;
+		var t = {};
 		db.bind('trelloTokens');
 		db.trelloTokens.find({id:userId}).toArray(function(err, data){
 			console.log(data);
