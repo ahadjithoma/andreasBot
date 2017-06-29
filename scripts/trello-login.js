@@ -1,5 +1,5 @@
 
-module.exports = function trello(userId) {
+module.exports = function(userId) {
     var Trello = require('node-trello');
     var encryption = require('./encryption.js');
     var Promise = require("bluebird");

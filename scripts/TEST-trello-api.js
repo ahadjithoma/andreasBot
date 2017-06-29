@@ -49,7 +49,7 @@ module.exports = function (robot) {
 
 	robot.hear('trello2login', function (res) {
 		var userId = msg.getUserId(res);
-		var t = require('./trello-login.js').trello(userId);
+		var t = require('./trello-login.js')(userId);
 		t
 		.then(data => console.log(data))
 		.catch(err => console.log(err))
