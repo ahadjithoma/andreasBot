@@ -8,7 +8,7 @@ module.exports = {
         var trello = {};
         var mongo = require('mongoskin');
         var Promise = require("bluebird");
-        var Q = require('q')
+        var q = require('q')
         var deferred = q.defer();
 
         // mLab connection URI
