@@ -18,9 +18,9 @@ var db = require('./mlab-login.js').db();
 
 module.exports = function (robot) {
 
-	// function trelloLogin(userId) {
-	// 	return Trello(key, token);
-	// }
+	function trelloLogin(userId) {
+		return new Trello(key, token);
+	}
 
 	// in some way CHECK TOKEN VALIDATION
 
@@ -42,24 +42,18 @@ module.exports = function (robot) {
 	// 	})
 
 	robot.hear('trello login', function (res) {
-		// let userId = msg.getUserId(res);
+		let userId = msg.getUserId(res);
 		// var trello = trelloLogin(userId);
 		// console.log(trello);
 		let t = new Trello(key, token);
-		new Trello(key, token).get('/1/members/me', function (err, data) {
+		trelloLogin(userId).get('/1/members/me', function (err, data) {
 			if (err) {
 				res.send('error');
 				return 0;
 			}
 			res.send('not');
 		})
-		Trello(key, token).get('/1/members/me', function (err, data) {
-			if (err) {
-				res.send('error2');
-				return 0;
-			}
-			res.send('not2');
-		})
+
 
 	})
 
