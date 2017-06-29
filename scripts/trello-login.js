@@ -27,7 +27,7 @@ module.exports = function (userId) {
 
 
     // var db = require('./mlab-login').db();
-    var collection = db.collectionAsync('trelloTokens');
+    var collection = db.collection('trelloTokens');
     collection.find({ id: userId }).toArrayAsync()
         .then(function (dbData) {
             console.log(dbData)
