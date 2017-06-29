@@ -23,9 +23,10 @@ module.exports = function (robot) {
 		db.bind('trelloTokens');
 		db.trelloTokens.findOneAsync({ id: userId }).then(function (data) {
 			console.log(data);
-			t['token'] = data.token;
 			console.log(t['token']);
 			var token = process.env.HUBOT_TRELLO_TOKEN;
+						t['token'] = token;
+
 
 		}).catch(function (err) {
 		})
