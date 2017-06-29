@@ -18,7 +18,7 @@ var db = require('./mlab-login.js').db();
 
 module.exports = function (robot) {
 
-	function trelloLogin(userId){
+	function trelloLogin(userId) {
 		return Trello(key, token);
 	}
 
@@ -47,6 +47,10 @@ module.exports = function (robot) {
 		// console.log(trello);
 		let t = new Trello(key, token);
 		t.get('/1/members/me', function (err, data) {
+			if (err) {
+				res.send(err.Error);
+				return 0;
+			}
 			res.send(data.fullName);
 		})
 
