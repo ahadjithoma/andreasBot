@@ -26,9 +26,10 @@ module.exports = function (robot) {
 			console.log(data);
 			t['token'] = data.token;
 			console.log(t['token']);
+					return new Trello(key, token);
+
 		})
 		console.log(t['token']);
-		return new Trello(key, token);
 	}
 
 	// in some way CHECK TOKEN VALIDATION
