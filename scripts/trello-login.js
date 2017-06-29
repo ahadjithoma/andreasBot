@@ -1,15 +1,12 @@
-module.exports = {trelloLogin: function (userID) {
+module.exports = function trelloLogin(userID) {
 
     var Trello = require('node-trello');
     var encryption = require('./encryption.js');
+    var db = require('./mlab-login.js').db();
     var Promise = require("bluebird");
-    var mongo = require('mongoskin');
-    // mLab connection URI
-    var uri = process.env.MONGODB_URI;
-    // connect to mLab database
-    var db = mongo.MongoClient.connect(uri);
 
     var key = process.env.HUBOT_TRELLO_KEY;
+    var trello = {};
 
 
     // db.bind('trelloTokens');
@@ -31,17 +28,17 @@ module.exports = {trelloLogin: function (userID) {
     //         console.log(error)
     //     })
 
-
-    // db.bind('trelloTokens');
     var trello = {};
-    db.collection('trelloTokens').find({ id: userID }).toArray(function (err, data) {
-        if (err) throw err;
-        let token = encryption.decrypt(data.token);
-        let userId = data.id;
-        let username = data.username;
-        trello = new Trello(key, token);
-        // trello = Promise.promisifyAll(t);
-    })
+
+    db.bind('trelloTokens');
+    db.trelloTokens.findOne({ id: userID }).toArray(function(err, data){
+        
+            let token = encryption.decrypt(data.token);
+            let userId = data.id;
+            let username = data.username;
+            let t = new Trello(key, token);
+            trello = Promise.promisifyAll(t);
+      })
 
     // db.bind('trelloTokens');
     // db.trelloTokens.find({ id: userID }).toArrayAsync()
@@ -55,6 +52,5 @@ module.exports = {trelloLogin: function (userID) {
     //     .catch(error => {
     //         console.log(error)
     //     })
-            return trello;
-}
+    return trello;
 }
