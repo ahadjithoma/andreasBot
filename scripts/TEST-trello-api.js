@@ -17,10 +17,10 @@ var db = require('./mlab-login.js').db();
 
 
 module.exports = function (robot) {
+		var t = {};
 
 	function trelloLogin(userId) {
 		// db get token based on userId
-		var t = {};
 		db.bind('trelloTokens');
 		db.trelloTokens.find({id:userId}).toArray(function(err, data){
 			console.log(data);
