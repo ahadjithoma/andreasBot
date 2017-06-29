@@ -5,13 +5,12 @@ var q = require('q');
 var rp = require('request-promise');
 var Trello = require('node-trello');
 var encryption = require('./encryption.js');
-var db = require('./mlab-login.js').db();
 
 // auth
 var key = process.env.HUBOT_TRELLO_KEY;
 var token = process.env.HUBOT_TRELLO_TOKEN;
 
-var t = require('./trello-login.js');
+// var t = require('./trello-login.js');
 var msg = require('./messages-info.js');
 var encryption = require('./encryption.js');
 var db = require('./mlab-login.js').db();
@@ -29,10 +28,9 @@ module.exports = function (robot) {
 		}).catch(function (err) {
 			deferred.reject(err);
 		})
-		return deferred.promise; // don't forget to send the promise!!
-		// return new Trello(key, t['token']);
+		return deferred.promise;
 	}
-	
+
 	// 	getBoard: function(id, pars, callback){
 	//         var deferred = q.defer();
 	//         t.get("/1/board/"+id, pars, function(err, data){
@@ -49,22 +47,11 @@ module.exports = function (robot) {
 
 	// in some way CHECK TOKEN VALIDATION
 
+	robot.hear('trello login 2', function (res) {
 
-	// let length = t.length;
-	// let i = 0;
-	// for (i = 0; i < length; i++) {
-	// let token = encryption.decrypt(records[i].token);
-	// let userId = trello[i].userId;
-	// let username = records[i].username;
-	// }
-
-	// t[userId].getAsync('/1/tokens/' + token)
-	// 	.then(data => {
-	// 		console.log(data);
-	// 	})
-	// 	.catch(err => {
-	// 		robot.messageRoom('andreas_h92', 'not auth dude');
-	// 	})
+		var t = require('./trello-login.js');
+		console.log(t);
+	})
 
 	robot.hear('trello login', function (res) {
 		let userId = msg.getUserId(res);
