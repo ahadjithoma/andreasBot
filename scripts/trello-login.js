@@ -27,8 +27,8 @@ module.exports = function (userId) {
 
 
     // var db = require('./mlab-login').db();
-
-    db.collection('trelloTokens').find({ id: userId }).toArrayAsync()
+    var collection = db.collectionAsync('trelloTokens');
+    collection.find({ id: userId }).toArrayAsync()
         .then(function (dbData) {
             console.log(dbData)
             var decryptedToken = dbData[0].token;
