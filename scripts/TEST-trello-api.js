@@ -9,7 +9,6 @@ var db = require('./mlab-login.js').db();
 
 // auth
 var key = process.env.HUBOT_TRELLO_KEY;
-var token = process.env.HUBOT_TRELLO_TOKEN;
 var t = require('./trello-login.js');
 var msg = require('./messages-info.js');
 var encryption = require('./encryption.js');
@@ -26,6 +25,8 @@ module.exports = function (robot) {
 			console.log(data);
 			t['token'] = data.token;
 			console.log(t['token']);
+			var token = process.env.HUBOT_TRELLO_TOKEN;
+
 		}).catch(function (err) {
 		})
 		console.log('1');
@@ -71,7 +72,6 @@ module.exports = function (robot) {
 		let userId = msg.getUserId(res);
 		// var trello = trelloLogin(userId);
 		// console.log(trello);
-		let t = new Trello(key, token);
 		trelloLogin(userId).get('/1/members/me', function (err, data) {
 			if (err) {
 				res.send('error');
