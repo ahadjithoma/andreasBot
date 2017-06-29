@@ -16,16 +16,17 @@ var db = require('./mlab-login.js').db();
 
 
 module.exports = function (robot) {
-	var t = {};
 
 	function trelloLogin(userId) {
+			var t = {};
+
 		// db get token based on userId
 		db.bind('trelloTokens');
 		db.trelloTokens.findOneAsync({ id: userId }).then(function (data) {
 			console.log(data);
 			console.log(t['token']);
 			var token = process.env.HUBOT_TRELLO_TOKEN;
-						t['token'] = token;
+t['token'] = token;
 
 
 		}).catch(function (err) {
