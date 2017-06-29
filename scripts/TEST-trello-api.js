@@ -9,7 +9,7 @@ var db = require('./mlab-login.js').db();
 
 // auth
 var key = process.env.HUBOT_TRELLO_KEY;
-			var token = process.env.HUBOT_TRELLO_TOKEN;
+var token = process.env.HUBOT_TRELLO_TOKEN;
 
 var t = require('./trello-login.js');
 var msg = require('./messages-info.js');
@@ -19,35 +19,33 @@ var db = require('./mlab-login.js').db();
 
 module.exports = function (robot) {
 
+
+	var t = {};
+
 	function trelloLogin(userId) {
-		var deferred = q.defer();
-
-		var t = {};
-
-		// db get token based on userId
+		// var deferred = q.defer();
 		db.bind('trelloTokens');
 		db.trelloTokens.findOneAsync({ id: userId }).then(function (data) {
-
-			deferred.resolve(new Trello(key, token))
+			t['token'] = data.token;
+			// deferred.resolve(new Trello(key, token))
 		}).catch(function (err) {
-			deferred.reject(err);
+			// deferred.reject(err);
 		})
-
-		return deferred.promise; // don't forget to send the promise!!
-
-		// return new Trello(key, t['token']);
+		// return deferred.promise; // don't forget to send the promise!!
+		return new Trello(key, t['token']);
 	}
-// 	getBoard: function(id, pars, callback){
-//         var deferred = q.defer();
-//         t.get("/1/board/"+id, pars, function(err, data){
-// 			if (err) {
-//       		    deferred.reject(err);
-// 	        };
-//             deferred.resolve(data);
-// 	    });
-//         deferred.promise.nodeify(callback);
-// 	    return deferred.promise;
-// 	}
+	
+	// 	getBoard: function(id, pars, callback){
+	//         var deferred = q.defer();
+	//         t.get("/1/board/"+id, pars, function(err, data){
+	// 			if (err) {
+	//       		    deferred.reject(err);
+	// 	        };
+	//             deferred.resolve(data);
+	// 	    });
+	//         deferred.promise.nodeify(callback);
+	// 	    return deferred.promise;
+	// 	}
 
 
 
@@ -72,11 +70,12 @@ module.exports = function (robot) {
 
 	robot.hear('trello login', function (res) {
 		let userId = msg.getUserId(res);
-		trelloLogin(userId).then(data =>{
-			robot.logger.info(data);
-		}).catch(err => {
-			robot.logger.error(err);
-		})
+		robot.logger.info(trelloLogin(userId));
+		// trelloLogin(userId).then(data => {
+		// 	robot.logger.info(data);
+		// }).catch(err => {
+		// 	robot.logger.error(err);
+		// })
 		// trelloLogin(userId).get('/1/members/me', function (err, data) {
 		// 	if (err) {
 		// 		res.send('error');
