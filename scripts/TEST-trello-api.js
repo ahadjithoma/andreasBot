@@ -18,20 +18,20 @@ var db = require('./mlab-login.js').db();
 
 module.exports = function (robot) {
 
-	function trelloLogin(userId) {
-		return Trello(key, token);
-	}
+	// function trelloLogin(userId) {
+	// 	return Trello(key, token);
+	// }
 
 	// in some way CHECK TOKEN VALIDATION
 
 
-	let length = t.length;
-	let i = 0;
-	for (i = 0; i < length; i++) {
+	// let length = t.length;
+	// let i = 0;
+	// for (i = 0; i < length; i++) {
 		// let token = encryption.decrypt(records[i].token);
 		// let userId = trello[i].userId;
 		// let username = records[i].username;
-	}
+	// }
 
 	// t[userId].getAsync('/1/tokens/' + token)
 	// 	.then(data => {
