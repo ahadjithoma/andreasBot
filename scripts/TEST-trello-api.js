@@ -48,8 +48,8 @@ module.exports = function (robot) {
 	// in some way CHECK TOKEN VALIDATION
 
 	robot.hear('trello2login', function (res) {
-
-		var t = require('./trello-login.js').trello();
+		var userId = msg.getUserId(res);
+		var t = require('./trello-login.js').trello(userId);
 		t
 		.then(data => console.log(data))
 		.catch(err => console.log(err))

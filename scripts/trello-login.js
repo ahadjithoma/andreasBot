@@ -5,7 +5,6 @@ module.exports = {
         var encryption = require('./encryption.js');
         var Promise = require("bluebird");
         var key = process.env.HUBOT_TRELLO_KEY;
-        var trello = {};
         var mongo = require('mongoskin');
         var Promise = require("bluebird");
         var q = require('q')
@@ -28,33 +27,21 @@ module.exports = {
         var db = mongo.MongoClient.connect(uri);
 
         db.bind('trelloTokens');
-        db.trelloTokens.find().toArrayAsync()
-            .then(function (records) {
-                let length = Object.keys(records).length;
-                let i = 0;
-                for (i = 0; i < length; i++) {
-                    let token = encryption.decrypt(records[i].token);
-                    let userId = records[i].id;
-                    let username = records[i].username;
-                    let t = new Trello(key, token);
-                    trello[userId] = Promise.promisifyAll(t);
-
-                    // in some way CHECK TOKEN VALIDATION
-                    trello[userId].getAsync('/1/tokens/' + token)
-                        .then(data => {
-                            // console.log(data);
-                        })
-                        .catch(err => {
-                            // DO SOMETHING TO RE-AUTH
-                        })
-                } deferred.resolve(trello);
+        db.trelloTokens.find({ is: userId }).toArrayAsync()
+            .then(function (dbData) {
+                let token = encryption.decrypt(dbData.token);
+                let userId = dbData.id;
+                let username = dbData.username;
+                let t = new Trello(key, token);
+                var trello = Promise.promisifyAll(t);
+                deferred.resolve(trello);
+                // in some way CHECK TOKEN VALIDATION
+            })
+            .catch(dbError => {
+                console.log(dbError)
+                deferred.reject(dbError);
 
             })
-            .catch(error => {
-                console.log(error)
-                deferred.reject(err);
-
-            })
-		return deferred.promise;
+        return deferred.promise;
     }
 }
