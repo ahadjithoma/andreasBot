@@ -1,4 +1,5 @@
 var mongo = require('mongoskin');
+var Promise = require("bluebird");
 // mLab connection URI
 var uri = process.env.MONGODB_URI;
 // promisify mongoskin with bluebird
@@ -17,7 +18,6 @@ module.exports = function (userId) {
     var encryption = require('./encryption.js');
     var Promise = require("bluebird");
     var key = process.env.HUBOT_TRELLO_KEY;
-    var Promise = require("bluebird");
     var q = require('q')
     var deferred = q.defer();
 
