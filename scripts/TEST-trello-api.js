@@ -22,7 +22,7 @@ module.exports = function (robot) {
 	function trelloLogin(userId) {
 		// db get token based on userId
 		db.bind('trelloTokens');
-		db.trelloTokens.findOneAsync({ id: userId }).then(function (result) {
+		db.trelloTokens.findOneAsync({ id: userId }).then(function (data) {
 			console.log(data);
 			t['token'] = data.token;
 			console.log(t['token']);
