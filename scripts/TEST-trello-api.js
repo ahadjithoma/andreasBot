@@ -29,14 +29,14 @@ module.exports = function (robot) {
 			// t['token'] = data.token;
 			var t = 1;
 			t = 5;
-			t = 9;	t = 5;
-			t = 9;	t = 5;
-			t = 9;	t = 5;
-			t = 9;	t = 5;
-			t = 9;	t = 5;
-			t = 9;	t = 5;
-			t = 9;	t = 5;
-			t = 9;	t = 5;
+			t = 2;	t = 5;
+			t = 2;	t = 5;
+			t = 2;	t = 5;
+			t = 2;	t = 5;
+			t = 2;	t = 5;
+			t = 2;	t = 5;
+			t = 2;	t = 5;
+			t = 2;	t = 5;
 			t = 9;
 			deferred.resolve(t);
 			// deferred.resolve(new Trello(key, token))
