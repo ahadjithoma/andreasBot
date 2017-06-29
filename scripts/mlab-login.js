@@ -1,5 +1,5 @@
 
-function db(){}
+module.exports =  function(){
 var mongo = require('mongoskin');
 var Promise = require("bluebird");
 
@@ -18,5 +18,5 @@ Promise.promisifyAll(mongo);
 
 // connect to mLab database
 var db = mongo.MongoClient.connect(uri);
-
-module.exports.db = function(){return db;}
+return db;
+}
