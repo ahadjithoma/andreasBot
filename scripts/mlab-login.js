@@ -1,5 +1,5 @@
 
-module.exports.db =  function(){
+function db(){
 var mongo = require('mongoskin');
 var Promise = require("bluebird");
 
@@ -20,3 +20,4 @@ Promise.promisifyAll(mongo);
 var dbObject = mongo.MongoClient.connect(uri);
 return dbObject;
 }
+module.exports.db = db();
