@@ -31,7 +31,9 @@ module.exports = {
         db.trelloTokens.find({ id: userId }).toArrayAsync()
             .then(function (dbData) {
                 console.log(dbData)
-                let token = encryption.decrypt(dbData['token']);
+                var decryptedToken = dbData.token;
+                console.log(decryptedToken);
+                let token = encryption.decrypt(decryptedToken);
                 let userId = dbData.id;
                 let username = dbData.username;
                 let t = new Trello(key, token);
