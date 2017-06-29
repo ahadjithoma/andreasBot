@@ -20,15 +20,12 @@ var db = mongo.MongoClient.connect(uri);
 var bcrypt = require('bcryptjs');
 var request = require('request-promise');
 var encryption = require('./encryption.js');
-db.bind('trelloTokens');
-
-var dbRefresh = require('./mlab-login.js');
-var trelloRefresh = require('./trello-login.js');
 
 var app_key = process.env.HUBOT_TRELLO_KEY;
 var oauth_secret = process.env.HUBOT_TRELLO_OAUTH;
 
 module.exports = function (robot) {
+db.bind('trelloTokens');
 
     var oauth_secrets = {};
     var loginCallback = `https://andreasbot.herokuapp.com/hubot/trello-token`;
