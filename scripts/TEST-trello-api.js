@@ -26,13 +26,25 @@ module.exports = function (robot) {
 			console.log(data);
 			t['token'] = data.token;
 			console.log(t['token']);
-		}).then(function(){
-					return new Trello(key, token);
-
 		}).catch(function (err) {
 		})
-
+		console.log('1');
+		console.log('2');
+		console.log('3');
+		console.log('4');
+		console.log('5');
+		console.log('6');
+		console.log('7');
+		console.log('8');
+		console.log('9');
+		console.log('10');
+		console.log('11');
+		console.log('12');
+		console.log('13');
+		console.log('14');
+		console.log('15');
 		console.log(t['token']);
+		return new Trello(key, token);
 
 	}
 
