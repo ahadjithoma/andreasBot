@@ -1,7 +1,7 @@
 var slackMsgs = require('./slackMsgs.js');
 var url = require('url');
 var Trello = require('node-trello');
-
+var Promise = require('bluebird');
 var mongo = require('mongoskin');
 // mLab connection URI
 var uri = process.env.MONGODB_URI;
