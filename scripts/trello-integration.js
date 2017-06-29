@@ -5,8 +5,6 @@ module.exports = function(robot) {
     var request = require('request');
     var rp = require('request-promise');
     var Trello = require('node-trello');
-    var db = require("./mlab-login").db();
-    var url = require('url')
 
     // auth
     var key = process.env.HUBOT_TRELLO_KEY;
