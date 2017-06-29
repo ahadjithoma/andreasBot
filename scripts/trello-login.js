@@ -25,11 +25,11 @@ module.exports = {
 
         // connect to mLab database
         var db = mongo.MongoClient.connect(uri);
+                console.log(userId)
 
         db.bind('trelloTokens');
         db.trelloTokens.find({ id: userId }).toArrayAsync()
             .then(function (dbData) {
-                console.log(userId)
                 console.log(dbData.token)
                 let token = encryption.decrypt(dbData.token);
                 let userId = dbData.id;
