@@ -5,6 +5,7 @@ var q = require('q');
 var rp = require('request-promise');
 var Trello = require('node-trello');
 var encryption = require('./encryption.js');
+var Promise = require('bluebird');
 
 // auth
 var key = process.env.HUBOT_TRELLO_KEY;
