@@ -72,8 +72,11 @@ module.exports = function (robot) {
 
 	robot.hear('trello login', function (res) {
 		let userId = msg.getUserId(res);
-		var trello = trelloLogin(userId);
-		console.log(trello);
+		trelloLogin(userId).then(data =>{
+			robot.logger.info(data);
+		}).catch(err => {
+			robot.logger.error(err);
+		})
 		// trelloLogin(userId).get('/1/members/me', function (err, data) {
 		// 	if (err) {
 		// 		res.send('error');
