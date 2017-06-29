@@ -24,7 +24,7 @@ module.exports = function(userId) {
     // var db = mongo.MongoClient.connect(uri);
 
 
-    var db = require('./mlab-login')();
+    var db = require('./mlab-login').db();
 
     db.bind('trelloTokens');
     db.trelloTokens.find({ id: userId }).toArrayAsync()
