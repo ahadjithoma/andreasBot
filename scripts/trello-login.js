@@ -27,8 +27,10 @@ module.exports = {
         var db = mongo.MongoClient.connect(uri);
 
         db.bind('trelloTokens');
-        db.trelloTokens.find({ is: userId }).toArrayAsync()
+        db.trelloTokens.find({ id: userId }).toArrayAsync()
             .then(function (dbData) {
+                console.log(userId)
+                console.log(dbData.token)
                 let token = encryption.decrypt(dbData.token);
                 let userId = dbData.id;
                 let username = dbData.username;
