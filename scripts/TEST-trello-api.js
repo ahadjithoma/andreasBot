@@ -45,7 +45,7 @@ module.exports = function (robot) {
 		// let userId = msg.getUserId(res);
 		// var trello = trelloLogin(userId);
 		// console.log(trello);
-		Trello(key, token).get('/1/members/me', function (err, data) {
+		new Trello(key, token).get('/1/members/me', function (err, data) {
 			res.send(data.fullName);
 		})
 
