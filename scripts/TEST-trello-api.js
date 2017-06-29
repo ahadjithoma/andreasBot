@@ -20,19 +20,16 @@ var db = require('./mlab-login.js').db();
 module.exports = function (robot) {
 
 
-	var t = {};
-
 	function trelloLogin(userId) {
 		var deferred = q.defer();
 		db.bind('trelloTokens');
 		db.trelloTokens.findOneAsync({ id: userId }).then(function (data) {
-var t =9;
-			deferred.resolve(t);
-			// deferred.resolve(new Trello(key, token))
+			
+			deferred.resolve(new Trello(key, token))
 		}).catch(function (err) {
 			deferred.reject(err);
 		})
-		return t; // don't forget to send the promise!!
+		return deferred.promise; // don't forget to send the promise!!
 		// return new Trello(key, t['token']);
 	}
 	
@@ -71,12 +68,12 @@ var t =9;
 
 	robot.hear('trello login', function (res) {
 		let userId = msg.getUserId(res);
-		robot.logger.info(trelloLogin(userId));
-		// trelloLogin(userId).then(data => {
-		// 	robot.logger.info(data);
-		// }).catch(err => {
-		// 	robot.logger.error(err);
-		// })
+		// robot.logger.info(trelloLogin(userId));
+		trelloLogin(userId).then(trello => {
+			robot.logger.info(trello);
+		}).catch(err => {
+			robot.logger.error(err);
+		})
 		// trelloLogin(userId).get('/1/members/me', function (err, data) {
 		// 	if (err) {
 		// 		res.send('error');
