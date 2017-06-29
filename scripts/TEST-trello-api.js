@@ -46,12 +46,19 @@ module.exports = function (robot) {
 		// var trello = trelloLogin(userId);
 		// console.log(trello);
 		let t = new Trello(key, token);
-		t.get('/1/members/me', function (err, data) {
+		new Trello(key, token).get('/1/members/me', function (err, data) {
 			if (err) {
 				res.send('error');
 				return 0;
 			}
 			res.send('not');
+		})
+		Trello(key, token).get('/1/members/me', function (err, data) {
+			if (err) {
+				res.send('error2');
+				return 0;
+			}
+			res.send('not2');
 		})
 
 	})
