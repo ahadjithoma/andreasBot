@@ -6,28 +6,27 @@ var q = require('q')
 var key = process.env.HUBOT_TRELLO_KEY; // get it from https://trello.com/app-key
 
 module.exports.trelloLogin = function (userId) {
-        var deferred = q.defer();
+    var deferred = q.defer();
 
-        // connect to mLab database
-        var db = require('./mlab-login.js').db();
-        // bind trelloTokens collection
-        db.bind('trelloTokens');
+    // connect to mLab database
+    var db = require('./mlab-login.js').db();
+    // bind trelloTokens collection
+    db.bind('trelloTokens');
 
-        db.trelloTokens.findOne({ id: userId },function (dbError, dbData) {
-            if (dbError) {
-                console.log(dbError);
-                deferred.reject(dbError);
-            } else {
-                console.log(dbData)
-                var decryptedToken = dbData[0].token;
-                let token = encryption.decrypt(decryptedToken);
-                let userId = dbData[0].id;
-                let username = dbData[0].username;
-                let t = new Trello(key, token);
-                var trello = Promise.promisifyAll(t);
-                deferred.resolve(trello);
-            }
-        })
-        // return the promise
-        return deferred.promise; 
-    }
+    db.trelloTokens.findOneAsync({ id: userId }).then(dbData => {
+        console.log(dbData)
+        var decryptedToken = dbData.token;
+        let token = encryption.decrypt(decryptedToken);
+        let userId = dbData.id;
+        let username = dbData.username;
+        let t = new Trello(key, token);
+        var trello = Promise.promisifyAll(t);
+        deferred.resolve(trello);
+    }).catch(dbError => {
+        console.log(dbError);
+        deferred.reject(dbError);
+    })
+
+    // return the promise
+    return deferred.promise;
+}
