@@ -28,7 +28,11 @@ module.exports = function (userId) {
     // var db = require('./mlab-login').db();
     // var collection = db.collection('trelloTokens');
     db.bind('trelloTokens');
-    // collection.trelloTokens.find({ id: userId }).toArray(function (dbError, dbData) {
+    db.trelloTokens.find().toArray(function(err,data){
+        if (err) throw err;
+        console.log(data);
+    })
+    // db.trelloTokens.find({ id: userId }).toArray(function (dbError, dbData) {
     //     if (dbError) {
     //         console.log(dbError);
     //         deferred.reject(dbError);
