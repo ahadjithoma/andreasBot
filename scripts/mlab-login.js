@@ -1,3 +1,5 @@
+module.exports.db = function(){ 
+
 var mongo = require('mongoskin');
 var Promise = require("bluebird");
 
@@ -15,6 +17,9 @@ Object.keys(mongo).forEach(function (key) {
 Promise.promisifyAll(mongo);
 
 // connect to mLab database
-var db = mongo.MongoClient.connect(uri);
+// var db = 
+return mongo.MongoClient.connect(uri);
+// return db;
+}
 
-module.exports.db = function(){return db;}
+// module.exports.db = function(){return db;}
