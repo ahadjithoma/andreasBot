@@ -26,8 +26,9 @@ module.exports = function (userId) {
     var db = mongo.MongoClient.connect(uri);
 
     // var db = require('./mlab-login').db();
-    var collection = db.collection('trelloTokens');
-    // collection.find({ id: userId }).toArray(function (dbError, dbData) {
+    // var collection = db.collection('trelloTokens');
+    db.bind('trelloTokens');
+    // collection.trelloTokens.find({ id: userId }).toArray(function (dbError, dbData) {
     //     if (dbError) {
     //         console.log(dbError);
     //         deferred.reject(dbError);
