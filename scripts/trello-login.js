@@ -2,34 +2,24 @@
 var Trello = require('node-trello');
 var encryption = require('./encryption.js');
 var Promise = require("bluebird");
-var key = process.env.HUBOT_TRELLO_KEY;
 var q = require('q')
+var key = process.env.HUBOT_TRELLO_KEY; // get it from https://trello.com/app-key
 
 module.exports.trelloLogin = function (userId) {
-
         var deferred = q.defer();
 
         // connect to mLab database
         var db = require('./mlab-login.js').db();
-
-        // bind trelloTokens collectioncollection
+        // bind trelloTokens collection
         db.bind('trelloTokens');
 
-        // THIS WORKS
-        // db.trelloTokens.find({ id: userId }).toArray(function (err, data) {
-        //     if (err) throw err;
-        //     console.log(data);
-        // })
-        // *************************
-
-        db.trelloTokens.find({ id: userId }).toArray(function (dbError, dbData) {
+        db.trelloTokens.findOne({ id: userId },function (dbError, dbData) {
             if (dbError) {
                 console.log(dbError);
                 deferred.reject(dbError);
             } else {
                 console.log(dbData)
                 var decryptedToken = dbData[0].token;
-                console.log(decryptedToken);
                 let token = encryption.decrypt(decryptedToken);
                 let userId = dbData[0].id;
                 let username = dbData[0].username;
