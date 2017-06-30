@@ -24,8 +24,8 @@ module.exports = {
 
 
         // connect to mLab database
-        var db = mongo.MongoClient.connect(uri);
-
+        // var db = mongo.MongoClient.connect(uri);
+        var db = require('./mlab-login.js').db();
 
 
 
