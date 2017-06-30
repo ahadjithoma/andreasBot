@@ -1,37 +1,21 @@
-var mongo = require('mongoskin');
-var Promise = require("bluebird");
-// mLab connection URI
-var uri = process.env.MONGODB_URI;
-// promisify mongoskin with bluebird
-Object.keys(mongo).forEach(function (key) {
-    var value = mongo[key];
-    if (typeof value === "function") {
-        Promise.promisifyAll(value);
-        Promise.promisifyAll(value.prototype);
-    }
-});
-Promise.promisifyAll(mongo);
 
+var Trello = require('node-trello');
+var encryption = require('./encryption.js');
+var Promise = require("bluebird");
+var key = process.env.HUBOT_TRELLO_KEY;
+var q = require('q')
 
 module.exports = {
     trelloLogin: function (userId) {
-        var Trello = require('node-trello');
-        var encryption = require('./encryption.js');
-        var Promise = require("bluebird");
-        var key = process.env.HUBOT_TRELLO_KEY;
-        var q = require('q')
+
         var deferred = q.defer();
 
-
         // connect to mLab database
-        // var db = mongo.MongoClient.connect(uri);
         var db = require('./mlab-login.js').db();
 
-
-
-        // var db = require('./mlab-login').db();
-        // var collection = db.collection('trelloTokens');
+        // bind trelloTokens collectioncollection
         db.bind('trelloTokens');
+
         // THIS WORKS
         // db.trelloTokens.find({ id: userId }).toArray(function (err, data) {
         //     if (err) throw err;
@@ -55,6 +39,7 @@ module.exports = {
                 deferred.resolve(trello);
             }
         })
-        return deferred.promise;
+        // return the promise
+        return deferred.promise; 
     }
 }
