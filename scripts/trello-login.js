@@ -30,7 +30,7 @@ module.exports = function (userId) {
     db.bind('trelloTokens');
     db.trelloTokens.find({id:userId},function(err,data){
         if (err) throw err;
-        console.log(data);
+        console.log(data.toArray);
     })
     // db.trelloTokens.find({ id: userId }).toArray(function (dbError, dbData) {
     //     if (dbError) {
