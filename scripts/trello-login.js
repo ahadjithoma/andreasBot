@@ -5,8 +5,7 @@ var Promise = require("bluebird");
 var key = process.env.HUBOT_TRELLO_KEY;
 var q = require('q')
 
-module.exports = {
-    trelloLogin: function (userId) {
+module.exports.trelloLogin = function (userId) {
 
         var deferred = q.defer();
 
@@ -42,4 +41,3 @@ module.exports = {
         // return the promise
         return deferred.promise; 
     }
-}
