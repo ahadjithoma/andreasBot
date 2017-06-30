@@ -3,14 +3,14 @@ var Promise = require("bluebird");
 // mLab connection URI
 var uri = process.env.MONGODB_URI;
 // promisify mongoskin with bluebird
-// Object.keys(mongo).forEach(function (key) {
-//     var value = mongo[key];
-//     if (typeof value === "function") {
-//         Promise.promisifyAll(value);
-//         Promise.promisifyAll(value.prototype);
-//     }
-// });
-// Promise.promisifyAll(mongo);
+Object.keys(mongo).forEach(function (key) {
+    var value = mongo[key];
+    if (typeof value === "function") {
+        Promise.promisifyAll(value);
+        Promise.promisifyAll(value.prototype);
+    }
+});
+Promise.promisifyAll(mongo);
 
 
 module.exports = {
@@ -26,29 +26,35 @@ module.exports = {
         // connect to mLab database
         var db = mongo.MongoClient.connect(uri);
 
+
+
+
         // var db = require('./mlab-login').db();
         // var collection = db.collection('trelloTokens');
         db.bind('trelloTokens');
-        db.trelloTokens.find({ id: userId }).toArray(function (err, data) {
-            if (err) throw err;
-            console.log(data);
-        })
-        // db.trelloTokens.find({ id: userId }).toArray(function (dbError, dbData) {
-        //     if (dbError) {
-        //         console.log(dbError);
-        //         deferred.reject(dbError);
-        //     } else {
-        //         console.log(dbData)
-        //         var decryptedToken = dbData[0].token;
-        //         console.log(decryptedToken);
-        //         let token = encryption.decrypt(decryptedToken);
-        //         let userId = dbData[0].id;
-        //         let username = dbData[0].username;
-        //         let t = new Trello(key, token);
-        //         var trello = Promise.promisifyAll(t);
-        //         deferred.resolve(trello);
-        //     }
+        // THIS WORKS
+        // db.trelloTokens.find({ id: userId }).toArray(function (err, data) {
+        //     if (err) throw err;
+        //     console.log(data);
         // })
-        // return deferred.promise;
+        // *************************
+
+        db.trelloTokens.find({ id: userId }).toArray(function (dbError, dbData) {
+            if (dbError) {
+                console.log(dbError);
+                deferred.reject(dbError);
+            } else {
+                console.log(dbData)
+                var decryptedToken = dbData[0].token;
+                console.log(decryptedToken);
+                let token = encryption.decrypt(decryptedToken);
+                let userId = dbData[0].id;
+                let username = dbData[0].username;
+                let t = new Trello(key, token);
+                var trello = Promise.promisifyAll(t);
+                deferred.resolve(trello);
+            }
+        })
+        return deferred.promise;
     }
 }
