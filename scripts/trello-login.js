@@ -13,7 +13,7 @@ module.exports.trelloLogin = function (userId) {
     // bind trelloTokens collection
     db.bind('trelloTokens');
 
-    db.trelloTokens.findOneAsync({ id: userId }).then(dbData => {
+    db.trelloTokens.findOne({ id: userId }).then(dbData => {
         console.log(dbData)
         var decryptedToken = dbData.token;
         let token = encryption.decrypt(decryptedToken);
