@@ -143,7 +143,7 @@ module.exports = {
             "pretext": "",
             "attachment_type": "default",
             "fallback": null,
-            "color": "#ffffff",
+            "color": "#111111",
             "text": "",
             "mrkdwn_in": ["text", "pretext", "fields"]
         }
