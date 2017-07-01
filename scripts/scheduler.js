@@ -17,12 +17,14 @@ module.exports = function (robot) {
     // add disable option
     db.collection('settings').find().toArrayAsync().then(dbData => {
         if (dbData.trelloNotifications){
+            robot.logger.info(dbData);
             job.start();
         } else {
             job.stop();
         }
-    }).catch(dbError => robot.logger.info(dbError));
-    // if (db.somewhere == false) { job.stop() }
+    }).catch(dbError => {
+        robot.logger.info(dbError)
+    });
 
     trelloNotifications();
     function trelloNotifications() {
