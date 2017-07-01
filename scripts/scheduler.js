@@ -7,6 +7,7 @@ module.exports = function (robot) {
     var encryption = require('./encryption.js');
     var CronJob = require('cron').CronJob;
     var job = new CronJob('00 32 14 * * *', function () {
+        db.bind('trelloTokens');
         db.trelloTokens.find().toArrayAsync().then(dbData => {
             var num = dbData.length;
             for (let i = 0; i < num; i++) {
