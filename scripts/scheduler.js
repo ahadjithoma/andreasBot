@@ -52,11 +52,12 @@ module.exports = function (robot) {
             var usersNum = dbData.length;
             for (let i = 0; i < usersNum; i++) { // i: the number of authorized trello users
                 var encryptedToken = dbData[i].token;
-                let userId = dbData[i].id;
                 var token = encryption.decrypt(encryptedToken);
                 var trello = Promise.promisifyAll(new Trello(key, token));
                 var args = { read_filter: 'unread' }; // get only the unread notifications
                 trello.getAsync('/1/member/me/notifications', args).then(notif => {
+                                    let userId = dbData[i].id;
+
                     let msg = message.attachmentMsg();
                     let notifNum = notif.length;
                     for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
