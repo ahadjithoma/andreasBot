@@ -44,6 +44,7 @@ module.exports = function (robot) {
 
 
     /********************* THIS SHOULD GO TO SCHEDULER****************************/
+    trelloNotifications();
     function trelloNotifications() {
         robot.logger.info('started')
         db.bind('trelloTokens');
