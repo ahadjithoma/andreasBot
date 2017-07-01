@@ -41,7 +41,7 @@ module.exports = function (robot) {
     // if (db.somewhere == false) { job.stop() }
 
 
-
+    trelloNotifications();
     /********************* THIS SHOULD GO TO SCHEDULER****************************/
     function trelloNotifications() {
         db.bind('trelloTokens');
@@ -54,7 +54,7 @@ module.exports = function (robot) {
                 var trello = Promise.promisifyAll(new Trello(key, token));
                 var args = { read_filter: 'unread' }; // get only the unread notifications
                 trello.getAsync('/1/member/me/notifications', args).then(trData => {
-                    robot.logger.info(trData);
+                    robot.logger.info(trData.data);
                 }).catch(trError => {
                     robot.logger.error(trError);
                 })
