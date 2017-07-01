@@ -60,7 +60,7 @@ module.exports = function (robot) {
                     robot.logger.info(notif)
                     let msg = message.attachmentMsg();
                     let notifNum = notif.length;
-                    for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
+                    for (let j = 0; j < 1; j++) { // j: the number of notifications per user
                         msg.attachments[j].text = notif[j].type;
                     }
                     if (notifNum > 0) {
