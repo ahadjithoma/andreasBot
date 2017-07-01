@@ -11,41 +11,23 @@ module.exports = function (robot) {
 
 
     var CronJob = require('cron').CronJob;
-    var jobA = new CronJob({
-        cronTime: '00 19 03 * * *',
-        startFunc: function () {
-            console.log('cron job A STARTED')
-            /*
-             * Runs every weekday (Monday through Friday)
-             * at 11:30:00 AM. It does not run on Saturday
-             * or Sunday.
-             */
-        },
-        stopFunc: function () {
-            console.log('cron job A FINISHED')
-            jobB.start()
-        },
-        start: false,
-        timeZone: 'Europe/Athens'
-    });
-    jobA.start();
-
-
-    var jobB = new CronJob('00 20 03 * * *', function () {
+    var job = new CronJob('00 23 03 * * *', function () {
+        robot.messageRoom('general', 'job started');
         console.log('cron job B STARTED')
-        jobA.stop();
+        job.stop();
         /*
          * Runs every weekday (Monday through Friday)
          * at 11:30:00 AM. It does not run on Saturday
          * or Sunday.
          */
     }, function () {
+        robot.messageRoom('general', 'job stopped');
         console.log('cron job B FINISHED')
-        
-
         /* This function is executed when the job stops */
     },
         true, /* Start the job right now */
         'Europe/Athens' /* Time zone of this job. */
     );
+    
+job.start()
 }
