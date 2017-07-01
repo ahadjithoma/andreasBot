@@ -14,12 +14,10 @@ module.exports = function (robot) {
         'Europe/Athens' /* Time zone of this job. */
     );
 
-    // add disable option
+    // check if trello notifications feature is enabled
     db.bind('settings');
-    db.settings.insert({trelloNotifications:true})
     db.settings.find().toArrayAsync().then(dbData => {
         if (dbData.trelloNotifications){
-            robot.logger.info(dbData);
             job.start();
         } else {
             job.stop();
@@ -28,7 +26,7 @@ module.exports = function (robot) {
         robot.logger.info(dbError)
     });
 
-    // trelloNotifications(); //for debugging
+    trelloNotifications(); //for debugging
     function trelloNotifications() {
         robot.logger.info('started')
         db.bind('trelloTokens');
@@ -46,10 +44,11 @@ module.exports = function (robot) {
 
                     for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
                         let attachment = message.attachment()
-                        attachment.text = notif[j].type;
+                        attachment.text = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                         msg.attachments.push(attachment);
                     }
                     
+                    // TODO -> DISPLAY NOTIFICATIONS BASED ON TYPE
                     // TODO -> MARK NOTIFICATIONS AS READ 
 
                     if (notifNum > 0) {
