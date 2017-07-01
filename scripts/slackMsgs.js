@@ -137,7 +137,17 @@ module.exports = {
             ]
         }
     },
-
+    "attachement": function () {
+        return {
+            "title": "",
+            "pretext": "",
+            "attachment_type": "default",
+            "fallback": null,
+            "color": "#ffffff",
+            "text": "",
+            "mrkdwn_in": ["text", "pretext", "fields"]
+        }
+    },
 
     basicMessage: function () {
         return {
