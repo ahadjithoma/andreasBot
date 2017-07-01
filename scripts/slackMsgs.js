@@ -116,6 +116,27 @@ module.exports = {
             ]
         }
     },
+    attachmentMsg: function () {
+        return {
+            "text": "",
+            "unfurl_links": false,
+            "attachments": [
+                {
+                    "title": "",
+                    "pretext": "",
+                    "attachment_type": "default",
+                    "fallback": null,
+                    "color": "#bdc3c7",
+                    "text": "",
+                    "mrkdwn_in": [
+                        "text",
+                        "pretext",
+                        "fields"
+                    ]
+                }
+            ]
+        }
+    },
 
 
     basicMessage: function () {

@@ -1,6 +1,7 @@
 var key = process.env.HUBOT_TRELLO_KEY;
 var Promise = require('bluebird');
 var Trello = require('node-trello');
+var slackmsg = require('./slackMsgs.js');
 
 module.exports = function (robot) {
     var db = require('./mlab-login.js').db();
@@ -15,9 +16,10 @@ module.exports = function (robot) {
                 var userId = dbData[i].id;
                 var token = encryption.decrypt(encryptedToken);
                 var trello = Promise.promisifyAll(new Trello(key, token));
-
                 trello.getAsync('/1/member/me/notifications').then(trData => {
-                    robot.logger.info(trData);
+                                    let msg = slackmsg.attachmentMsg();
+
+                    robot.logger.info(trData.data);
                 }).catch(trError => {
                     robot.logger.error(trError);
                 })
@@ -38,4 +40,28 @@ module.exports = function (robot) {
 
     // if (db.somewhere == false) { job.stop() }
 
+
+
+    /********************* THIS SHOULD GO TO SCHEDULER****************************/
+    function trelloNotifications() {
+        db.bind('trelloTokens');
+        db.trelloTokens.find().toArrayAsync().then(dbData => {
+            var num = dbData.length;
+            for (let i = 0; i < num; i++) {
+                var encryptedToken = dbData[i].token;
+                var userId = dbData[i].id;
+                var token = encryption.decrypt(encryptedToken);
+                var trello = Promise.promisifyAll(new Trello(key, token));
+                var args = { read_filter: 'unread' }; // get only the unread notifications
+                trello.getAsync('/1/member/me/notifications', args).then(trData => {
+                    robot.logger.info(trData);
+                }).catch(trError => {
+                    robot.logger.error(trError);
+                })
+            }
+        }).catch(dbError => {
+
+        })
+    }
+    /*****************************************************************************/
 }
