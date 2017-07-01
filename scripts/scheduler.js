@@ -12,9 +12,9 @@ db.trelloTokens.find().toArrayAsync().then(dbData => {
 
 var CronJob = require('cron').CronJob;
 var job = new CronJob({
-    cronTime: '00 30 11 * * 1-5',
+    cronTime: '00 05 03 * * 1-5',
     function() {
-        console.log('cron job STARTED')
+        console.log('cron job A STARTED')
         /*
          * Runs every weekday (Monday through Friday)
          * at 11:30:00 AM. It does not run on Saturday
@@ -22,23 +22,25 @@ var job = new CronJob({
          */
     },
     function() {
-        console.log('cron job FINISHED')
+        console.log('cron job A FINISHED')
     },
     start: false,
-    timeZone: 'America/Los_Angeles'
+    timeZone: 'Europe/Athens'
 });
 job.start();
 
 
 var CronJob = require('cron').CronJob;
-var job = new CronJob('00 30 11 * * 1-5', function () {
-    console.log('cron job STARTED')
+var job = new CronJob('00 05 03 * * 1-5', function () {
+    console.log('cron job B STARTED')
     /*
      * Runs every weekday (Monday through Friday)
      * at 11:30:00 AM. It does not run on Saturday
      * or Sunday.
      */
 }, function () {
+            console.log('cron job B FINISHED')
+
     /* This function is executed when the job stops */
 },
     true, /* Start the job right now */
