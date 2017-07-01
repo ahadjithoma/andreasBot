@@ -7,35 +7,36 @@ module.exports = function (robot) {
     var db = require('./mlab-login.js').db();
     var encryption = require('./encryption.js');
     var CronJob = require('cron').CronJob;
-    var job = new CronJob('00 24 19 * * *', 
+    var job = new CronJob('00 24 19 * * *',
 
-     function () {trelloNotifications();
-                 // db.bind('trelloTokens');
-        // db.trelloTokens.find().toArrayAsync().then(dbData => {
-        //     var num = dbData.length;
-        //     for (let i = 0; i < num; i++) {
-        //         var encryptedToken = dbData[i].token;
-        //         var userId = dbData[i].id;
-        //         var token = encryption.decrypt(encryptedToken);
-        //         var trello = Promise.promisifyAll(new Trello(key, token));
-        //         trello.getAsync('/1/member/me/notifications').then(trData => {
+        function () {
+            trelloNotifications();
+            // db.bind('trelloTokens');
+            // db.trelloTokens.find().toArrayAsync().then(dbData => {
+            //     var num = dbData.length;
+            //     for (let i = 0; i < num; i++) {
+            //         var encryptedToken = dbData[i].token;
+            //         var userId = dbData[i].id;
+            //         var token = encryption.decrypt(encryptedToken);
+            //         var trello = Promise.promisifyAll(new Trello(key, token));
+            //         trello.getAsync('/1/member/me/notifications').then(trData => {
 
-        //             robot.logger.info(trData.data);
-        //         }).catch(trError => {
-        //             robot.logger.error(trError);
-        //         })
-        //     }
-        // }).catch(dbError => {
+            //             robot.logger.info(trData.data);
+            //         }).catch(trError => {
+            //             robot.logger.error(trError);
+            //         })
+            //     }
+            // }).catch(dbError => {
 
-        // })
-        // robot.messageRoom('general', 'job started');
-        // console.log('cron job B STARTED')
+            // })
+            // robot.messageRoom('general', 'job started');
+            // console.log('cron job B STARTED')
 
-    }
-    , function () {
-        robot.messageRoom('general', 'job stopped');
-        /* This function is executed when the job stops */
-    },
+        }
+        , function () {
+            robot.messageRoom('general', 'job stopped');
+            /* This function is executed when the job stops */
+        },
         true, /* Start the job right now */
         'Europe/Athens' /* Time zone of this job. */
     );
@@ -56,15 +57,16 @@ module.exports = function (robot) {
                 var trello = Promise.promisifyAll(new Trello(key, token));
                 var args = { read_filter: 'unread' }; // get only the unread notifications
                 trello.getAsync('/1/member/me/notifications', args).then(notif => {
-                                    let userId = dbData[i].id;
-
-                    let msg = message.attachmentMsg();
-                    let notifNum = notif.length;
-                    for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
-                        msg.attachments[j].text = notif[j].type;
+                    robot.logger.info(notif)
+                    if (notif != null) {
+                        let userId = dbData[i].id;
+                        let msg = message.attachmentMsg();
+                        let notifNum = notif.length;
+                        for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
+                            msg.attachments[j].text = notif[j].type;
+                        }
+                        robot.messageRoom(userId, msg);
                     }
-                    if (notif != null){
-                    robot.messageRoom(userId, msg);}
                 }).catch(trError => {
                     robot.logger.error(trError);
                 })
