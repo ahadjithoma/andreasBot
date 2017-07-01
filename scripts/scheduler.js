@@ -54,7 +54,9 @@ module.exports = function (robot) {
                 var trello = Promise.promisifyAll(new Trello(key, token));
                 var args = { read_filter: 'unread' }; // get only the unread notifications
                 trello.getAsync('/1/member/me/notifications', args).then(trData => {
-                    robot.logger.info(trData.data);
+                    robot.logger.info(trData);
+                    robot.logger.error(trData['data']);
+                    robot.logger.warning(trData[0].data);
                 }).catch(trError => {
                     robot.logger.error(trError);
                 })
