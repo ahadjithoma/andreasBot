@@ -7,10 +7,10 @@ module.exports = function (robot) {
     var db = require('./mlab-login.js').db();
     var encryption = require('./encryption.js');
     var CronJob = require('cron').CronJob;
-    var job = new CronJob('00 22 19 * * *', trelloNotifications()
+    var job = new CronJob('00 24 19 * * *', 
 
-    // function () {
-        // db.bind('trelloTokens');
+     function () {trelloNotifications();
+                 // db.bind('trelloTokens');
         // db.trelloTokens.find().toArrayAsync().then(dbData => {
         //     var num = dbData.length;
         //     for (let i = 0; i < num; i++) {
@@ -31,7 +31,7 @@ module.exports = function (robot) {
         // robot.messageRoom('general', 'job started');
         // console.log('cron job B STARTED')
 
-    // }
+    }
     , function () {
         robot.messageRoom('general', 'job stopped');
         /* This function is executed when the job stops */
