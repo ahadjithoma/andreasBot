@@ -63,7 +63,7 @@ module.exports = function (robot) {
                     for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
                         msg.attachments[j].text = notif[j].type;
                     }
-                    if (notif){
+                    if (notif != null){
                     robot.messageRoom(userId, msg);}
                 }).catch(trError => {
                     robot.logger.error(trError);
