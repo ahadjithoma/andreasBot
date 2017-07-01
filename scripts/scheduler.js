@@ -15,7 +15,7 @@ module.exports = function (robot) {
     );
 
     // add disable option
-    db.bind('settings');
+    db.collection('settings');
     // if (db.somewhere == false) { job.stop() }
 
     trelloNotifications();
