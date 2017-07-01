@@ -56,7 +56,7 @@ module.exports = function (robot) {
                     let msg = message.attachmentMsg();
                     let notifNum = notif.length;
                     for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
-                        msg.attachments[j].text = notif.type;
+                        msg.attachments[j].text = notif[j].type;
                     }
                     robot.messageRoom(userId, msg);
                 }).catch(trError => {
