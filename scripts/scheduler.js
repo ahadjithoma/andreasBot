@@ -10,12 +10,18 @@ module.exports = function (robot) {
     var job = new CronJob('00 24 19 * * *', // note that heroku free plan is not running 24/7
         function () { trelloNotifications(); },
         function () { }, /* This function is executed when the job stops */
-        true, /* Start the job right now */
+        false, /* Start the job right now */
         'Europe/Athens' /* Time zone of this job. */
     );
 
     // add disable option
-    db.collection('settings');
+    db.collection('settings').find().toArrayAsync().then(dbData => {
+        if (dbData.trelloNotifications){
+            job.start();
+        } else {
+            job.stop();
+        }
+    }).catch(dbError => robot.logger.info(dbError));
     // if (db.somewhere == false) { job.stop() }
 
     trelloNotifications();
