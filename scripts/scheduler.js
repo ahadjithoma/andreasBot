@@ -1,5 +1,5 @@
-var db = require('./mlab-login.js').db();
-var CronJob = require('cron').CronJob;
+module.exports = function(robot){
+    var db = require('./mlab-login.js').db();
 
 db.bind('trelloTokens');
 db.trelloTokens.find().toArrayAsync().then(dbData => {
@@ -12,7 +12,7 @@ db.trelloTokens.find().toArrayAsync().then(dbData => {
 
 var CronJob = require('cron').CronJob;
 var job = new CronJob({
-    cronTime: '00 07 03 * * 1-5',
+    cronTime: '00 07 10 * * *',
     function() {
         console.log('cron job A STARTED')
         /*
@@ -31,7 +31,7 @@ job.start();
 
 
 var CronJob = require('cron').CronJob;
-var job = new CronJob('00 07 03 * * 1-5', function () {
+var job = new CronJob('00 10 03 * * *', function () {
     console.log('cron job B STARTED')
     /*
      * Runs every weekday (Monday through Friday)
@@ -46,3 +46,4 @@ var job = new CronJob('00 07 03 * * 1-5', function () {
     true, /* Start the job right now */
     'Europe/Athens' /* Time zone of this job. */
 );
+}
