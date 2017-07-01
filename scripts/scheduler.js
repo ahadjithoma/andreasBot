@@ -15,7 +15,9 @@ module.exports = function (robot) {
     );
 
     // add disable option
-    db.collection('settings').find().toArrayAsync().then(dbData => {
+    db.bind('settings');
+    db.settings.insert({trelloNotifications:true})
+    db.settings.find().toArrayAsync().then(dbData => {
         if (dbData.trelloNotifications){
             robot.logger.info(dbData);
             job.start();
@@ -26,7 +28,7 @@ module.exports = function (robot) {
         robot.logger.info(dbError)
     });
 
-    trelloNotifications();
+    // trelloNotifications(); //for debugging
     function trelloNotifications() {
         robot.logger.info('started')
         db.bind('trelloTokens');
@@ -39,7 +41,6 @@ module.exports = function (robot) {
                 var args = { read_filter: 'unread' }; // get only the unread notifications
 
                 trello.getAsync('/1/member/me/notifications', args).then(notif => {
-                    robot.logger.info(notif)
                     var msg = { attachments: [] };
                     let notifNum = notif.length;
 
@@ -48,6 +49,8 @@ module.exports = function (robot) {
                         attachment.text = notif[j].type;
                         msg.attachments.push(attachment);
                     }
+                    
+                    // TODO -> MARK NOTIFICATIONS AS READ 
 
                     if (notifNum > 0) {
                         let userId = dbData[i].id;      // get user's id (on chat platform)
