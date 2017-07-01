@@ -6,7 +6,7 @@ module.exports = function (robot) {
     var db = require('./mlab-login.js').db();
     var encryption = require('./encryption.js');
     var CronJob = require('cron').CronJob;
-    var job = new CronJob('00 34 14 * * *', function () {
+    var job = new CronJob('00 37 14 * * *', function () {
         db.bind('trelloTokens');
         db.trelloTokens.find().toArrayAsync().then(dbData => {
             var num = dbData.length;
