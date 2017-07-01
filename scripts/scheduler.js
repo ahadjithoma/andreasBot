@@ -59,10 +59,10 @@ module.exports = function (robot) {
                 trello.getAsync('/1/member/me/notifications', args).then(notif => {
                     robot.logger.info(notif)
                     var msg = [];
-                    var attachment = message.attachement();
+                    var attachment = message.attachment();
                     let notifNum = notif.length;
                     for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
-                        attachement.text = notif[j].type;
+                        attachment.text = notif[j].type;
                         msg[j]=attachment;
                     }
                     if (notifNum > 0) {

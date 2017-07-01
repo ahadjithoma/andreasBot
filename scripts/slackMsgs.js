@@ -137,7 +137,7 @@ module.exports = {
             ]
         }
     },
-    "attachement": function () {
+    "attachment": function () {
         return {
             "title": "",
             "pretext": "",
