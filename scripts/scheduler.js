@@ -12,7 +12,7 @@ db.trelloTokens.find().toArrayAsync().then(dbData => {
 
 var CronJob = require('cron').CronJob;
 var job = new CronJob({
-    cronTime: '00 05 03 * * 1-5',
+    cronTime: '00 07 03 * * 1-5',
     function() {
         console.log('cron job A STARTED')
         /*
@@ -31,7 +31,7 @@ job.start();
 
 
 var CronJob = require('cron').CronJob;
-var job = new CronJob('00 05 03 * * 1-5', function () {
+var job = new CronJob('00 07 03 * * 1-5', function () {
     console.log('cron job B STARTED')
     /*
      * Runs every weekday (Monday through Friday)

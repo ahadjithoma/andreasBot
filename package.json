@@ -8,6 +8,7 @@
     "apollo-client": "^1.4.2",
     "bcryptjs": "^2.4.3",
     "bluebird": "^3.5.0",
+    "cron": "^1.2.1",
     "express": "^4.15.2",
     "github": "^9.2.0",
     "graphql": "^0.10.3",
