@@ -10,8 +10,9 @@ module.exports = function (robot) {
     })
 
 
+
     var CronJob = require('cron').CronJob;
-    var job = new CronJob('00 25 03 * * *', function () {
+    var job = new CronJob('00 00 11 * * *', function () {
         robot.messageRoom('general', 'job started');
         console.log('cron job B STARTED')
         job.stop();
@@ -28,4 +29,7 @@ module.exports = function (robot) {
         true, /* Start the job right now */
         'Europe/Athens' /* Time zone of this job. */
     );
-    }
+
+    // if (db.somewhere == false) { job.stop() }
+
+}
