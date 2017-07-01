@@ -58,7 +58,7 @@ module.exports = function (robot) {
                 var args = { read_filter: 'unread' }; // get only the unread notifications
                 trello.getAsync('/1/member/me/notifications', args).then(notif => {
                     robot.logger.info(notif)
-                    let msg = [];
+                    var msg = [];
                     var attachment = message.attachement();
                     let notifNum = notif.length;
                     for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
