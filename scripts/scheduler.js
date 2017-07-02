@@ -17,7 +17,7 @@ module.exports = function (robot) {
     // check if trello notifications feature is enabled
     db.bind('settings');
     db.settings.find().toArrayAsync().then(dbData => {
-        if (dbData.trelloNotifications){
+        if (dbData.trelloNotifications) {
             job.start();
         } else {
             job.stop();
@@ -39,21 +39,14 @@ module.exports = function (robot) {
                 var args = { read_filter: 'unread' }; // get only the unread notifications
 
                 trello.getAsync('/1/member/me/notifications', args).then(notif => {
-                    var msg = { attachments: [] };
-                    let notifNum = notif.length;
 
-                    for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
-                        let attachment = message.attachment();
-                        let type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
-                        let creator = notif[j].memberCreator.username; 
-                        attachment.text = `${type} by ${creator}`;
-                        msg.attachments.push(attachment);
-                    }
                     
                     // TODO -> DISPLAY NOTIFICATIONS BASED ON TYPE
                     // TODO -> MARK NOTIFICATIONS AS READ 
 
-                    if (notifNum > 0) {
+                    if (notif.length > 0) {
+                                            let msg = getMsg(notif);
+
                         let userId = dbData[i].id;      // get user's id (on chat platform)
                         robot.messageRoom(userId, msg); // send massage to that user
                     }
@@ -66,5 +59,19 @@ module.exports = function (robot) {
             robot.messageRoom('general', 'dbError on scheduler.js. Please check server log');
             robot.logger.error(dbError)
         })
+    }
+
+    function getMsg(notif) {
+        var msg = { attachments: [] };
+        let notifNum = notif.length;
+
+        for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
+            let attachment = message.attachment();
+            let type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
+            let creator = notif[j].memberCreator.username;
+            attachment.pretext = `${type} by ${creator}`;
+
+            msg.attachments.push(attachment);
+        }
     }
 }
