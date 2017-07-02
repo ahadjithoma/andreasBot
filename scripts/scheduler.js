@@ -58,10 +58,18 @@ module.exports = function (robot) {
 
     function getMsg(notif) {
         var msg = { attachments: [] };
-        let notifNum = notif.length;
+        var notifNum = notif.length;
 
         for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
             let attachment = message.attachment();
+
+            switch (notif[j].type) {
+                case 'commentCard' || 'changedCard':
+                    robot.messageRoom('random', 'card')
+                    break;
+            }
+
+
             let type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
             let creator = notif[j].memberCreator.username;
             attachment.pretext = `${type} by ${creator}`;
