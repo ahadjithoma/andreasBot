@@ -43,8 +43,10 @@ module.exports = function (robot) {
                     let notifNum = notif.length;
 
                     for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
-                        let attachment = message.attachment()
-                        attachment.text = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase();// + ' by ' + notif[j].memberCreator.username;  
+                        let attachment = message.attachment();
+                        let type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
+                        let creator = notif[j].memberCreator.username; 
+                        attachment.text = `${type} by ${creator}`;
                         msg.attachments.push(attachment);
                     }
                     
