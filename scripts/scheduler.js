@@ -64,7 +64,7 @@ module.exports = function (robot) {
             let attachment = message.attachment();
 
             switch (notif[j].type) {
-                case 'commentCard' || 'changedCard':
+                case ('commentCard' || 'changeCard'):
                     robot.messageRoom('random', 'card')
                     break;
             }
