@@ -40,13 +40,8 @@ module.exports = function (robot) {
 
                 trello.getAsync('/1/member/me/notifications', args).then(notif => {
 
-                    
-                    // TODO -> DISPLAY NOTIFICATIONS BASED ON TYPE
-                    // TODO -> MARK NOTIFICATIONS AS READ 
-
                     if (notif.length > 0) {
-                                            let msg = getMsg(notif);
-
+                        let msg = getMsg(notif);
                         let userId = dbData[i].id;      // get user's id (on chat platform)
                         robot.messageRoom(userId, msg); // send massage to that user
                     }
@@ -73,5 +68,6 @@ module.exports = function (robot) {
 
             msg.attachments.push(attachment);
         }
+        return msg;
     }
 }
