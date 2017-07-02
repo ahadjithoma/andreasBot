@@ -44,7 +44,7 @@ module.exports = function (robot) {
 
                     for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
                         let attachment = message.attachment()
-                        attachment.text = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase() + ' by ' + notif[j].memberCreator.username;  
+                        attachment.text = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase();// + ' by ' + notif[j].memberCreator.username;  
                         msg.attachments.push(attachment);
                     }
                     
