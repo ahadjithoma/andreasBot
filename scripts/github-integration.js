@@ -78,7 +78,7 @@ module.exports = function (robot) {
 		if (adapter == 'slack') {
 			let msg = slackMsgs.githubEvent();
 			let target_url = payload.deployment_status.target_url;
-			let repo_url = payload.deployment_status.repository_url;
+			let repo_url = payload.repository.html_url;
 			let state = payload.deployment_status.state;
 			let creator = payload.deployment_status.creator.login;
 			let repo = payload.repository.full_name;
