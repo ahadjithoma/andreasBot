@@ -63,10 +63,11 @@ module.exports = function (robot) {
 
         for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
             let attachment = message.attachment();
-            let type, creator, text, pretext, cardUrl, cardName, color;
+            let type, creator, text, pretext, cardUrl, cardName, listName, color;
             creator = notif[j].memberCreator.username;
             cardUrl = `https://trello.com/c/${notif[j].data.card.shortLink}`
             cardName = notif[j].data.card.name;
+            listName = notif[j].data.listBefore.name || notif[j].data.list.name 
             switch (notif[j].type) {
                 // case 'addAdminToBoard':
                 // case 'addAdminToOrganization':
@@ -80,13 +81,14 @@ module.exports = function (robot) {
                 case 'changeCard':
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
-                    pretext = `Card <${cardUrl}|${cardName}> updated by ${creator}`;
+
+                    pretext = `Card <${cardUrl}|${cardName}> on list _${listName}_ updated by ${creator}`;
                     color = c.getColor('cyan');
                     if (notif[j].data.card.due != null) {
                         let fullDate = getDate(notif[j].data.card.due);
                         text = `*Due Date:* ${fullDate}`;
                     } else if (notif[j].data.listBefore){
-                        text = `Card moved to list: ${notif[j].data.listAfter.name}`;
+                        text = `*Moved* to list: ${notif[j].data.listAfter.name}`;
                     }
                     break;
                 case 'closeBoard':
