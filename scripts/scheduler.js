@@ -66,13 +66,40 @@ module.exports = function (robot) {
             switch (notif[j].type) {
                 case 'commentCard':
                 case 'changeCard':
-                    robot.messageRoom('random', 'card')
+                case 'addAdminToBoard':
+                case 'addAdminToOrganization':
+                case 'addedAttachmentToCard':
+                case 'addedMemberToCard':
+                case 'addedToBoard':
+                case 'addedToCard':
+                case 'addedToOrganization':
+                case 'cardDueSoon':
+                case 'changeCard':
+                case 'closeBoard':
+                case 'commentCard':
+                case 'createdCard':
+                case 'declinedInvitationToBoard':
+                case 'declinedInvitationToOrganization':
+                case 'invitedToBoard':
+                case 'invitedToOrganization':
+                case 'makeAdminOfBoard':
+                case 'makeAdminOfOrganization':
+                case 'memberJoinedTrello':
+                case 'mentionedOnCard':
+                case 'removedFromBoard':
+                case 'removedFromCard':
+                case 'removedFromOrganization':
+                case 'removedMemberFromCard':
+                case 'unconfirmedInvitedToBoard':
+                case 'unconfirmedInvitedToOrganization':
+                case 'updateCheckItemStateOnCard':
                     break;
+                default: 
+                                    let type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
+                    let creator = notif[j].memberCreator.username;break;
             }
 
 
-            let type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
-            let creator = notif[j].memberCreator.username;
             attachment.pretext = `${type} by ${creator}`;
 
             msg.attachments.push(attachment);
