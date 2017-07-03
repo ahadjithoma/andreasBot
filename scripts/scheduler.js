@@ -96,7 +96,7 @@ module.exports = function (robot) {
                 case 'unconfirmedInvitedToBoard':
                 case 'unconfirmedInvitedToOrganization':
                 case 'updateCheckItemStateOnCard':
-
+            
                 default:
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
