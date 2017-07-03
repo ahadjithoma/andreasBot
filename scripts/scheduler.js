@@ -76,7 +76,8 @@ module.exports = function (robot) {
                 case 'changeCard':
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
-                    break; break;
+                    attachment.pretext = `${type} by ${creator}`;
+                    break;
                 case 'closeBoard':
                 case 'commentCard':
                 case 'createdCard':
@@ -102,7 +103,6 @@ module.exports = function (robot) {
                     attachment.pretext = `${type} by ${creator}`;
                     break;
             }
-
             msg.attachments.push(attachment);
         }
         return msg;
