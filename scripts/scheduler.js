@@ -79,14 +79,14 @@ module.exports = function (robot) {
                 case 'changeCard':
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
-                    pretext = `${type} by ${creator}`;
-                    text = notif[i].data.card
+                    attachment.pretext = `${type} by ${creator}`;
+                    attachment.text = notif[i].data.card
                     break;
                 case 'closeBoard':
                     break;
                 case 'commentCard':
-                    pretext = `New comment on card <${cardUrl}|${cardName}> by ${creator}`
-                    text = notif[j].data.text
+                    attachment.pretext = `New comment on card <${cardUrl}|${cardName}> by ${creator}`
+                    attachment.text = notif[j].data.text
                     break;
                 // case 'createdCard':
                 // case 'declinedInvitationToBoard':
@@ -108,11 +108,9 @@ module.exports = function (robot) {
 
                 default:
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
-                    pretext = `${type} by ${creator}`;
+                    attachment.pretext = `${type} by ${creator}`;
                     break;
             }
-            attachment.pretext = pretext;
-            attachment.text = text;
             msg.attachments.push(attachment);
         }
         return msg;
