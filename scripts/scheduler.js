@@ -79,10 +79,10 @@ module.exports = function (robot) {
                 case 'changeCard':
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
-                    pretext = `Card <${cardUrl}|{cardName}> edited by ${creator}`;
+                    pretext = `Card <${cardUrl}|${cardName}> updated by ${creator}`;
                     if (notif[j].data.card.due != null) {
-                        let fullDate = notif[j].data.card.due;
-                        text = fullDate;
+                        let fullDate = getDate(notif[j].data.card.due);
+                        text = `*Due Date:* ${fullDate}`;
                     } else {
                         text = notif[j].data.listAfter;
                     }
@@ -101,7 +101,7 @@ module.exports = function (robot) {
                 // case 'makeAdminOfBoard':
                 // case 'makeAdminOfOrganization':
                 // case 'memberJoinedTrello':
-                // case 'mentionedOnCard':
+                // case 'mentioxnedOnCard':
                 // case 'removedFromBoard':
                 // case 'removedFromCard':
                 // case 'removedFromOrganization':
@@ -122,5 +122,40 @@ module.exports = function (robot) {
             msg.attachments.push(attachment);
         }
         return msg;
+    }
+
+
+    function getDate(timestamp) {
+        var d = new Date(timestamp);
+        var options = {
+            year: "numeric", month: "long",
+            day: "numeric", hour: "2-digit", minute: "2-digit"
+        };
+        var str = d.toLocaleString("en-uk", options).split(',') // MMMM DD, YYYY, HH:MM PP 
+        var date = str[0];
+        var year = str[1];
+        var time = str[2];
+        var day = d.getDate()
+
+        // don't display year if due date year matches the current year
+        if (parseInt(year) === (new Date()).getFullYear()) {
+            year = '';
+        } else {
+            year = ',' + year;
+        }
+
+        var suffix = "th";
+        if (day % 10 == 1 && day != 11) {
+            suffix = 'st'
+        } else if (day % 10 == 2 && day != 12) {
+            suffix = 'nd'
+        } else if (day % 10 == 3 && day != 13) {
+            suffix = 'rd'
+        }
+        else {
+            suffix = 'th'
+        }
+
+        return (date + suffix + year + ' at' + time);
     }
 }
