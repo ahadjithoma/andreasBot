@@ -62,7 +62,10 @@ module.exports = function (robot) {
 
         for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
             let attachment = message.attachment();
-            let type, creator;
+            let type, creator, text, pretext, cardUrl, cardName;
+            creator = notif[j].memberCreator.username;
+            cardUrl = `https://trello.com/c/${notif[j].data.card.shortLink}`
+            cardName = notif[j].data.card.name;
             switch (notif[j].type) {
                 case 'addAdminToBoard':
                 case 'addAdminToOrganization':
@@ -79,7 +82,10 @@ module.exports = function (robot) {
                     attachment.pretext = `${type} by ${creator}`;
                     break;
                 case 'closeBoard':
+                break;
                 case 'commentCard':
+                    pretext = `New comment on card <${cardUrl}|${cardName}> by ${creator}`
+                    text = notif[j].data.text
                 case 'createdCard':
                 case 'declinedInvitationToBoard':
                 case 'declinedInvitationToOrganization':
