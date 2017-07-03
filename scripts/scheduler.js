@@ -87,6 +87,8 @@ module.exports = function (robot) {
                 case 'commentCard':
                     attachment.pretext = `New comment on card <${cardUrl}|${cardName}> by ${creator}`
                     attachment.text = notif[j].data.text
+                                msg.attachments.push(attachment);
+
                     break;
                 // case 'createdCard':
                 // case 'declinedInvitationToBoard':
@@ -111,7 +113,6 @@ module.exports = function (robot) {
                     attachment.pretext = `${type} by ${creator}`;
                     break;
             }
-            msg.attachments.push(attachment);
         }
         return msg;
     }
