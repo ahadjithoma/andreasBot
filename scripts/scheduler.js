@@ -113,7 +113,7 @@ module.exports = function (robot) {
                     break;
             }
             attachment.text = text;
-            attachemnt.pretext = pretext;
+            attachment.pretext = pretext;
             msg.attachments.push(attachment);
 
         }
