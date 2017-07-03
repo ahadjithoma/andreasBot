@@ -87,8 +87,7 @@ module.exports = function (robot) {
                 case 'commentCard':
                     attachment.pretext = `New comment on card <${cardUrl}|${cardName}> by ${creator}`
                     attachment.text = notif[j].data.text
-                                msg.attachments.push(attachment);
-
+                    msg.attachments.push(attachment);
                     break;
                 // case 'createdCard':
                 // case 'declinedInvitationToBoard':
@@ -111,6 +110,8 @@ module.exports = function (robot) {
                 default:
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     attachment.pretext = `${type} by ${creator}`;
+                                        msg.attachments.push(attachment);
+
                     break;
             }
         }
