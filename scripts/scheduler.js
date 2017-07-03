@@ -84,7 +84,7 @@ module.exports = function (robot) {
                         let fullDate = notif[j].data.card.due;
                         text = fullDate;
                 } else {
-                        text = data.listAfter;
+                        text = notif[j].data.listAfter;
                     }
                     break;
                 case 'closeBoard':
