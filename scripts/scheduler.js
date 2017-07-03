@@ -80,7 +80,12 @@ module.exports = function (robot) {
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
                     pretext = `Card <${cardUrl}|{cardName}> edited by ${creator}`;
-                    text = notif[j].data.old;
+                    if (notif[j].data.card.due){
+                        let fullDate = notif[j].data.card.due;
+                        text = fullDate;
+                } else {
+                        text = data.listAfter;
+                    }
                     break;
                 case 'closeBoard':
                     break;
