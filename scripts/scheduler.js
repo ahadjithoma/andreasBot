@@ -85,8 +85,8 @@ module.exports = function (robot) {
                     if (notif[j].data.card.due != null) {
                         let fullDate = getDate(notif[j].data.card.due);
                         text = `*Due Date:* ${fullDate}`;
-                    } else {
-                        text = notif[j].data.listAfter;
+                    } else if (notif[j].data.listBefore){
+                        text = `Card moved to list: ${notif[j].data.listAfter.name}`;
                     }
                     break;
                 case 'closeBoard':
@@ -103,7 +103,7 @@ module.exports = function (robot) {
                 // case 'makeAdminOfBoard':
                 // case 'makeAdminOfOrganization':
                 // case 'memberJoinedTrello':
-                // case 'mentioxnedOnCard':
+                // case 'mentionedOnCard':
                 // case 'removedFromBoard':
                 // case 'removedFromCard':
                 // case 'removedFromOrganization':
@@ -117,11 +117,13 @@ module.exports = function (robot) {
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     text = 'default';
                     pretext = `${type} by ${creator}`;
+                    color = c.getColor('cyan');
+
                     break;
             }
             attachment.text = text;
             attachment.pretext = pretext;
-            attachment.color = color; 
+            attachment.color = color;
             msg.attachments.push(attachment);
         }
         return msg;
