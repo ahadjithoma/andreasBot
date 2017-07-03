@@ -108,7 +108,7 @@ module.exports = function (robot) {
 
                 default:
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
-                    text = null;
+                    text = 'default';
                     pretext = `${type} by ${creator}`;
                     break;
             }
