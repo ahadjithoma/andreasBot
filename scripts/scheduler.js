@@ -117,10 +117,9 @@ module.exports = function (robot) {
                     pretext = `${type} by ${creator}`;
                     break;
             }
-            attachment.text = text;
+            attachment.text = 'text';
             attachment.pretext = pretext;
             msg.attachments.push(attachment);
-
         }
         return msg;
     }
