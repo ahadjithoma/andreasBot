@@ -67,46 +67,46 @@ module.exports = function (robot) {
             cardUrl = `https://trello.com/c/${notif[j].data.card.shortLink}`
             cardName = notif[j].data.card.name;
             switch (notif[j].type) {
-                case 'addAdminToBoard':
-                case 'addAdminToOrganization':
-                case 'addedAttachmentToCard':
-                case 'addedMemberToCard':
-                case 'addedToBoard':
-                case 'addedToCard':
-                case 'addedToOrganization':
-                    break;
+                // case 'addAdminToBoard':
+                // case 'addAdminToOrganization':
+                // case 'addedAttachmentToCard':
+                // case 'addedMemberToCard':
+                // case 'addedToBoard':
+                // case 'addedToCard':
+                // case 'addedToOrganization':
+                //     break;
                 case 'cardDueSoon':
                 case 'changeCard':
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
-                    attachment.pretext = `${type} by ${creator}`;
+                    pretext = `${type} by ${creator}`;
                     break;
                 case 'closeBoard':
-                break;
+                    break;
                 case 'commentCard':
                     pretext = `New comment on card <${cardUrl}|${cardName}> by ${creator}`
                     text = notif[j].data.text
                     break;
-                case 'createdCard':
-                case 'declinedInvitationToBoard':
-                case 'declinedInvitationToOrganization':
-                case 'invitedToBoard':
-                case 'invitedToOrganization':
-                case 'makeAdminOfBoard':
-                case 'makeAdminOfOrganization':
-                case 'memberJoinedTrello':
-                case 'mentionedOnCard':
-                case 'removedFromBoard':
-                case 'removedFromCard':
-                case 'removedFromOrganization':
-                case 'removedMemberFromCard':
-                case 'unconfirmedInvitedToBoard':
-                case 'unconfirmedInvitedToOrganization':
-                case 'updateCheckItemStateOnCard':
-            
+                // case 'createdCard':
+                // case 'declinedInvitationToBoard':
+                // case 'declinedInvitationToOrganization':
+                // case 'invitedToBoard':
+                // case 'invitedToOrganization':
+                // case 'makeAdminOfBoard':
+                // case 'makeAdminOfOrganization':
+                // case 'memberJoinedTrello':
+                // case 'mentionedOnCard':
+                // case 'removedFromBoard':
+                // case 'removedFromCard':
+                // case 'removedFromOrganization':
+                // case 'removedMemberFromCard':
+                // case 'unconfirmedInvitedToBoard':
+                // case 'unconfirmedInvitedToOrganization':
+                // case 'updateCheckItemStateOnCard':
+                // break;
+
                 default:
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
-                    creator = notif[j].memberCreator.username;
                     pretext = `${type} by ${creator}`;
                     break;
             }
