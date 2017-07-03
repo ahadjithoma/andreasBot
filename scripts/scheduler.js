@@ -64,8 +64,6 @@ module.exports = function (robot) {
             let attachment = message.attachment();
             let type, creator;
             switch (notif[j].type) {
-                case 'commentCard':
-                case 'changeCard':
                 case 'addAdminToBoard':
                 case 'addAdminToOrganization':
                 case 'addedAttachmentToCard':
@@ -73,8 +71,12 @@ module.exports = function (robot) {
                 case 'addedToBoard':
                 case 'addedToCard':
                 case 'addedToOrganization':
+                    break;
                 case 'cardDueSoon':
                 case 'changeCard':
+                    type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
+                    creator = notif[j].memberCreator.username;
+                    break; break;
                 case 'closeBoard':
                 case 'commentCard':
                 case 'createdCard':
@@ -93,17 +95,13 @@ module.exports = function (robot) {
                 case 'unconfirmedInvitedToBoard':
                 case 'unconfirmedInvitedToOrganization':
                 case 'updateCheckItemStateOnCard':
-                    type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
-                    creator = notif[j].memberCreator.username;
-                    break;
+
                 default:
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
+                    attachment.pretext = `${type} by ${creator}`;
                     break;
             }
-
-
-            attachment.pretext = `${type} by ${creator}`;
 
             msg.attachments.push(attachment);
         }
