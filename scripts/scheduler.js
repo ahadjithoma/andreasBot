@@ -62,7 +62,7 @@ module.exports = function (robot) {
 
         for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
             let attachment = message.attachment();
-
+            let type, creator;
             switch (notif[j].type) {
                 case 'commentCard':
                 case 'changeCard':
@@ -93,10 +93,13 @@ module.exports = function (robot) {
                 case 'unconfirmedInvitedToBoard':
                 case 'unconfirmedInvitedToOrganization':
                 case 'updateCheckItemStateOnCard':
+                    type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
+                    creator = notif[j].memberCreator.username;
                     break;
-                default: 
-                                    let type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
-                    let creator = notif[j].memberCreator.username;break;
+                default:
+                    type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
+                    creator = notif[j].memberCreator.username;
+                    break;
             }
 
 
