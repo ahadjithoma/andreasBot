@@ -79,8 +79,8 @@ module.exports = function (robot) {
                 case 'changeCard':
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
-                    pretext = `${type} by ${creator}`;
-                    text = notif[j].data.card
+                    pretext = `Card <${cardUrl}|{cardName}> edited by ${creator}`;
+                    text = notif[j].data.old;
                     break;
                 case 'closeBoard':
                     break;
