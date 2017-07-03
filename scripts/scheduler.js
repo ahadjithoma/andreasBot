@@ -80,7 +80,7 @@ module.exports = function (robot) {
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
                     attachment.pretext = `${type} by ${creator}`;
-                    attachment.text = notif[i].data.card
+                    attachment.text = notif[j].data.card
                     break;
                 case 'closeBoard':
                     break;
