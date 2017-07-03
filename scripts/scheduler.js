@@ -80,10 +80,10 @@ module.exports = function (robot) {
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
                     pretext = `Card <${cardUrl}|{cardName}> edited by ${creator}`;
-                    if (notif[j].data.card.due){
+                    if (notif[j].data.card.due != null) {
                         let fullDate = notif[j].data.card.due;
                         text = fullDate;
-                } else {
+                    } else {
                         text = notif[j].data.listAfter;
                     }
                     break;
@@ -117,7 +117,7 @@ module.exports = function (robot) {
                     pretext = `${type} by ${creator}`;
                     break;
             }
-            attachment.text = 'text';
+            attachment.text = text;
             attachment.pretext = pretext;
             msg.attachments.push(attachment);
         }
