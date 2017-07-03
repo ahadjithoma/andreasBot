@@ -2,6 +2,7 @@ var key = process.env.HUBOT_TRELLO_KEY;
 var Promise = require('bluebird');
 var Trello = require('node-trello');
 var message = require('./slackMsgs.js');
+var c = require('./colors.js');
 
 module.exports = function (robot) {
     var db = require('./mlab-login.js').db();
@@ -62,7 +63,7 @@ module.exports = function (robot) {
 
         for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
             let attachment = message.attachment();
-            let type, creator, text, pretext, cardUrl, cardName;
+            let type, creator, text, pretext, cardUrl, cardName, color;
             creator = notif[j].memberCreator.username;
             cardUrl = `https://trello.com/c/${notif[j].data.card.shortLink}`
             cardName = notif[j].data.card.name;
@@ -80,6 +81,7 @@ module.exports = function (robot) {
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
                     pretext = `Card <${cardUrl}|${cardName}> updated by ${creator}`;
+                    color = c.getColor('cyan');
                     if (notif[j].data.card.due != null) {
                         let fullDate = getDate(notif[j].data.card.due);
                         text = `*Due Date:* ${fullDate}`;
@@ -119,6 +121,7 @@ module.exports = function (robot) {
             }
             attachment.text = text;
             attachment.pretext = pretext;
+            attachment.color = color; 
             msg.attachments.push(attachment);
         }
         return msg;
