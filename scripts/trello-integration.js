@@ -39,7 +39,7 @@ module.exports = function(robot) {
                 robot.messageRoom(room, `updateList`);
                 break;
             default:
-                robot.messageRoom(room, type.split(/(?=[A-Z])/).toLowerCase().join(" "));
+                robot.messageRoom(room, type.split(/(?=[A-Z])/).join(" ").toLowerCase());
                 break;
         }
     })
