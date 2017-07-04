@@ -39,7 +39,7 @@ module.exports = function(robot) {
                 robot.messageRoom(room, `updateList`);
                 break;
             default:
-                robot.messageRoom(room, `trello-webhook-event`);
+                robot.messageRoom(room, type.split(/(?=[A-Z])/).toLowerCase().join(" "));
                 break;
         }
     })

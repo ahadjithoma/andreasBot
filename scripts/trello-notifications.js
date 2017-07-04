@@ -27,7 +27,7 @@ module.exports = function (robot) {
         robot.logger.info(dbError)
     });
 
-    trelloNotifications(); //for debugging
+    trelloNotifications(); //for debugging -> MUST DELETE THIS AT THE END OF DEVELOPMENT
     function trelloNotifications() {
         robot.logger.info('started')
         db.bind('trelloTokens');
@@ -65,8 +65,9 @@ module.exports = function (robot) {
             let attachment = message.attachment();
             let type, creator, text, pretext, cardUrl, cardName, listName, color;
             creator = notif[j].memberCreator.username;
-            cardUrl = `https://trello.com/c/${notif[j].data.card.shortLink}`
+            cardUrl = `https://trello.com/c/${notif[j].data.card.shortLink}`;
             cardName = notif[j].data.card.name;
+
             switch (notif[j].type) {
                 // case 'addAdminToBoard':
                 // case 'addAdminToOrganization':
@@ -78,8 +79,7 @@ module.exports = function (robot) {
                 //     break;
                 case 'cardDueSoon':
                 case 'changeCard':
-                            listName = (notif[j].data.listBefore || notif[j].data.list)['name'];
-
+                    listName = (notif[j].data.listBefore || notif[j].data.list)['name'];
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
                     pretext = `Card <${cardUrl}|${cardName}> on list _${listName}_ updated by ${creator}`;
@@ -87,7 +87,7 @@ module.exports = function (robot) {
                     if (notif[j].data.card.due != null) {
                         let fullDate = getDate(notif[j].data.card.due);
                         text = `*Due Date:* ${fullDate}`;
-                    } else if (notif[j].data.listBefore){
+                    } else if (notif[j].data.listBefore) {
                         text = `*Moved* to list: ${notif[j].data.listAfter.name}`;
                     }
                     break;
