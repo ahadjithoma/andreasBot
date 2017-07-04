@@ -67,7 +67,7 @@ module.exports = function (robot) {
             creator = notif[j].memberCreator.username;
             cardUrl = `https://trello.com/c/${notif[j].data.card.shortLink}`
             cardName = notif[j].data.card.name;
-            listName = notif[j].data.listBefore.name || notif[j].data.list.name 
+            listName = (notif[j].data.listBefore.name || notif[j].data.list.name)
             switch (notif[j].type) {
                 // case 'addAdminToBoard':
                 // case 'addAdminToOrganization':
@@ -81,7 +81,6 @@ module.exports = function (robot) {
                 case 'changeCard':
                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
-
                     pretext = `Card <${cardUrl}|${cardName}> on list _${listName}_ updated by ${creator}`;
                     color = c.getColor('cyan');
                     if (notif[j].data.card.due != null) {
