@@ -10,6 +10,39 @@ module.exports = function (robot) {
         robot.logger.info(`trello-webhook POST. Status Code: ${res.statusCode}\nHeaders: ${headers}`);
         robot.emit("trello-webhook-event", req, res);
         res.send(200);
-        robot.messageRoom('random', 'webhook from trello - testing');
+
+        var room = "random";
+        let payload = req.body;
+        let type = payload.action.type;
+        // switch (type)
+        robot.messageRoom('random', type);
+
+/*addAdminToBoard
+addAdminToOrganization
+addedAttachmentToCard
+addedMemberToCard
+addedToBoard
+addedToCard
+addedToOrganization
+cardDueSoon
+changeCard
+closeBoard
+commentCard
+createdCard
+declinedInvitationToBoard
+declinedInvitationToOrganization
+invitedToBoard
+invitedToOrganization
+makeAdminOfBoard
+makeAdminOfOrganization
+memberJoinedTrello
+mentionedOnCard
+removedFromBoard
+removedFromCard
+removedFromOrganization
+removedMemberFromCard
+unconfirmedInvitedToBoard
+unconfirmedInvitedToOrganization
+updateCheckItemStateOnCard*/
     });
 }
