@@ -10,5 +10,6 @@ module.exports = function (robot) {
         robot.logger.info(`trello-webhook POST. Status Code: ${res.statusCode}\nHeaders: ${headers}`);
         robot.emit("trello-webhook-event", req, res);
         res.send(200);
+        robot.messageRoom('random', 'webhook from trello - testing');
     });
 }

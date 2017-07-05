@@ -80,7 +80,7 @@ module.exports = function (robot) {
                 case 'cardDueSoon':
                 case 'changeCard':
                     listName = (notif[j].data.listBefore || notif[j].data.list)['name'];
-                    type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
+                    // type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
                     pretext = `Card <${cardUrl}|${cardName}> on list _${listName}_ updated by ${creator}`;
                     color = c.getColor('cyan');

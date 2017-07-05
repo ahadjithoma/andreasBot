@@ -1,4 +1,4 @@
-module.exports = function(robot) {
+module.exports = function (robot) {
     // 'use strict'
 
     var slackmsg = require("./slackMsgs.js");
@@ -16,28 +16,37 @@ module.exports = function(robot) {
     const Promise = require("bluebird");
     var trello = Promise.promisifyAll(trelloAuth);
 
-    robot.hear(/trello hooks/, function(res) {
+    robot.hear(/trello hooks/, function (res) {
         let boardId = 'BE7seI7e';
         let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
         let args = { description: "my test webhook", callbackURL: cb_url, idModel: '59245663c76f54b975558854' };
 
-        trello.postAsync('/1/webhooks', args).then(function(data) {
+        trello.postAsync('/1/webhooks', args).then(function (data) {
             res.send(data)
-        }).catch(function(err) {
+        }).catch(function (err) {
             res.send(err.Error);
         })
     })
 
-    robot.on('trello-webhook-event', function(data, res) {
+    robot.hear(/delete trello webhook (.*)/, function (res_r) {
+        res_r.match[1];
+        // TODO0
+
+    })
+
+    robot.on('trello-webhook-event', function (data, res) {
 
         var room = "random";
         let payload = data.body;
         let type = payload.action.type;
         robot.logger.info(type);
         switch (type) {
+
             case 'updateList':
                 robot.messageRoom(room, `updateList`);
                 break;
+            case 'voteOnCard':
+                break;  
             default:
                 robot.messageRoom(room, type.split(/(?=[A-Z])/).join(" ").toLowerCase());
                 break;
@@ -65,12 +74,12 @@ module.exports = function(robot) {
     }
 
     // trello board
-    robot.hear(/trello board/i, function(res_r) {
+    robot.hear(/trello board/i, function (res_r) {
         // TODO: fetch the board id from other source (env, redis or mongodb)
         let boardId = 'BE7seI7e';
         let args = { fields: "name,url,prefs" };
 
-        trello.get("/1/board/" + boardId, args, function(err, data) {
+        trello.get("/1/board/" + boardId, args, function (err, data) {
             if (err) {
                 res_r.send(err);
                 robot.logger.error(err);
@@ -103,7 +112,7 @@ module.exports = function(robot) {
     var slackCB = 'slack:msg_action:';
 
     // responding to 'trello_board' interactive message
-    robot.on(slackCB + 'trello_board', function(data, res) {
+    robot.on(slackCB + 'trello_board', function (data, res) {
         robot.logger.info(`robot.on: ${slackCB}trello_board`);
         let btnId = data.actions[0].value;
         let btnName = data.actions[0].name;
@@ -122,7 +131,7 @@ module.exports = function(robot) {
                 // get board info to fetch lists
                 let boardId = 'BE7seI7e';
                 let args = { lists: "all" };
-                trello.get("1/board/" + boardId, args, function(err, data) {
+                trello.get("1/board/" + boardId, args, function (err, data) {
                     if (err) {
                         res.send(err);
                         robot.logger.error(err);
@@ -160,7 +169,7 @@ module.exports = function(robot) {
     })
 
     // responding to 'trello_list' interactive message
-    robot.on(slackCB + 'trello_list', function(data_board, res) {
+    robot.on(slackCB + 'trello_list', function (data_board, res) {
         let response_url = data_board.response_url;
 
         res.status(200).end() // best practice to respond with 200 status
@@ -170,7 +179,7 @@ module.exports = function(robot) {
 
         // call function to fetch list - provide list id
         let args = { cards: "all" };
-        trello.get("/1/lists/" + listId, args, function(err, data) {
+        trello.get("/1/lists/" + listId, args, function (err, data) {
             if (err) {
                 robot.logger.error(err);
                 res.send(`Error: ${err}`)
