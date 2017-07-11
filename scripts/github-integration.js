@@ -34,12 +34,11 @@ module.exports = function (robot) {
 	// 	key: process.env.GITHUB_APP_CLIENT_ID,
 	// 	secret: process.env.GITHUB_APP_CLIENT_SECRET
 	// })
-	robot.hear(/gh hook/i, function (res_r) {
+	robot.hear(/gh auth/i, function (res_r) {
 
 		var client_id = process.env.GITHUB_APP_CLIENT_ID;
 		var data = { client_id: client_id };
-		robot.http("http://github.com/login/oauth/authorize").get()(function (err, res, body) {
-
+		robot.http("http://github.com/login/oauth/authorize").post(data)(function (err, res, body) {
 			console.log(err)
 			console.log(res)
 			console.log(body)
