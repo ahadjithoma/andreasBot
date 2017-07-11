@@ -52,14 +52,11 @@ module.exports = function (robot) {
             case 'updateLabel':
             case 'updateList':
             case 'voteOnCard':
-                robot.messageRoom(room, type.split(/(?=[A-Z])/).join(" ").toLowerCase());
+                robot.messageRoom(room, 'webhook: ' + type.split(/(?=[A-Z])/).join(" ").toLowerCase());
                 break;
             default:
                 robot.messageRoom(room, 'webhook not found: ' + type.split(/(?=[A-Z])/));
                 break;
         }
-        robot.messageRoom('random', type);
-
-
     });
 }

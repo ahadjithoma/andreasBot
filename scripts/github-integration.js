@@ -23,9 +23,16 @@ module.exports = function (robot) {
 	});
 
 	/* oauth autentication using github personal token */
+	// github.authenticate({
+	// 	"type": "oauth",
+	// 	"token": process.env.HUBOT_GITHUB_TOKEN
+	// })
+
+	// oauth key/secret (to get a token)
 	github.authenticate({
-		"type": "oauth",
-		"token": process.env.HUBOT_GITHUB_TOKEN
+		type: "oauth",
+		key: process.env.GITHUB_APP_CLIENT_ID,
+		secret: process.env.GITHUB_APP_CLIENT_SECRET
 	})
 
 	/* basic autentication using github's username & password */
