@@ -29,21 +29,22 @@ module.exports = function (robot) {
 	// })
 
 	// oauth key/secret (to get a token)
-	github.authenticate({
-		type: "oauth",
-		key: process.env.GITHUB_APP_CLIENT_ID,
-		secret: process.env.GITHUB_APP_CLIENT_SECRET
-	})
+	// github.authenticate({
+	// 	type: "oauth",
+	// 	key: process.env.GITHUB_APP_CLIENT_ID,
+	// 	secret: process.env.GITHUB_APP_CLIENT_SECRET
+	// })
+	robot.hear(/gh hook/i, function (res_r) {
 
-var client_id = process.env.GITHUB_APP_CLIENT_ID;
-var data = {client_id: client_id};
-	robot.http("http://github.com/login/oauth/authorize").get()(function(err, res, body) {
+		var client_id = process.env.GITHUB_APP_CLIENT_ID;
+		var data = { client_id: client_id };
+		robot.http("http://github.com/login/oauth/authorize").get()(function (err, res, body) {
 
 			console.log(err)
 			console.log(res)
 			console.log(body)
 		})
-
+	})
 	/* basic autentication using github's username & password */
 	// github.authenticate({
 	//     type: "basic",
