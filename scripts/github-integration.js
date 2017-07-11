@@ -35,6 +35,13 @@ module.exports = function (robot) {
 		secret: process.env.GITHUB_APP_CLIENT_SECRET
 	})
 
+	robot.http("https://midnight-train")
+		.get(function(err, res, body){
+			console.log(err)
+			console.log(res)
+			console.log(body)
+		})
+
 	/* basic autentication using github's username & password */
 	// github.authenticate({
 	//     type: "basic",
@@ -75,7 +82,7 @@ module.exports = function (robot) {
 		}
 	}
 
-	function getCommits(){
+	function getCommits() {
 
 	}
 
