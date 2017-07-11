@@ -35,8 +35,9 @@ module.exports = function (robot) {
 		secret: process.env.GITHUB_APP_CLIENT_SECRET
 	})
 
-	robot.http("https://midnight-train")
-		.get(function(err, res, body){
+var data = {client_id: process.var.GITHUB_APP_CLIENT_ID};
+	robot.http("http://github.com/login/oauth/authorize")
+		.get(data, function(err, res, body){
 			console.log(err)
 			console.log(res)
 			console.log(body)
