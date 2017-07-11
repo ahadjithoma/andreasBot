@@ -37,9 +37,15 @@ module.exports = function (robot) {
 	robot.hear(/gh auth/i, function (res_r) {
 
 		var client_id = process.env.GITHUB_APP_CLIENT_ID;
-		var data = { client_id: client_id };
-		robot.http("http://github.com/login/oauth/authorize").post(data)(function (err, res, body) {
-			console.log(err)
+		var data = { client_id: client_id,
+		redirect_uri: "https://andreasbot.herokuapp.com/hubot/github-oauth"};
+		
+
+		robot.http("http://github.com/login/oauth/authorize").get(data)(function (err, res, body) {
+			if (err){
+				robot.logger.error(err)
+				return 0;
+			}
 			console.log(res)
 			console.log(body)
 		})
