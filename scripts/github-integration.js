@@ -37,8 +37,8 @@ module.exports = function (robot) {
 
 var client_id = process.env.GITHUB_APP_CLIENT_ID;
 var data = {client_id: client_id};
-	robot.http("http://github.com/login/oauth/authorize")
-		.post(function(err, res, body){
+	robot.http("http://github.com/login/oauth/authorize").get()(function(err, res, body) {
+
 			console.log(err)
 			console.log(res)
 			console.log(body)
