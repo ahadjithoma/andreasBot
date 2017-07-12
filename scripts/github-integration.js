@@ -39,9 +39,12 @@ module.exports = function (robot) {
 		var client_id = process.env.GITHUB_APP_CLIENT_ID;
 		var data = { client_id: client_id,
 		redirect_uri: "https://andreasbot.herokuapp.com/hubot/github-oauth"};
+		var headers = {  'Accept': 'application/vnd.github.machine-man-preview+json'};
 		
 
-		robot.http("http://github.com/login/oauth/authorize").get(data)(function (err, res, body) {
+		robot.http("http://github.com/login/oauth/authorize")
+		.headers(headers)
+		.get(data)(function (err, res, body) {
 			if (err){
 				robot.logger.error(err)
 				return 0;
