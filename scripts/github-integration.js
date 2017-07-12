@@ -46,11 +46,11 @@ module.exports = function (robot) {
 		.headers(headers)
 		.get(data)(function (err, res, body) {
 			if (err){
-				robot.logger.error(err)
+				res_r.send(err)
 				return 0;
 			}
-			console.log(res)
-			console.log(body)
+			res_r.send(res)
+			res_r.send(body)
 		})
 	})
 	/* basic autentication using github's username & password */
