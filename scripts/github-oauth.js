@@ -5,36 +5,36 @@ module.exports = function (robot) {
     var authorization_base_url = 'https://github.com/login/oauth/authorize'
     var token_url = 'https://github.com/login/oauth/access_token'
 
-/* oauth */
-/**************************************************************************************/
- describe('OAuth2',function(){
-  var OAuth = require('oauth');
+    /* oauth */
+    /**************************************************************************************/
+    var githubOAuth = require('github-oauth')({
+        githubClient: client_id,
+        githubSecret: client_secret,
+        baseURL: 'https://andreasbot.herokuapp.com/',
+        loginURI: '/login',
+        callbackURI: '/callback',
+        scope: 'user' // optional, default scope is set to user
+    })
 
-   it('gets bearer token', function(done){
-     var OAuth2 = OAuth.OAuth2;    
-     var twitterConsumerKey = client_id;
-     var twitterConsumerSecret = client_secret;
-     var oauth2 = new OAuth2(server.config.keys.twitter.consumerKey,
-       twitterConsumerSecret, 
-       hostUrl, 
-       null,
-       'oauth2/token', 
-       null);
-     oauth2.getOAuthAccessToken(
-       '',
-       {'grant_type':'client_credentials'},
-       function (e, access_token, refresh_token, results){
-       console.log('bearer: ',access_token);
-       done();
-     });
-   });
- })
+    require('http').createServer(function (req, res) {
+        if (req.url.match(/login/)) return githubOAuth.login(req, res)
+        if (req.url.match(/callback/)) return githubOAuth.callback(req, res)
+    }).listen(80)
 
+    githubOAuth.on('error', function (err) {
+        console.error('there was a login error', err)
+    })
 
+    githubOAuth.on('token', function (token, serverResponse) {
+        console.log('here is your shiny new github oauth token', token)
+        serverResponse.end(JSON.stringify(token))
+    })
 
 
-/* SIMPLE_OAUTH2 */
-/**************************************************************************************/
+
+
+    /* SIMPLE_OAUTH2 */
+    /**************************************************************************************/
     // // Set the configuration settings
     // const credentials = {
     //     client: {
