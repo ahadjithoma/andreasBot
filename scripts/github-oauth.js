@@ -26,7 +26,7 @@ module.exports = function (robot) {
     });
 
     // Redirect example using Express (see http://expressjs.com/api.html#res.redirect)
-    res.redirect(authorizationUri);
+    robot.logger.info(authorizationUri);
 
     // Get the access token object (the authorization code is given from the previous step).
     const tokenConfig = {
