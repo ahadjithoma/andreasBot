@@ -5,21 +5,34 @@ module.exports = function (robot) {
     var authorization_base_url = 'https://github.com/login/oauth/authorize'
     var token_url = 'https://github.com/login/oauth/access_token'
 
+    /* mine */
+    /**************************************************************************************/
+    // https://github.com/login/oauth/authorize?scope=user:email&client_id=Iv1.c499866501901223
+    // var scopes = 'user:email'
+    // var url = authorization_base_url + `?scope=${scopes}&client_id=${client_id}`;
+    // robot.messageRoom('andreas_h92', url);
+
+    // robot.router.get('/', function (req, res) {
+    // })
+
+
     /* oauth */
     /**************************************************************************************/
     var githubOAuth = require('github-oauth')({
         githubClient: client_id,
         githubSecret: client_secret,
-  baseURL: 'http://localhost',
+        baseURL: 'https://andreasbot.herokuapp.com',
         loginURI: '/login',
         callbackURI: '/callback',
         scope: 'user' // optional, default scope is set to user
     })
 
-    require('http').createServer(function (req, res) {
-        if (req.url.match(/login/)) return githubOAuth.login(req, res)
-        if (req.url.match(/callback/)) return githubOAuth.callback(req, res)
-    }).listen(8080)
+    robot.router.get('/login/', function (req, res) {
+        return githubOAuth.login(req, res)
+    })
+    robot.router.get('/callback/', function (req, res) {
+        return githubOAuth.callback(req, res)
+    })
 
     githubOAuth.on('error', function (err) {
         console.error('there was a login error', err)
@@ -29,9 +42,6 @@ module.exports = function (robot) {
         console.log('here is your shiny new github oauth token', token)
         serverResponse.end(JSON.stringify(token))
     })
-
-
-
 
     /* SIMPLE_OAUTH2 */
     /**************************************************************************************/
