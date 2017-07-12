@@ -19,7 +19,7 @@ module.exports = function (robot) {
     require('http').createServer(function (req, res) {
         if (req.url.match(/login/)) return githubOAuth.login(req, res)
         if (req.url.match(/callback/)) return githubOAuth.callback(req, res)
-    }).listen(80)
+    }).listen(8080)
 
     githubOAuth.on('error', function (err) {
         console.error('there was a login error', err)
