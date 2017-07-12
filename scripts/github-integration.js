@@ -44,7 +44,7 @@ module.exports = function (robot) {
 
 		robot.http("http://github.com/login/oauth/authorize")
 		.headers(headers)
-		.get(data)(function (err, res, body) {
+		.post(data)(function (err, res, body) {
 			if (err){
 				robot.logger.error(err)
 				return 0;
