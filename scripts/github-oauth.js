@@ -37,6 +37,8 @@ module.exports = function (robot) {
 
     robot.router.get('/auth/github/callback', function (req, res) {
         var code = req.query.code;
+        console.log("code: " + code + "\n");
+
         OAuth2.getOAuthAccessToken(code, {}, function (err, access_token, refresh_token) {
             if (err) {
                 console.log(err);
@@ -44,10 +46,6 @@ module.exports = function (robot) {
             accessToken = access_token;
             // authenticate github API
             console.log("AccessToken: " + accessToken + "\n");
-            github.authenticate({
-                type: "oauth",
-                token: accessToken
-            });
         });
         res.redirect('home');
     });
