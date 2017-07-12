@@ -11,7 +11,7 @@ module.exports = function (robot) {
             secret: client_secret
         },
         auth: {
-            tokenHost: hostUrl
+            tokenHost: "http://github.com/login/oauth/authorize"
         }
     };
 
