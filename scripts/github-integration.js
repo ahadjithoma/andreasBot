@@ -37,23 +37,36 @@ module.exports = function (robot) {
 	robot.hear(/gh auth/i, function (res_r) {
 
 		var client_id = process.env.GITHUB_APP_CLIENT_ID;
-		var data = { client_id: client_id,
-		redirect_uri: "https://andreasbot.herokuapp.com/hubot/github-oauth"};
-		var headers = {  'Accept': 'application/vnd.github.machine-man-preview+json'};
+		var client_secret = process.env.GITHUB_APP_CLIENT_SECRET;
+
+		github.authorization.getOrCreateAuthorizationForApp({
+			client_secret:client_secret, 
+			client_id:client_id, 
+			note:'some note'
+		}).then(res => {
+			robot.logger.info(res);
+		}).catch(err => {
+			robot.logger.error(err);
+		});
+
+
+		// var data = { client_id: client_id,
+		// redirect_uri: "https://andreasbot.herokuapp.com/hubot/github-oauth"};
+		// var headers = {  'Accept': 'application/vnd.github.machine-man-preview+json'};
 		
 
-		robot.http("http://github.com/login/oauth/authorize")
-		.headers(headers)
-		.post(data)(function (err, res, body) {
-			if (err){
-				robot.logger.error(err)
-				return 0;
-			}
-			robot.logger.info(res)
-			robot.logger.warning(body)
-						robot.logger.error(res.req.ClientRequest._events.response)
+		// robot.http("http://github.com/login/oauth/authorize")
+		// .headers(headers)
+		// .post(data)(function (err, res, body) {
+		// 	if (err){
+		// 		robot.logger.error(err)
+		// 		return 0;
+		// 	}
+		// 	robot.logger.info(res)
+		// 	robot.logger.warning(body)
+		// 				robot.logger.error(res.req.ClientRequest._events.response)
 
-		})
+		// })
 	})
 	/* basic autentication using github's username & password */
 	// github.authenticate({
