@@ -28,21 +28,21 @@ module.exports = function (robot) {
     // Redirect example using Express (see http://expressjs.com/api.html#res.redirect)
     robot.logger.info(authorizationUri);
 
-    // Get the access token object (the authorization code is given from the previous step).
-    const tokenConfig = {
-        code: '<code>',
-        redirect_uri: 'https://andreasbot.herokuapp.com/hubot/github-oauth'
-    };
+    // // Get the access token object (the authorization code is given from the previous step).
+    // const tokenConfig = {
+    //     code: '<code>',
+    //     redirect_uri: 'https://andreasbot.herokuapp.com/hubot/github-oauth'
+    // };
 
-    // Callbacks
-    // Save the access token
-    oauth2.authorizationCode.getToken(tokenConfig, (error, result) => {
-        if (error) {
-            return robot.logger.error('Access Token Error', error.message);
-        }
+    // // Callbacks
+    // // Save the access token
+    // oauth2.authorizationCode.getToken(tokenConfig, (error, result) => {
+    //     if (error) {
+    //         return robot.logger.error('Access Token Error', error.message);
+    //     }
 
-        const token = oauth2.accessToken.create(result);
-        robot.logger.info(token);
-    });
+    //     const token = oauth2.accessToken.create(result);
+    //     robot.logger.info(token);
+    // });
 
 }
