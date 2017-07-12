@@ -51,6 +51,8 @@ module.exports = function (robot) {
 			}
 			robot.logger.info(res)
 			robot.logger.warning(body)
+						robot.logger.error(res.req.ClientRequest._events.response)
+
 		})
 	})
 	/* basic autentication using github's username & password */
