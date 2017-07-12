@@ -15,33 +15,74 @@ module.exports = function (robot) {
     // robot.router.get('/', function (req, res) {
     // })
 
-
-    /* oauth */
+    /* oauth*/
     /**************************************************************************************/
-    var githubOAuth = require('github-oauth')({
-        githubClient: client_id,
-        githubSecret: client_secret,
-        baseURL: 'https://andreasbot.herokuapp.com',
-        loginURI: '/login',
-        callbackURI: '/callback',
-        scope: 'user' // optional, default scope is set to user
-    })
+    var oauth = require("oauth").OAuth2;
+    var OAuth2 = new oauth(
+        client_id,
+        client_secret,
+        "https://github.com/",
+        "login/oauth/authorize",
+        "login/oauth/access_token");
 
-    robot.router.get('/login/', function (req, res) {
-        return githubOAuth.login(req, res)
-    })
-    robot.router.get('/callback/', function (req, res) {
-        return githubOAuth.callback(req, res)
-    })
+    robot.router.get('/auth/github', function (req, res) {
+        res.writeHead(303, {
+            Location: OAuth2.getAuthorizeUrl({
+                redirect_uri: 'https://andreasbot.herokuapp.com/auth/github/callback',
+                scope: "user,repo,gist"
+            })
+        });
+        res.end();
+    });
 
-    githubOAuth.on('error', function (err) {
-        console.error('there was a login error', err)
-    })
+    robot.router.get('/auth/github/callback', function (req, res) {
+        var code = req.query.code;
+        OAuth2.getOAuthAccessToken(code, {}, function (err, access_token, refresh_token) {
+            if (err) {
+                console.log(err);
+            }
+            accessToken = access_token;
+            // authenticate github API
+            console.log("AccessToken: " + accessToken + "\n");
+            github.authenticate({
+                type: "oauth",
+                token: accessToken
+            });
+        });
+        res.redirect('home');
+    });
 
-    githubOAuth.on('token', function (token, serverResponse) {
-        console.log('here is your shiny new github oauth token', token)
-        serverResponse.end(JSON.stringify(token))
-    })
+    /* github-oauth - NOT WORKING */
+    /**************************************************************************************/
+    // var githubOAuth = require('github-oauth')({
+    //     githubClient: client_id,
+    //     githubSecret: client_secret,
+    //     baseURL: 'https://andreasbot.herokuapp.com',
+    //     loginURI: '/login',
+    //     callbackURI: '/callback',
+    //     scope: 'user' // optional, default scope is set to user
+    // })
+
+    // robot.router.get('/login/', function (req, res) {
+    //     robot.logger.info(res);
+    //     robot.logger.warning(req)
+    //     return githubOAuth.login(req, res)
+
+    // })
+    // robot.router.get('/callback/', function (req, res) {
+    //     robot.logger.info(res);
+    //     robot.logger.warning(req)
+    //     return githubOAuth.callback(req, res)
+    // })
+
+    // githubOAuth.on('error', function (err) {
+    //     console.error('there was a login error', err)
+    // })
+
+    // githubOAuth.on('token', function (token, serverResponse) {
+    //     console.log('here is your shiny new github oauth token', token)
+    //     serverResponse.end(JSON.stringify(token))
+    // })
 
     /* SIMPLE_OAUTH2 */
     /**************************************************************************************/
