@@ -10,7 +10,7 @@ module.exports = function (robot) {
     var githubOAuth = require('github-oauth')({
         githubClient: client_id,
         githubSecret: client_secret,
-        baseURL: 'https://andreasbot.herokuapp.com/',
+  baseURL: 'http://localhost',
         loginURI: '/login',
         callbackURI: '/callback',
         scope: 'user' // optional, default scope is set to user
@@ -19,7 +19,7 @@ module.exports = function (robot) {
     require('http').createServer(function (req, res) {
         if (req.url.match(/login/)) return githubOAuth.login(req, res)
         if (req.url.match(/callback/)) return githubOAuth.callback(req, res)
-    }).listen(8080)
+    }).listen(80)
 
     githubOAuth.on('error', function (err) {
         console.error('there was a login error', err)
