@@ -26,7 +26,7 @@ module.exports = function (robot) {
         "login/oauth/access_token");
 
     robot.router.get('/auth/github', function (req, res) {
-        res.writeHead(303, {
+        res.send(303, {
             Location: OAuth2.getAuthorizeUrl({
                 redirect_uri: 'https://andreasbot.herokuapp.com/auth/github/callback',
                 scope: "user,repo,gist"
@@ -44,8 +44,11 @@ module.exports = function (robot) {
                 console.log(err);
             }
             accessToken = access_token;
+            refreshToken = refresh_token;
             // authenticate github API
             console.log("AccessToken: " + accessToken + "\n");
+            console.log("RefreshToken: " + refreshToken + "\n");
+
         });
         res.redirect('home');
     });
