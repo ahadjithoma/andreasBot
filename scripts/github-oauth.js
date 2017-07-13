@@ -39,18 +39,15 @@ module.exports = function (robot) {
         var code = req.query.code;
         console.log("code: " + code + "\n");
 
-        OAuth2.getOAuthAccessToken(code, {}, function (err, access_token, refresh_token) {
+        OAuth2.getOAuthAccessToken(code, {}, function (err, access_token) {
             if (err) {
                 console.log(err);
             }
             accessToken = access_token;
-            refreshToken = refresh_token;
-            // authenticate github API
             console.log("AccessToken: " + accessToken + "\n");
-            console.log("RefreshToken: " + refresh_token + "\n");
-
+            // SAVE TOKEN TO DB
         });
-        res.redirect('home');
+        res.redirect('');
     });
 
     /* github-oauth - NOT WORKING */
