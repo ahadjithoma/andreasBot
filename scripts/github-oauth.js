@@ -47,7 +47,7 @@ module.exports = function (robot) {
             refreshToken = refresh_token;
             // authenticate github API
             console.log("AccessToken: " + accessToken + "\n");
-            console.log("RefreshToken: " + refreshToken + "\n");
+            console.log("RefreshToken: " + refresh_token + "\n");
 
         });
         res.redirect('home');
