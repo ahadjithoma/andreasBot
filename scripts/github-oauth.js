@@ -19,7 +19,7 @@ module.exports = function (robot) {
 
     robot.hear('gh oauth', function (res) {
         var userId = res.message.user.id;
-        res.send(`https://andreasbot.herokuapp.com/auth/github?userid=${userId}`);
+        res.send(`<https://andreasbot.herokuapp.com/auth/github?userid=${userId}|login>`);
     })
 
     robot.router.get('/auth/github', function (req, res) {
@@ -27,7 +27,8 @@ module.exports = function (robot) {
             Location: OAuth2.getAuthorizeUrl({
                 redirect_uri: 'https://andreasbot.herokuapp.com/auth/github/callback',
                 scope: "user,repo,gist",
-                state: req.query.userid
+                state: req.query.userid,
+                userid: req.query.userid
             })
         });
         res.end();
