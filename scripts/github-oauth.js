@@ -36,7 +36,7 @@ module.exports = function (robot) {
     });
 
     robot.router.get('/auth/github/callback', function (req, res) {
-        robot.logger.info(req.query.state);
+        robot.logger.info(JSON.parse(req.query.state).userid);
         robot.logger.info(req.query)
 
         var code = req.query.code;
