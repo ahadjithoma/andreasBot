@@ -42,6 +42,8 @@ module.exports = function (robot) {
             }
             var encryptedToken = encryption.encrypt(access_token);
         robot.logger.info(req.query)
+                robot.logger.info(req.url)
+
 
             // SAVE TOKEN TO DB based on user ID 
 
