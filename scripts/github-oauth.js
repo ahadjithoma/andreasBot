@@ -23,8 +23,8 @@ module.exports = function (robot) {
     })
 
     robot.router.get('/auth/github', function (req, res) {
-        //var state = JSON.stringify({userid:req.query.userid});
-var state = {userid:req.query.userid};
+        var state = JSON.stringify({ userid: req.query.userid });
+        // var state = {userid:req.query.userid};
         res.writeHead(303, {
             Location: OAuth2.getAuthorizeUrl({
                 redirect_uri: 'https://andreasbot.herokuapp.com/auth/github/callback',
@@ -37,7 +37,7 @@ var state = {userid:req.query.userid};
 
     robot.router.get('/auth/github/callback', function (req, res) {
         robot.logger.info(req.query.state);
-                robot.logger.info(req.query)
+        robot.logger.info(req.query)
 
         var code = req.query.code;
 
