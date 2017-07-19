@@ -17,7 +17,7 @@ module.exports = function (robot) {
         "login/oauth/authorize",
         "login/oauth/access_token");
 
-    robot.hear('gh oauth', function (req, res) {
+    robot.hear('gh oauth', function (res) {
         res.send('https://andreasbot.herokuapp.com/auth/github');
     })
 
