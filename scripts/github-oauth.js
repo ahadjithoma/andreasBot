@@ -35,7 +35,7 @@ module.exports = function (robot) {
 
     robot.router.get('/auth/github/callback', function (req, res) {
         robot.logger.info(req.query)
-        robot.logger.info(req.url)
+        robot.logger.info(req.originalUrl)
         var code = req.query.code;
 
         OAuth2.getOAuthAccessToken(code, {}, function (err, access_token) {
