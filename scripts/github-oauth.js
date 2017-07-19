@@ -23,11 +23,12 @@ module.exports = function (robot) {
     })
 
     robot.router.get('/auth/github', function (req, res) {
+        var state = JSON.stringify({userid:req.query.userid});
         res.writeHead(303, {
             Location: OAuth2.getAuthorizeUrl({
                 redirect_uri: 'https://andreasbot.herokuapp.com/auth/github/callback',
                 scope: "user,repo,gist",
-                state: {userid: req.query.userid},
+                state: state
             })
         });
         res.end();
