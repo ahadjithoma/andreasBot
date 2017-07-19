@@ -36,8 +36,8 @@ var state = {userid:req.query.userid};
     });
 
     robot.router.get('/auth/github/callback', function (req, res) {
-        robot.logger.info(req.query.state.userid);
-                robot.logger.info(req.url)
+        robot.logger.info(req.query.state);
+                robot.logger.info(req.query)
 
         var code = req.query.code;
 
