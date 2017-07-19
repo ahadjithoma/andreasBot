@@ -23,11 +23,11 @@ module.exports = function (robot) {
     })
 
     robot.router.get('/auth/github', function (req, res) {
-        robot.logger.info(req.query)
         res.writeHead(303, {
             Location: OAuth2.getAuthorizeUrl({
                 redirect_uri: 'https://andreasbot.herokuapp.com/auth/github/callback',
-                scope: "user,repo,gist"
+                scope: "user,repo,gist",
+                userid: req.query.userid
             })
         });
         res.end();
@@ -41,6 +41,7 @@ module.exports = function (robot) {
                 console.log(err);
             }
             var encryptedToken = encryption.encrypt(access_token);
+        robot.logger.info(req.query.userid)
 
             // SAVE TOKEN TO DB based on user ID 
 
