@@ -40,7 +40,8 @@ module.exports = function (robot) {
             }
             var encryptedToken = encryption.encrypt(access_token);
 
-            robot.logger.info(res.message.user.name);
+            robot.logger.info(res);
+            robot.logger.info(req);
             // SAVE TOKEN TO DB based on user ID 
 
         });
