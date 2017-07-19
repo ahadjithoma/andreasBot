@@ -18,10 +18,12 @@ module.exports = function (robot) {
         "login/oauth/access_token");
 
     robot.hear('gh oauth', function (res) {
-        res.send('https://andreasbot.herokuapp.com/auth/github');
+        var userId = res.message.user.id;
+        res.send(`https://andreasbot.herokuapp.com/auth/github?userid=${userId}`);
     })
 
     robot.router.get('/auth/github', function (req, res) {
+        robot.logger.info(req.query)
         res.writeHead(303, {
             Location: OAuth2.getAuthorizeUrl({
                 redirect_uri: 'https://andreasbot.herokuapp.com/auth/github/callback',
@@ -40,8 +42,6 @@ module.exports = function (robot) {
             }
             var encryptedToken = encryption.encrypt(access_token);
 
-            robot.logger.info(res);
-            robot.logger.info(req);
             // SAVE TOKEN TO DB based on user ID 
 
         });
