@@ -64,7 +64,8 @@ module.exports = function (robot) {
         for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
             let attachment = message.attachment();
             let type, creator, text, pretext, cardUrl, cardName, listName, color;
-            creator = notif[j].memberCreator.username;
+            if (notif[j].memberCreator)
+                creator = notif[j].memberCreator.username;
             cardUrl = `https://trello.com/c/${notif[j].data.card.shortLink}`;
             cardName = notif[j].data.card.name;
 
