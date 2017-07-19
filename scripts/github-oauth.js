@@ -24,10 +24,10 @@ module.exports = function (robot) {
 
     robot.router.get('/auth/github', function (req, res) {
         res.writeHead(303, {
+            userid: req.query.userid,
             Location: OAuth2.getAuthorizeUrl({
                 redirect_uri: 'https://andreasbot.herokuapp.com/auth/github/callback',
-                scope: "user,repo,gist",
-                userid: req.query.userid
+                scope: "user,repo,gist"
             })
         });
         res.end();
