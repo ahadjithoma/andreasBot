@@ -27,15 +27,14 @@ module.exports = function (robot) {
             Location: OAuth2.getAuthorizeUrl({
                 redirect_uri: 'https://andreasbot.herokuapp.com/auth/github/callback',
                 scope: "user,repo,gist",
-                state: req.query.userid,
-                userid: req.query.userid
+                state: {userid: req.query.userid},
             })
         });
         res.end();
     });
 
     robot.router.get('/auth/github/callback', function (req, res) {
-        robot.logger.info(req.query);
+        robot.logger.info(req.query.state.userid);
                 robot.logger.info(req.url)
 
         var code = req.query.code;
