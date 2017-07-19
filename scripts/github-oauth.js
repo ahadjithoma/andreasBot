@@ -39,7 +39,7 @@ module.exports = function (robot) {
             if (err) {
                 console.log(err);
             }
-            console.log("AccessToken: " + accessToken + "\n");
+            console.log("AccessToken: " + access_token + "\n");
             var encryptedToken = encryption.encrypt(access_token);
 
             // SAVE TOKEN TO DB based on user ID 
