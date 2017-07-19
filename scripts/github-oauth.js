@@ -34,6 +34,8 @@ module.exports = function (robot) {
     });
 
     robot.router.get('/auth/github/callback', function (req, res) {
+        robot.logger.info(req.query)
+        robot.logger.info(req.url)
         var code = req.query.code;
 
         OAuth2.getOAuthAccessToken(code, {}, function (err, access_token) {
@@ -41,8 +43,7 @@ module.exports = function (robot) {
                 console.log(err);
             }
             var encryptedToken = encryption.encrypt(access_token);
-        robot.logger.info(req.query)
-                robot.logger.info(req.url)
+
 
 
             // SAVE TOKEN TO DB based on user ID 
