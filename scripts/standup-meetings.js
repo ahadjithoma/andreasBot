@@ -10,7 +10,7 @@ module.exports = function (robot) {
         res.reply('Sure, please give me the *name* of your new standup');
 
         dialog.addChoice(/(.*)/, function (res2) {
-            var name = res2.match[1];
+            var name = res2.match[2];
             res.reply('name = ' + name);
         });
     });
