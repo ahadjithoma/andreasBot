@@ -17,12 +17,16 @@ module.exports = function (robot) {
 
     robot.hear('gh oauth', function (res) {
         var userId = res.message.user.id;
-        res.send(`<https://andreasbot.herokuapp.com/auth/github?userid=${userId}|login>`);
+        var username = res.message.user.name;
+        res.send(`<https://andreasbot.herokuapp.com/auth/github?userid=${userId}&username=${username}|login>`);
     })
 
     robot.router.get('/auth/github', function (req, res) {
         // get the user id and pass it through 'state' for later use
-        var state = JSON.stringify({ userid: req.query.userid });
+        var state = JSON.stringify({
+            userid: req.query.userid,
+            username: req.query.username
+        });
 
         res.writeHead(303, {
             Location: OAuth2.getAuthorizeUrl({
@@ -36,6 +40,8 @@ module.exports = function (robot) {
 
     robot.router.get('/auth/github/callback', function (req, res) {
         var userid = JSON.parse(req.query.state).userid;
+        var username = JSON.parse(req.query.state).username;
+
         var code = req.query.code;
 
         OAuth2.getOAuthAccessToken(code, {}, function (err, access_token) {
@@ -46,11 +52,9 @@ module.exports = function (robot) {
 
             var db = require('./mlab-login.js').db();
             db.bind('users')
-            db.users.save({_id:userid, github_token:encryptedToken}, function(err, result){
+            db.users.save({ _id: userid, github_token: encryptedToken }, function (err, result) {
                 if (err) throw err;
-                if (result) {
-                    robot.logger.info(result)
-                };
+                robot.logger.info(`github token for user: ${username} received successfully`)
             })
 
         });
