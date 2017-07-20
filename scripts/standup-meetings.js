@@ -1,8 +1,8 @@
 const Conversation = require('hubot-conversation');
-var type = 'user' //Type parameter can take one of two values: user (default) or room 
-var switchBoard = new Conversation(robot, type);
 
 module.exports = function (robot) {
+    var type = 'user' //Type parameter can take one of two values: user (default) or room 
+    var switchBoard = new Conversation(robot, type);
 
     robot.respond(/setup standup/, function (res) {
         var timeout = 1000 * 60; //60 seconds timeout. Default = 30 sec
