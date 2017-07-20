@@ -1,12 +1,12 @@
 module.exports = function (robot) {
 
-const Conversation = require('hubot-conversation');
+    const Conversation = require('hubot-conversation');
     var switchBoard = new Conversation(robot);
 
     robot.respond(/jump/, function (msg) {
         var dialog = switchBoard.startDialog(msg);
         msg.reply('Sure, How many times?');
-        
+
         dialog.addChoice(/([0-9]+)/i, function (msg2) {
             var times = parseInt(msg2.match[1], 10);
             for (var i = 0; i < times; i++) {
@@ -23,7 +23,7 @@ const Conversation = require('hubot-conversation');
         dialog.addChoice(/kitchen/i, function (msg2) {
             msg2.reply('On it boss!');
         });
-        dialog.timeout = function (msg2){
+        dialog.timeout = function (msg2) {
             msg2.emote('yoyoyoyoyoyoyo');
         }
         dialog.addChoice(/bathroom/i, function (msg2) {
@@ -34,7 +34,7 @@ const Conversation = require('hubot-conversation');
         });
     });
 
-      robot.respond(/.*the mission/, function (msg) {
+    robot.respond(/.*the mission/, function (msg) {
         msg.reply('Your have 5 seconds to accept your mission, or this message will self-destruct');
         var dialog = switchBoard.startDialog(msg, 5000); //5 Second timeout
         dialog.dialogTimeout = function (msg2) {
