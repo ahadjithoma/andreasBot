@@ -9,7 +9,7 @@ module.exports = function (robot) {
         var dialog = switchBoard.startDialog(res, timeout);
         res.reply('Sure, please give me the *name* of your new standup');
 
-        dialog.addChoice(/(.*)/i, function (res) {
+        dialog.addChoice(/(.*)/, function (res) {
             var name = res.match[1];
             res.reply('name = ' + name);
         });
