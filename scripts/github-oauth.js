@@ -7,9 +7,6 @@ module.exports = function (robot) {
     var authorization_base_url = 'https://github.com/login/oauth/authorize'
     var token_url = 'https://github.com/login/oauth/access_token'
 
-
-    /* oauth*/
-    /**************************************************************************************/
     var oauth = require("oauth").OAuth2;
     var OAuth2 = new oauth(
         client_id,
@@ -38,7 +35,6 @@ module.exports = function (robot) {
     });
 
     robot.router.get('/auth/github/callback', function (req, res) {
-
         var userid = JSON.parse(req.query.state).userid;
         var code = req.query.code;
 
@@ -50,15 +46,12 @@ module.exports = function (robot) {
 
             var db = require('./mlab-login.js').db();
             db.bind('users')
-            db.users.save({_id:userid, github_token:access_token}, function(err, result){
+            db.users.save({_id:userid, github_token:encryptedToken}, function(err, result){
                 if (err) throw err;
                 if (result) {
                     robot.logger.info(result)
                 };
             })
-
-
-            // SAVE TOKEN TO DB based on user ID 
 
         });
         res.redirect('');
