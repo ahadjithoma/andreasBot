@@ -31,7 +31,7 @@ module.exports = function (robot) {
         res.writeHead(303, {
             Location: OAuth2.getAuthorizeUrl({
                 redirect_uri: 'https://andreasbot.herokuapp.com/auth/github/callback',
-                scope: "user,repo,gist",
+                // scope: "user,repo,gist",
                 state: state
             })
         });

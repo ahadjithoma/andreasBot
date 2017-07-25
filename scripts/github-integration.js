@@ -6,7 +6,6 @@ module.exports = function (robot) {
 
 	/* set Github Account */
 	var GitHubApi = require("github");
-	//var Trello = require(https://api.trello.com/1/client.js?key=51def9cb08cf171cd0970d8607ad8f97);
 
 	var github = new GitHubApi({
 		/* optional */
