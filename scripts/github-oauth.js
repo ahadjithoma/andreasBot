@@ -33,7 +33,8 @@ module.exports = function (robot) {
                 redirect_uri: 'https://andreasbot.herokuapp.com/auth/github/callback',
                 scope: "user",//"user, public_repo, repo, repo_deployment, delete_repo, notifications, gist, read, write, admin",
                 state: state
-            })
+            }),
+            'Accept':'application/vnd.github.machine-man-preview+json'
         });
         res.end();
     });
