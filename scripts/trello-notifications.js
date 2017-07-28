@@ -8,8 +8,11 @@ module.exports = function (robot) {
     var db = require('./mlab-login.js').db();
     var encryption = require('./encryption.js');
     var CronJob = require('cron').CronJob;
-    var job = new CronJob('00 37 19 * * *', // note that heroku free plan is not running 24/7
-        function () { trelloNotifications(); },
+    var job = new CronJob('00 41 19 * * *', 
+        function () { 
+            robot.logger.info('cron job running');
+            trelloNotifications(); 
+        },
         function () { }, /* This function is executed when the job stops */
         true, /* Start the job right now */
         'Europe/Athens' /* Time zone of this job. */
