@@ -8,7 +8,7 @@ module.exports = function (robot) {
     var db = require('./mlab-login.js').db();
     var encryption = require('./encryption.js');
     var CronJob = require('cron').CronJob;
-    var job = new CronJob('00 30 19 * * *', // note that heroku free plan is not running 24/7
+    var job = new CronJob('00 37 19 * * *', // note that heroku free plan is not running 24/7
         function () { trelloNotifications(); },
         function () { }, /* This function is executed when the job stops */
         true, /* Start the job right now */
@@ -80,7 +80,7 @@ module.exports = function (robot) {
                 //     break;
                 case 'cardDueSoon':
                 case 'changeCard':
-                    listName = (notif[j].data.listBefore || notif[j].data.list)['name'];
+                    listName = 'TODO: list name';//(notif[j].data.listBefore || notif[j].data.list)['name'];
                     // type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
                     pretext = `Card <${cardUrl}|${cardName}> on list _${listName}_ updated by ${creator}`;
