@@ -8,10 +8,10 @@ module.exports = function (robot) {
     var db = require('./mlab-login.js').db();
     var encryption = require('./encryption.js');
     var CronJob = require('cron').CronJob;
-    var job = new CronJob('00 24 19 * * *', // note that heroku free plan is not running 24/7
+    var job = new CronJob('00 30 19 * * *', // note that heroku free plan is not running 24/7
         function () { trelloNotifications(); },
         function () { }, /* This function is executed when the job stops */
-        false, /* Start the job right now */
+        true, /* Start the job right now */
         'Europe/Athens' /* Time zone of this job. */
     );
 
@@ -27,7 +27,7 @@ module.exports = function (robot) {
         robot.logger.info(dbError)
     });
 
-    trelloNotifications(); //for debugging -> MUST DELETE THIS AT THE END OF DEVELOPMENT
+    // trelloNotifications(); //for debugging -> MUST DELETE THIS AT THE END OF DEVELOPMENT
     function trelloNotifications() {
         robot.logger.info('started')
         db.bind('trelloTokens');
