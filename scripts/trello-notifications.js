@@ -10,7 +10,7 @@ module.exports = function (robot) {
     var CronJob = require('cron').CronJob;
     var job = new CronJob('00 05 20 * * *',
         function () {
-            robot.logger.info('cron job running');
+            robot.logger.info('cron job running on trello-notifications.js');
             trelloNotifications();
         },
         function () { }, /* This function is executed when the job stops */
@@ -30,9 +30,8 @@ module.exports = function (robot) {
         robot.logger.info(dbError)
     });
 
-    // trelloNotifications(); //for debugging -> MUST DELETE THIS AT THE END OF DEVELOPMENT
+    trelloNotifications(); //for debugging -> MUST DELETE THIS AT THE END OF DEVELOPMENT
     function trelloNotifications() {
-        robot.logger.info('started')
         db.bind('trelloTokens');
         db.trelloTokens.find().toArrayAsync().then(dbData => {
             var usersNum = dbData.length;
@@ -83,8 +82,8 @@ module.exports = function (robot) {
                 //     break;
                 case 'cardDueSoon':
                 case 'changeCard':
-                    listName = 'TODO: list name';//(notif[j].data.listBefore || notif[j].data.list)['name'];
-                    // type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
+                    listName = (notif[j].data.listBefore || notif[j].data.list)['name'];
+                    type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
                     creator = notif[j].memberCreator.username;
                     pretext = `Card <${cardUrl}|${cardName}> on list _${listName}_ updated by ${creator}`;
                     color = c.getColor('cyan');
