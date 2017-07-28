@@ -8,10 +8,10 @@ module.exports = function (robot) {
     var db = require('./mlab-login.js').db();
     var encryption = require('./encryption.js');
     var CronJob = require('cron').CronJob;
-    var job = new CronJob('00 41 19 * * *', 
-        function () { 
+    var job = new CronJob('00 05 20 * * *',
+        function () {
             robot.logger.info('cron job running');
-            trelloNotifications(); 
+            trelloNotifications();
         },
         function () { }, /* This function is executed when the job stops */
         true, /* Start the job right now */
@@ -24,7 +24,7 @@ module.exports = function (robot) {
         if (dbData.trelloNotifications) {
             job.start();
         } else {
-            job.stop();
+            // job.stop();
         }
     }).catch(dbError => {
         robot.logger.info(dbError)
