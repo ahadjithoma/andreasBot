@@ -35,11 +35,6 @@ module.exports = function (robot) {
 
     robot.respond(/trello auth/, function (res) {
         let userId = res.message.user.id;
-        db.trelloTokens.findOneAsync({ id: userId })
-            .then(function (result) {
-            })
-            .catch(function (err) {
-            })
         tOAuth.getRequestToken(function (err, data) {
             oauth_secrets['username'] = res.message.user.name;
             oauth_secrets['id'] = res.message.user.id;
