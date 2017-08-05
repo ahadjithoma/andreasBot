@@ -29,7 +29,8 @@ db.bind('trelloTokens');
 
     var oauth_secrets = {};
     var loginCallback = `https://andreasbot.herokuapp.com/hubot/trello-token`;
-    var tOAuth = new Trello.OAuth(app_key, oauth_secret, loginCallback, 'Hubot');
+    var TrelloOAuth = require('./trello-oauth.js')
+    var tOAuth = new TrelloOAuth(app_key, oauth_secret, loginCallback, 'Hubot');
 
     robot.respond(/trello auth/, function (res) {
         let userId = res.message.user.id;
