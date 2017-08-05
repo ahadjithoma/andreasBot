@@ -56,9 +56,6 @@ module.exports = function (robot) {
             let token = encryption.encrypt(data['oauth_access_token']); // encrypt token before storing it
             // TODO: encryption -> return promise
             // TODO: get trello username and save
-            var trello = new Trello(trelloKey, encryption.encrypt(data['oauth_access_token']));
-            trello.get('/1/members/me', function (err, data) {
-                if (err) throw err;
                 //TODO error
                 var trelloUsername = data.username
                 db.bind('users');
@@ -68,7 +65,6 @@ module.exports = function (robot) {
                         robot.logger.info(`User's Token Added to DB!`)
                     };
                 })
-            })
 
         })
         res_r.redirect('/a');
