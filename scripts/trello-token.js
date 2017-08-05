@@ -3,8 +3,9 @@ var url = require('url');
 var Trello = require('node-trello');
 var Promise = require('bluebird');
 var mongo = require('mongoskin');
-// mLab connection URI
+
 var uri = process.env.MONGODB_URI;
+var trelloKey = process.env.HUBOT_TRELLO_KEY;
 // promisify mongoskin with bluebird
 Object.keys(mongo).forEach(function (key) {
     var value = mongo[key];
@@ -25,7 +26,6 @@ var app_key = process.env.HUBOT_TRELLO_KEY;
 var oauth_secret = process.env.HUBOT_TRELLO_OAUTH;
 
 module.exports = function (robot) {
-db.bind('trelloTokens');
 
     var oauth_secrets = {};
     var loginCallback = `https://andreasbot.herokuapp.com/hubot/trello-token`;
@@ -59,15 +59,22 @@ db.bind('trelloTokens');
             let userName = oauth_secrets['username'];
             let userId = oauth_secrets['id'];
             let token = encryption.encrypt(data['oauth_access_token']); // encrypt token before storing it
-            
-            // TODO: get trello username and save
 
-            db.trelloTokens.save({ username: userName, id: userId, token: token }, function (err, result) {
+            // TODO: get trello username and save
+            var trello = new Trello(trelloKey, token);
+            trello.get('/1/members/me', function (err, data) {
                 if (err) throw err;
-                if (result) {
-                    robot.logger.info(`User's Token Added to DB!`)
-                };
+                //TODO error
+                var trelloUsername = data.username
+                db.bind('users');
+                db.users.save({ _id: userId, trello_username: trelloUsername, trello_token: token }, function (err, result) {
+                    if (err) throw err;
+                    if (result) {
+                        robot.logger.info(`User's Token Added to DB!`)
+                    };
+                })
             })
+
         })
         res_r.redirect('/a');
     });
@@ -75,7 +82,7 @@ db.bind('trelloTokens');
 
 
     /**********************************************************/
-    /* DEPRECATED */ 
+    /* DEPRECATED */
     robot.respond(/trello get token/i, function (res_r) {
 
         let scope = 'read,write,account';
@@ -96,7 +103,7 @@ db.bind('trelloTokens');
     })
 
     /**********************************************************/
-    /* DEPRECATED */ 
+    /* DEPRECATED */
     robot.respond(/trello add token (.*)/i, function (res_r) {
         var token = res_r.match[1];
         //***IMPORTANT*** 
