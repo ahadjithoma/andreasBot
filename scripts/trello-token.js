@@ -59,7 +59,10 @@ db.bind('trelloTokens');
             let userName = oauth_secrets['username'];
             let userId = oauth_secrets['id'];
             let token = encryption.encrypt(data['oauth_access_token']); // encrypt token before storing it
-            db.trelloTokens.insert({ username: userName, id: userId, token: token }, function (err, result) {
+            
+            // TODO: get trello username and save
+
+            db.trelloTokens.save({ username: userName, id: userId, token: token }, function (err, result) {
                 if (err) throw err;
                 if (result) {
                     robot.logger.info(`User's Token Added to DB!`)
@@ -69,6 +72,10 @@ db.bind('trelloTokens');
         res_r.redirect('/a');
     });
 
+
+
+    /**********************************************************/
+    /* DEPRECATED */ 
     robot.respond(/trello get token/i, function (res_r) {
 
         let scope = 'read,write,account';
@@ -88,6 +95,8 @@ db.bind('trelloTokens');
         res_r.send(msg);
     })
 
+    /**********************************************************/
+    /* DEPRECATED */ 
     robot.respond(/trello add token (.*)/i, function (res_r) {
         var token = res_r.match[1];
         //***IMPORTANT*** 

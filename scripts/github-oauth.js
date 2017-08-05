@@ -50,7 +50,7 @@ module.exports = function (robot) {
                 console.log(err);
             }
             var encryptedToken = encryption.encrypt(access_token);
-
+            // TODO: Get github login user name as well 
             var db = require('./mlab-login.js').db();
             db.bind('users')
             db.users.save({ _id: userid, github_token: encryptedToken }, function (err, result) {
