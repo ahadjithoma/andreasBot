@@ -54,9 +54,9 @@ module.exports = function (robot) {
             let userName = oauth_secrets['username'];
             let userId = oauth_secrets['id'];
             let token = encryption.encrypt(data['oauth_access_token']); // encrypt token before storing it
-
+            // TODO: encryption -> return promise
             // TODO: get trello username and save
-            var trello = new Trello(trelloKey, token);
+            var trello = new Trello(trelloKey, encryption.encrypt(data['oauth_access_token']));
             trello.get('/1/members/me', function (err, data) {
                 if (err) throw err;
                 //TODO error
