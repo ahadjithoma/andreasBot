@@ -7,15 +7,15 @@ var authorizeUrl = "https://trello.com/1/OAuthAuthorizeToken";
 // secret: your trello application's API secret
 // loginCallback: the URL that trello redirects back to after authentication
 // appName: the name you'd like shown on trello's "authorize this app" page
-var TrelloOAuth = module.exports = function (key, secret, loginCallback, appName) {
+var TrelloOAuth = module.exports = function (key, secret, loginCallback, appName, scope) {
   this.oauth = new OAuth(requestUrl, accessUrl, key, secret, "1.0", loginCallback, "HMAC-SHA1");
   this.appName = appName;
-//   this.scope = scope;
+  this.scope = scope;
 };
 
 TrelloOAuth.prototype.getRequestToken = function (callback) {
   var appName = this.appName;
-//   var scope = this.scope;
+  var scope = this.scope;
 
   this.oauth.getOAuthRequestToken(function (error, token, tokenSecret, results) {
     if (error) {
@@ -25,7 +25,7 @@ TrelloOAuth.prototype.getRequestToken = function (callback) {
     callback(null, {
       oauth_token: token,
       oauth_token_secret: tokenSecret,
-      redirect: authorizeUrl + ("?oauth_token=" + token + "&name=" + appName)
+      redirect: authorizeUrl + ("?oauth_token=" + token + "&name=" + appName + "&scope=" + scope)
     });
   });
 };
