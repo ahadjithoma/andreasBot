@@ -59,7 +59,7 @@ module.exports = function (robot) {
                 //TODO error
                 var trelloUsername = data.username
                 db.bind('users');
-                db.users.save({ _id: userId, trello_username: trelloUsername, trello_token: token }, function (err, result) {
+                db.users.update({ _id: userId},{'$push':{trello_username: trelloUsername, trello_token: token }}, function (err, result) {
                     if (err) throw err;
                     if (result) {
                         robot.logger.info(`User's Token Added to DB!`)
