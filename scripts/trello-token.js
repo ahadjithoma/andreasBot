@@ -56,19 +56,18 @@ module.exports = function (robot) {
             let token = encryption.encrypt(data['oauth_access_token']); // encrypt token before storing it
             // TODO: encryption -> return promise
             // TODO: get trello username and save
-                //TODO error
-                var trelloUsername = data.username
-                db.bind('users');
-                db.users.findAndModify({
-                    query:{_id: userId},
-                    update:{ $push:{trello_token: token}},
-                    upsert: true
-                }, function (err, result) {
-                    if (err) throw err;
-                    if (result) {
-                        robot.logger.info(`User's Token Added to DB!`)
-                    };
-                })
+            //TODO error
+            var trelloUsername = data.username
+            db.bind('users');
+            db.users.findAndModify({
+                update: { $push: { _id: userId, trello_token: token } },
+                upsert: true
+            }, function (err, result) {
+                if (err) throw err;
+                if (result) {
+                    robot.logger.info(`User's Token Added to DB!`)
+                };
+            })
 
         })
         res_r.redirect('/a');
