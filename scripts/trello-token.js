@@ -59,7 +59,7 @@ module.exports = function (robot) {
             //TODO error
             var trelloUsername = data.username
             db.bind('users');
-            db.users.findAndModify({_id:userId},["_id",1],{ $push: {trello_token: token } },
+            db.users.findAndModify({_id:userId},["_id",1],{trello_token: token},
             {upsert: true}, function (err, result) {
                 if (err) throw err;
                 if (result) {
