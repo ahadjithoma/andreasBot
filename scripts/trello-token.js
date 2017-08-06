@@ -63,7 +63,7 @@ module.exports = function (robot) {
             {upsert: true}, function (err, result) {
                 if (err) throw err;
                 if (result) {
-                    robot.logger.info(`User's Token Added to DB!`)
+                    robot.logger.info(`User's Token Added to DB!\n`, result)
                 };
             })
 
