@@ -62,7 +62,7 @@ module.exports = function (robot) {
             db.users.findAndModify(
                 { _id: userId },
                 [["_id", 1]],
-                { $push: { trello_token: token } },
+                { $set: { trello_token: token } },
                 { upsert: true },
                 function (err, result) {
                     if (err) throw err;
