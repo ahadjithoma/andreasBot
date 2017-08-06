@@ -65,12 +65,12 @@ module.exports = function (robot) {
                 { $set: { trello_token: token } },
                 { upsert: true },
                 function (err, result) {
-                    if (err) throw err;
-                    if (result) {
-                        robot.logger.info(`User's Token Added to DB!\n`, result)
-                    };
+                    if (err)
+                        robot.logger.error(err);
+                    if (result)
+                        robot.logger.info(`User's Token Added to DB!`)
+                    db.close();
                 })
-
         })
         res_r.redirect('/a');
     });
