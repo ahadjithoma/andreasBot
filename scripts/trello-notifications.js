@@ -39,19 +39,18 @@ module.exports = function (robot) {
                 var encryptedToken = dbData[i].token;
                 encryption.decrypt(encryptedToken).then(token => {
                     var trello = Promise.promisifyAll(new Trello(key, token));
-                })
-                var args = { read_filter: 'unread' }; // get only the unread notifications
+                    var args = { read_filter: 'unread' }; // get only the unread notifications
 
-                trello.getAsync('/1/member/me/notifications', args).then(notif => {
-
-                    if (notif.length > 0) {
-                        let msg = getMsg(notif);
-                        let userId = dbData[i].id;      // get user's id (on chat platform)
-                        robot.messageRoom(userId, msg); // send massage to that user
-                    }
-                }).catch(trError => {
-                    robot.messageRoom('general', 'trError on scheduler.js. Please check server log');
-                    robot.logger.error(trError);
+                    trello.getAsync('/1/member/me/notifications', args).then(notif => {
+                        if (notif.length > 0) {
+                            let msg = getMsg(notif);
+                            let userId = dbData[i].id;      // get user's id (on chat platform)
+                            robot.messageRoom(userId, msg); // send message to that user
+                        }
+                    }).catch(trError => {
+                        robot.messageRoom('general', 'trError on scheduler.js. Please check server log');
+                        robot.logger.error(trError);
+                    })
                 })
             }
         }).catch(dbError => {
