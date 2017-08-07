@@ -54,7 +54,7 @@ module.exports = function (robot) {
             var db = require('./mlab-login.js').db();
             db.bind('users')
             db.users.findAndModify(
-                { _id = userid },
+                { _id: userid },
                 [["_id", 1]],
                 { $set: { github_token: encryptedToken } },
                 { upsert: true },
