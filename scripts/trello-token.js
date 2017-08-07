@@ -52,24 +52,21 @@ module.exports = function (robot) {
             let userName = oauth_secrets['username'];
             let userId = oauth_secrets['id'];
             let token = encryption.encrypt(data['oauth_access_token']); // encrypt token before storing it
-                    // TODO: encryption -> return promise
+            // TODO: encryption -> return promise
             // TODO: get trello username and save
             //TODO error
             var trelloUsername = data.username
-            var db = require('./mlab-login.js').db();
+            var db = mongo.MongoClient.connect(uri);
             db.bind('users');
             db.users.findAndModify(
                 { _id: userId },
                 [["_id", 1]],
                 { $set: { trello_token: token } },
-                { upsert: true },
-                function (err, result) {
-                    if (err)
-                        robot.logger.error(err);
-                    if (result)
-                        robot.logger.info(`User's Trello Token Added to DB!`)
+                { upsert: true }).then(res => {
+                    console.log(res)
                     db.close();
-                })
+                }).catch(err => console.log(err))
+
         })
         res_r.redirect('/a');
     });
