@@ -51,21 +51,25 @@ module.exports = function (robot) {
             if (err) throw err;
             let userName = oauth_secrets['username'];
             let userId = oauth_secrets['id'];
-            let token = encryption.encrypt(data['oauth_access_token']); // encrypt token before storing it
+
+            encryption.encrypt(data['oauth_access_token']).then(token => {
+                var trelloUsername = data.username
+                var db = mongo.MongoClient.connect(uri);
+                db.bind('users');
+                db.users.findAndModify(
+                    { _id: userId },
+                    [["_id", 1]],
+                    { $set: { trello_token: token } },
+                    { upsert: true })
+                    .then(res => {
+                        console.log(res)
+                        db.close();
+                    }).catch(err => console.log(err))
+            }); 
+            // encrypt token before storing it
             // TODO: encryption -> return promise
             // TODO: get trello username and save
             //TODO error
-            var trelloUsername = data.username
-            var db = mongo.MongoClient.connect(uri);
-            db.bind('users');
-            db.users.findAndModify(
-                { _id: userId },
-                [["_id", 1]],
-                { $set: { trello_token: token } },
-                { upsert: true }).then(res => {
-                    console.log(res)
-                    db.close();
-                }).catch(err => console.log(err))
 
         })
         res_r.redirect('/a');
