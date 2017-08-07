@@ -28,8 +28,9 @@ module.exports = function (robot) {
     var oauth_secrets = {};
     var loginCallback = `https://andreasbot.herokuapp.com/hubot/trello-token`;
     var scope = 'read,write,account'
+    var expr = 'never' // expiration
     var TrelloOAuth = require('./trello-oauth.js')
-    var tOAuth = new TrelloOAuth(app_key, oauth_secret, loginCallback, 'Hubot', scope);
+    var tOAuth = new TrelloOAuth(app_key, oauth_secret, loginCallback, 'Hubot', scope, expr);
 
     robot.respond(/trello auth/, function (res) {
         let userId = res.message.user.id;

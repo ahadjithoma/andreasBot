@@ -5,7 +5,6 @@ module.exports.db = function () {
 
     // mLab connection URI
     var uri = process.env.MONGODB_URI;
-
     // promisify mongoskin with bluebird
     Object.keys(mongo).forEach(function (key) {
         var value = mongo[key];

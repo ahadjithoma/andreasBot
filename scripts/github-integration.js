@@ -14,6 +14,7 @@ module.exports = function (robot) {
 		host: "api.github.com", // should be api.github.com for GitHub
 		thPrefix: "/api/v3", // for some GHEs; none for GitHub
 		headers: {
+			"Accept": "application/vnd.github.machine-man-preview+json",
 			"user-agent": "Hubot-GitHub" // GitHub is happy with a unique user agent
 		},
 		Promise: require('bluebird'),
@@ -39,9 +40,9 @@ module.exports = function (robot) {
 		var client_secret = process.env.GITHUB_APP_CLIENT_SECRET;
 
 		github.authorization.getOrCreateAuthorizationForApp({
-			client_secret:client_secret, 
-			client_id:client_id, 
-			note:'some note'
+			client_secret: client_secret,
+			client_id: client_id,
+			note: 'some note'
 		}).then(res => {
 			robot.logger.info(res);
 		}).catch(err => {
@@ -52,7 +53,7 @@ module.exports = function (robot) {
 		// var data = { client_id: client_id,
 		// redirect_uri: "https://andreasbot.herokuapp.com/hubot/github-oauth"};
 		// var headers = {  'Accept': 'application/vnd.github.machine-man-preview+json'};
-		
+
 
 		// robot.http("http://github.com/login/oauth/authorize")
 		// .headers(headers)

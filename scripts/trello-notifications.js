@@ -19,16 +19,16 @@ module.exports = function (robot) {
     );
 
     // check if trello notifications feature is enabled
-    db.bind('settings');
-    db.settings.find().toArrayAsync().then(dbData => {
-        if (dbData.trelloNotifications) {
-            job.start();
-        } else {
-            // job.stop();
-        }
-    }).catch(dbError => {
-        robot.logger.info(dbError)
-    });
+    // db.bind('settings');
+    // db.settings.find().toArrayAsync().then(dbData => {
+    //     if (dbData.trelloNotifications) {
+    //         job.start();
+    //     } else {
+    //         // job.stop();
+    //     }
+    // }).catch(dbError => {
+    //     robot.logger.info(dbError)
+    // });
 
     trelloNotifications(); //for debugging -> MUST DELETE THIS AT THE END OF DEVELOPMENT
     function trelloNotifications() {

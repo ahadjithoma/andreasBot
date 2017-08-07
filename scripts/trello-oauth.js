@@ -1,3 +1,9 @@
+/* Forked from https://github.com/adunkman/node-trello
+ * Added support for: 
+ *    OAuth scopes 
+ *    Expiration Token 
+ */
+
 var OAuth = (require("oauth")).OAuth;
 var requestUrl = "https://trello.com/1/OAuthGetRequestToken";
 var accessUrl = "https://trello.com/1/OAuthGetAccessToken";
@@ -7,15 +13,17 @@ var authorizeUrl = "https://trello.com/1/OAuthAuthorizeToken";
 // secret: your trello application's API secret
 // loginCallback: the URL that trello redirects back to after authentication
 // appName: the name you'd like shown on trello's "authorize this app" page
-var TrelloOAuth = module.exports = function (key, secret, loginCallback, appName, scope) {
+var TrelloOAuth = module.exports = function (key, secret, loginCallback, appName, scope, expiration) {
   this.oauth = new OAuth(requestUrl, accessUrl, key, secret, "1.0", loginCallback, "HMAC-SHA1");
   this.appName = appName;
   this.scope = scope;
+  this.expiration = expiration;
 };
 
 TrelloOAuth.prototype.getRequestToken = function (callback) {
   var appName = this.appName;
   var scope = this.scope;
+  var expiration = this.expiration;
 
   this.oauth.getOAuthRequestToken(function (error, token, tokenSecret, results) {
     if (error) {
@@ -25,7 +33,7 @@ TrelloOAuth.prototype.getRequestToken = function (callback) {
     callback(null, {
       oauth_token: token,
       oauth_token_secret: tokenSecret,
-      redirect: authorizeUrl + ("?oauth_token=" + token + "&name=" + appName + "&scope=" + scope)
+      redirect: authorizeUrl + ("?oauth_token=" + token + "&name=" + appName + "&scope=" + scope + "&expiration=" + expiration)
     });
   });
 };

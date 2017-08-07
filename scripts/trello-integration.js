@@ -10,6 +10,7 @@ module.exports = function (robot) {
     var key = process.env.HUBOT_TRELLO_KEY;
     var secret = process.env.HUBOT_TRELLO_OAUTH;
     var token = process.env.HUBOT_TRELLO_TOKEN;
+    // TODO : login based on user
     var trelloAuth = new Trello(key, token);
 
     // convert node-trello callbacks to promises
