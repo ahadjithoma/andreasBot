@@ -49,22 +49,25 @@ module.exports = function (robot) {
             if (err) {
                 console.log(err);
             }
-            var encryptedToken = encryption.encrypt(access_token);
-            // TODO: Get github login user name as well 
-            var db = require('./mlab-login.js').db();
-            db.bind('users')
-            db.users.findAndModify(
-                { _id: userid },
-                [["_id", 1]],
-                { $set: { github_token: encryptedToken } },
-                { upsert: true },
-                function (err, result) {
-                    if (err)
-                        robot.logger.error(err);
-                    if (result)
-                        robot.logger.info(`${username}'s GitHub Token Added to DB!`)
-                    db.close();
-                })
+            encryption.encrypt(access_token).then(encryptedToken => {
+                // TODO: Get github login user name as well 
+                var db = require('./mlab-login.js').db();
+                db.bind('users')
+                db.users.findAndModify(
+                    { _id: userid },
+                    [["_id", 1]],
+                    { $set: { github_token: encryptedToken } },
+                    { upsert: true },
+                    function (err, result) {
+                        if (err)
+                            robot.logger.error(err);
+                        if (result)
+                            robot.logger.info(`${username}'s GitHub Token Added to DB!`)
+                        db.close();
+                    }
+                )
+            });
+
 
         });
         res.redirect('');
