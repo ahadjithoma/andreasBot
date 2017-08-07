@@ -15,8 +15,6 @@ Object.keys(mongo).forEach(function (key) {
     }
 });
 Promise.promisifyAll(mongo);
-// connect to mLab database
-var db = mongo.MongoClient.connect(uri);
 
 var bcrypt = require('bcryptjs');
 var request = require('request-promise');
@@ -54,10 +52,11 @@ module.exports = function (robot) {
             let userName = oauth_secrets['username'];
             let userId = oauth_secrets['id'];
             let token = encryption.encrypt(data['oauth_access_token']); // encrypt token before storing it
-            // TODO: encryption -> return promise
+                    // TODO: encryption -> return promise
             // TODO: get trello username and save
             //TODO error
             var trelloUsername = data.username
+            var db = require('./mlab-login.js').db();
             db.bind('users');
             db.users.findAndModify(
                 { _id: userId },
@@ -68,7 +67,7 @@ module.exports = function (robot) {
                     if (err)
                         robot.logger.error(err);
                     if (result)
-                        robot.logger.info(`User's Token Added to DB!`)
+                        robot.logger.info(`User's Trello Token Added to DB!`)
                     db.close();
                 })
         })

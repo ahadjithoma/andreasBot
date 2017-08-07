@@ -34,7 +34,7 @@ module.exports = function (robot) {
                 scope: "read:org,user,public_repo,repo,repo_deployment,delete_repo,notifications,gist,read,write,admin",
                 state: state
             }),
-            'Accept':'application/vnd.github.machine-man-preview+json'
+            'Accept': 'application/vnd.github.machine-man-preview+json'
         });
         res.end();
     });
@@ -53,10 +53,18 @@ module.exports = function (robot) {
             // TODO: Get github login user name as well 
             var db = require('./mlab-login.js').db();
             db.bind('users')
-            db.users.save({ _id: userid, github_token: encryptedToken }, function (err, result) {
-                if (err) throw err;
-                robot.logger.info(`github token for user: ${username} received successfully`)
-            })
+            db.users.findAndModify(
+                { _id = userid },
+                [["_id", 1]],
+                { $set: { github_token: encryptedToken } },
+                { upsert: true },
+                function (err, result) {
+                    if (err)
+                        robot.logger.error(err);
+                    if (result)
+                        robot.logger.info(`${username}'s GitHub Token Added to DB!`)
+                    db.close();
+                })
 
         });
         res.redirect('');
