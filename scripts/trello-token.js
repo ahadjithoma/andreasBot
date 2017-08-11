@@ -3,18 +3,12 @@ var url = require('url');
 var Trello = require('node-trello');
 var Promise = require('bluebird');
 var mongo = require('mongoskin');
+Promise.promisifyAll(mongo);
 
+// config
 var uri = process.env.MONGODB_URI;
 var trelloKey = process.env.HUBOT_TRELLO_KEY;
-// promisify mongoskin with bluebird
-Object.keys(mongo).forEach(function (key) {
-    var value = mongo[key];
-    if (typeof value === "function") {
-        Promise.promisifyAll(value);
-        Promise.promisifyAll(value.prototype);
-    }
-});
-Promise.promisifyAll(mongo);
+
 
 var bcrypt = require('bcryptjs');
 var request = require('request-promise');
@@ -57,7 +51,7 @@ module.exports = function (robot) {
                 var trelloUsername = data.username
                 var db = mongo.MongoClient.connect(uri);
                 db.bind('users');
-                db.users.findAndModify(
+                db.users.findAndModifyAsync(
                     { _id: userId },
                     [["_id", 1]],
                     { $set: { trello_token: token } },
@@ -65,8 +59,11 @@ module.exports = function (robot) {
                     .then(res => {
                         console.log(res)
                         db.close();
-                    }).catch(err => console.log(err))
-            }); 
+                    }).catch(err => { //TODO better error handling
+                        console.log(err)
+                        db.close();
+                    })
+            });
             // encrypt token before storing it
             // TODO: encryption -> return promise
             // TODO: get trello username and save

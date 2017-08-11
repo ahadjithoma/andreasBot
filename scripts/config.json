@@ -1,3 +1,11 @@
 {
-    
+    "_comments": "To DISABLE error posting set errorsChannel to false",
+    "errorsChannel": "hubot-errors",
+    "errorMessage": ":disappointed: An error occured. Please check server's Logs. ",
+    "tokenAddedMessage": "Your token has been succesfully received! :thumbsup:",
+    "GithubApp": {
+        "tokenStoredMsg": "Github App Generated and Stored a new Token",
+        "privateKeyDir": "/home/andreas/Desktop/andreasBot/scripts/hubot-integration.2017-07-25.private-key.pem",
+        "AppId": 3559
+    }
 }

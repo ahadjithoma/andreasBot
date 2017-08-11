@@ -41,7 +41,7 @@ module.exports = robot => {
             // if the action is completed, emit the data 
             var isComplete = !r.actionIncomplete;
             if (isComplete) {
-                var handled = robot.emit(r.action, r.parameters, res);
+                var handled = robot.emit(r.action, r, res);
                 if (!handled) {
                     robot.logger.info('No scripts handled the api.ai action: ' + r.action);
                 }

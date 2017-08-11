@@ -3,9 +3,10 @@
 const crypto = require('crypto');
 
 const key = process.env.ENCRYPTION_KEY; // Must be   256 bytes (32 characters)
-const algorithm = 'aes-256-ctr';
+const algorithm = process.env.ENCRYPTION_ALGORITHM
 
 function encrypt(text) {
+  if (!text) return false;
   return new Promise((resolve, reject) => {
     var cipher = crypto.createCipher(algorithm, key)
     var crypted = cipher.update(text, 'utf8', 'hex')
@@ -15,6 +16,7 @@ function encrypt(text) {
 }
 
 function decrypt(text) {
+  if (!text) return false;
   return new Promise((resolve, reject) => {
     var decipher = crypto.createDecipher(algorithm, key)
     var decrypted = decipher.update(text, 'hex', 'utf8')

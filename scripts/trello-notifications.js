@@ -30,7 +30,7 @@ module.exports = function (robot) {
     //     robot.logger.info(dbError)
     // });
 
-    trelloNotifications(); //for debugging -> MUST DELETE THIS AT THE END OF DEVELOPMENT
+    // trelloNotifications(); //for debugging -> MUST DELETE THIS AT THE END OF DEVELOPMENT
     function trelloNotifications() {
         db.bind('trelloTokens');
         db.trelloTokens.find().toArrayAsync().then(dbData => {

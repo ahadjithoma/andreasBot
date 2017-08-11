@@ -1,12 +1,30 @@
 'use strict';
-var Q = require('q');
+
+// init
+var GitHubApi = require("github");
+var slackMsgs = require('./slackMsgs.js');
+var mongoskin = require('mongoskin')
+var Promise = require('bluebird')
+var path = require('path')
+var c = require('./config.json')
+var encryption = require('./encryption.js')
+Promise.promisifyAll(mongoskin)
+
+// config
+var mongodb_uri = process.env.MONGODB_URI
+
 module.exports = function (robot) {
 
-	var slackMsgs = require('./slackMsgs.js');
 
-	/* set Github Account */
-	var GitHubApi = require("github");
+	robot.on('getbrain', function () {
+		getBrain();
+	})
+	function getBrain() {
+		var u = robot.brain.get('U514U4XDF')
+		console.log('AFTER: ', u)
+	}
 
+	/* set Github Accounts for Users and App (bot) */
 	var github = new GitHubApi({
 		/* optional */
 		// debug: true,
@@ -21,6 +39,62 @@ module.exports = function (robot) {
 		followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
 		timeout: 5000
 	});
+
+	var ghUser, ghApp
+	var ghUser = new GitHubApi({
+		/* optional */
+		// debug: true,
+		protocol: "https",
+		host: "api.github.com", // should be api.github.com for GitHub
+		thPrefix: "/api/v3", // for some GHEs; none for GitHub
+		headers: {
+			"Accept": "application/vnd.github.machine-man-preview+json",
+			"user-agent": "Hubot-GitHub" // GitHub is happy with a unique user agent
+		},
+		Promise: require('bluebird'),
+		followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
+		timeout: 5000
+	})
+
+	robot.on('getRepos', (data, res) => {
+		getRepos(res)
+	})
+
+	function getRepos(res) {
+		var userID = res.message.user.id;
+		var token = robot.brain.get(userID).github_token
+		if (!token){
+			// TODO 
+			// tell user to login 
+			// (maybe emit e message and do it somewhere else)
+			// maybe cancel api.ai context
+			return
+		}
+		githubAuthUser(token)
+		console.log(robot.brain.get('GithubApp'))
+
+	}
+
+	function getAppToken(appID) {
+		var db = mongoskin.MongoClient.connect(mongodb_uri)
+		db.bind('GithubApp')
+		return db.GithubApp.findOneAsync({ _id: appID })
+			.then(dbData => encryption.decrypt(dbData.token))
+			.catch(error => {
+				robot.logger.error(error)
+				if (c.errorsChannel) {
+					robot.messageRoom(c.errorsChannel, c.errorMessage
+						+ `Script: ${path.basename(__filename)}`)
+				}
+			})
+	}
+
+	function githubAuthUser(token) {
+		ghUser.authenticate({
+			"type": "token",
+			"token": token
+		})
+	}
 
 	/* oauth autentication using github personal token */
 	// github.authenticate({
