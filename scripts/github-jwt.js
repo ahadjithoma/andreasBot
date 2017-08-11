@@ -25,7 +25,7 @@ module.exports = robot => {
         'Europe/Athens' /* Time zone of this job. */
     );
 
-
+    generateJWToken()
     function generateJWToken() {
         var privateKeyDir = (c.GithubApp.privateKeyDir || process.env.GITHUB_KEY_DIR)
         var cert = fs.readFileSync(privateKeyDir);  // the get private key

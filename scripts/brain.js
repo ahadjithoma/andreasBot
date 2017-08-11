@@ -17,7 +17,7 @@ module.exports = (robot) => {
         refreshBrain()
     })
 
-    function refreshBrainForUsers() {
+    function refreshBrain() {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
         db.collection('users').find().toArrayAsync()
             .then(data => {

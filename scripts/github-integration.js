@@ -41,7 +41,7 @@ module.exports = function (robot) {
 	});
 
 	var ghUser, ghApp
-	var ghUser = new GitHubApi({
+	var ghUser = ghApp = new GitHubApi({
 		/* optional */
 		// debug: true,
 		protocol: "https",
@@ -63,16 +63,26 @@ module.exports = function (robot) {
 	function getRepos(res) {
 		var userID = res.message.user.id;
 		var token = robot.brain.get(userID).github_token
-		if (!token){
+		if (!token) {
 			// TODO 
 			// tell user to login 
 			// (maybe emit e message and do it somewhere else)
 			// maybe cancel api.ai context
 			return
 		}
-		githubAuthUser(token)
-		console.log(robot.brain.get('GithubApp'))
+		githubAuthApp(robot.brain.get('GithubApp'))
 
+		var repos = [];
+		ghApp.integrations.getInstallationRepositories({ user_id: 'andreash92' })
+			.then(res => {
+				(res.data.repositories).forEach(function (repo) {
+					repos.push(`• ${repo.full_name}`)
+				})
+			})
+			.then(()=>{
+				console.log(repos)
+				robot.messageRoom(userID, repos)
+			})
 	}
 
 	function getAppToken(appID) {
@@ -92,6 +102,12 @@ module.exports = function (robot) {
 	function githubAuthUser(token) {
 		ghUser.authenticate({
 			"type": "token",
+			"token": token
+		})
+	}
+	function githubAuthApp(token) {
+		ghApp.authenticate({
+			"type": "integration",
 			"token": token
 		})
 	}
