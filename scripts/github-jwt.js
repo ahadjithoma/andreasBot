@@ -27,8 +27,12 @@ module.exports = robot => {
 
     generateJWToken()
     function generateJWToken() {
+        // TODO
         var privateKeyDir = (c.GithubApp.privateKeyDir || process.env.GITHUB_KEY_DIR)
         var cert = fs.readFileSync(privateKeyDir);  // the get private key
+        console.log('KEY', fs.readFileSync(privateKeyDir))// the get private key
+        
+        var cert = null;
         var date = new Date();
         var payload = {
             iat: Math.round(new Date().getTime() / 1000),
