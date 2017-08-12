@@ -64,6 +64,10 @@ module.exports = function (robot) {
 
             var db = require('./mlab-login.js').db();
 
+            github.authenticate({
+                "type":"token",
+                "token":access_token
+            })
             github.users.get({}, function (err, res) {
                 var username = res.data.login
                 db.bind(users).findAndModify(
