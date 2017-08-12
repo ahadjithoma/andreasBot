@@ -41,7 +41,7 @@ module.exports = (robot) => {
                         var id = document._id
                         robot.brain.set(id, values) // (key, value)
                     }).then(() => {
-                        // robot.emit('getbrain')
+                        robot.emit('generateJWToken')
                     }).catch(err => {
                         robot.logger.error(err)
                         if (c.errorsChannel)

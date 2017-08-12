@@ -25,7 +25,14 @@ module.exports = robot => {
         'Europe/Athens' /* Time zone of this job. */
     );
 
+
+
     generateJWToken()
+    
+    robot.on('generateJWToken', ()=>{
+        generateJWToken()
+    })
+    
     function generateJWToken() {
         // TODO
         var privateKeyDir = (c.GithubApp.privateKeyDir || process.env.GITHUB_KEY_DIR)
