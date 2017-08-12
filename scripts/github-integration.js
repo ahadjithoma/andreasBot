@@ -102,7 +102,7 @@ module.exports = function (robot) {
 			})
 	}
 
-	robot.respond('gh oauth', function (res) {
+	robot.respond(/gh oauth/, function (res) {
 		oauthLogin(res)
 	})
 
