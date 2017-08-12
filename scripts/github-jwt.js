@@ -18,7 +18,7 @@ var db = mongoskin.MongoClient.connect(mongodb_uri)
 module.exports = robot => {
 
     // generate a new token every 55 minutes. (Tokens expire after 60 minutes)
-    var job = new CronJob('00 */55 * * * *', 
+    var job = new CronJob('00 */55 * * * *',
         function () { generateJWToken() },
         function () { return null; }, /* This function is executed when the job stops */
         true, /* Start the job right now */
@@ -29,10 +29,9 @@ module.exports = robot => {
     function generateJWToken() {
         // TODO
         var privateKeyDir = (c.GithubApp.privateKeyDir || process.env.GITHUB_KEY_DIR)
-        var cert = fs.readFileSync(privateKeyDir);  // the get private key
-        console.log('KEY', fs.readFileSync(privateKeyDir))// the get private key
-        
-        var cert = null;
+        var cert = fs.readFileSync(path.resolve(__dirname, c.GithubApp.privateKeyDir));  // the get private key
+        // end of todo
+
         var date = new Date();
         var payload = {
             iat: Math.round(new Date().getTime() / 1000),
