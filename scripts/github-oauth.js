@@ -7,7 +7,7 @@ module.exports = function (robot) {
     var authorization_base_url = 'https://github.com/login/oauth/authorize'
     var token_url = 'https://github.com/login/oauth/access_token'
     var bot_host = process.env.HUBOT_HOST_URL
-    var GithubApi = require('github')
+    var GitHubApi = require('github')
 
     var github = new GitHubApi({
         /* optional */
