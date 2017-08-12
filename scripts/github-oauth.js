@@ -70,7 +70,7 @@ module.exports = function (robot) {
             })
             github.users.get({}, function (err, res) {
                 var username = res.data.login
-                db.bind(users).findAndModify(
+                db.bind('users').findAndModify(
                     { _id: userid },
                     [["_id", 1]],
                     { $set: { github_username: username } },
