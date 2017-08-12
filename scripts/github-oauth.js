@@ -79,7 +79,7 @@ module.exports = function (robot) {
                             robot.emit('refreshBrain') //refresh brain to update tokens 
                         }
                     })
-
+            })
 
 
                 encryption.encrypt(access_token).then(encryptedToken => {
