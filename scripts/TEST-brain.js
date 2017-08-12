@@ -1,5 +1,5 @@
-module.exports = function(robot) {
-  robot.respond(/have a soda/i, function(res) {
+module.exports = function (robot) {
+  robot.respond(/have a soda/i, function (res) {
     var sodasHad;
     sodasHad = robot.brain.get('totalSodas') * 1 || 0;
     if (sodasHad > 1) {
@@ -9,9 +9,23 @@ module.exports = function(robot) {
       robot.brain.set('totalSodas', sodasHad + 1);
     }
   });
-  
-  robot.respond(/sleep it off/i, function(res) {
+
+  robot.respond(/sleep it off/i, function (res) {
     robot.brain.set('totalSodas', 0);
     res.reply('zzzzz');
   });
+
+  var mongoskin = require('mongoskin')
+  var mongodb_uri = process.env.MONGODB_URI
+  var db = mongoskin.MongoClient.connect(mongodb_uri)
+
+  robot.respond('mydb', function (res) {
+    db.bind('users').find().toArray((err, res) => {
+      if (err) throw err
+      console.log(res)
+    })
+    db.close()
+  })
+
+
 };
