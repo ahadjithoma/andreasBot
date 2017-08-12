@@ -6,10 +6,9 @@ const key = process.env.ENCRYPTION_KEY; // Must be   256 bytes (32 characters)
 const algorithm = process.env.ENCRYPTION_ALGORITHM
 
 function encrypt(text) {
+  if (!text) return false;
+
   return new Promise((resolve, reject) => {
-    if (!text){
-      reject('No text. Text: ' + text)
-    }
     var cipher = crypto.createCipher(algorithm, key)
     var crypted = cipher.update(text, 'utf8', 'hex')
     crypted += cipher.final('hex');
