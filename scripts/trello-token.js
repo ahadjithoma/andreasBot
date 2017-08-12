@@ -16,11 +16,11 @@ var encryption = require('./encryption.js');
 
 var app_key = process.env.HUBOT_TRELLO_KEY;
 var oauth_secret = process.env.HUBOT_TRELLO_OAUTH;
-
+var host_url = process.env.HUBOT_HOST_URL
 module.exports = function (robot) {
 
     var oauth_secrets = {};
-    var loginCallback = `https://andreasbot.herokuapp.com/hubot/trello-token`;
+    var loginCallback = `${host_url}/hubot/trello-token`;
     var scope = 'read,write,account'
     var expr = 'never' // expiration
     var TrelloOAuth = require('./trello-oauth.js')
@@ -58,9 +58,9 @@ module.exports = function (robot) {
                     { upsert: true })
                     .then(res => {
                         console.log(res)
-                        db.close();
                     }).catch(err => { //TODO better error handling
                         console.log(err)
+                    }).done(() => {
                         db.close();
                     })
             });

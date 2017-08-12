@@ -11,13 +11,18 @@ var mongodb_uri = process.env.MONGODB_URI
 
 module.exports = (robot) => {
     robot.brain.constructor(robot)  // new Brain with no external storage.
+    console.log('BEFORE ', robot.brain.data._private)
+
     refreshBrain()
+
 
     robot.on('refreshBrain', function () {
         refreshBrain()
     })
 
     function refreshBrain() {
+        robot.brain.constructor(robot)  // new Brain with no external storage.
+
         var db = mongoskin.MongoClient.connect(mongodb_uri)
         db.collection('users').find().toArrayAsync()
             .then(data => {
@@ -53,6 +58,11 @@ module.exports = (robot) => {
                 if (c.errorsChannel)
                     robot.messageRoom(c.errorsChannel, c.errorMessage
                         + `Script: ${path.basename(__filename)}`)
+            }).done(() => {
+                db.close()
+                robot.brain.constructor(robot)  // new Brain with no external storage.
+
+                console.log('AFTER', robot.brain.data._private)
             })
     }
 

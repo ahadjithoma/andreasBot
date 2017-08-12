@@ -6,6 +6,8 @@ module.exports = function (robot) {
     var hostUrl = 'http://github.com/login/oauth/authorize';
     var authorization_base_url = 'https://github.com/login/oauth/authorize'
     var token_url = 'https://github.com/login/oauth/access_token'
+    var bot_host = process.env.HUBOT_HOST_URL
+
 
     var oauth = require("oauth").OAuth2;
     var OAuth2 = new oauth(
@@ -15,11 +17,7 @@ module.exports = function (robot) {
         "login/oauth/authorize",
         "login/oauth/access_token");
 
-    robot.hear('gh oauth', function (res) {
-        var userId = res.message.user.id;
-        var username = res.message.user.name;
-        res.send(`<https://andreasbot.herokuapp.com/auth/github?userid=${userId}&username=${username}|login>`);
-    })
+
 
     robot.router.get('/auth/github', function (req, res) {
         // get the user id and pass it through 'state' for later use
@@ -27,10 +25,9 @@ module.exports = function (robot) {
             userid: req.query.userid,
             username: req.query.username
         });
-
         res.writeHead(303, {
             Location: OAuth2.getAuthorizeUrl({
-                redirect_uri: 'https://andreasbot.herokuapp.com/auth/github/callback',
+                redirect_uri: `${bot_host}/auth/github/callback`,
                 scope: "read:org,user,public_repo,repo,repo_deployment,delete_repo,notifications,gist,read,write,admin",
                 state: state
             }),
@@ -44,6 +41,7 @@ module.exports = function (robot) {
         var username = JSON.parse(req.query.state).username;
 
         var code = req.query.code;
+        // return console.log("CODE: ",code)
 
         OAuth2.getOAuthAccessToken(code, {}, function (err, access_token) {
             if (err) {
@@ -61,8 +59,10 @@ module.exports = function (robot) {
                     function (err, result) {
                         if (err)
                             robot.logger.error(err);
-                        if (result)
+                        if (result) {
                             robot.logger.info(`${username}'s GitHub Token Added to DB!`)
+                            robot.emit('refreshBrain') //refresh brain to update tokens 
+                        }
                         db.close();
                     }
                 )

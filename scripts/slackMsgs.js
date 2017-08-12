@@ -94,6 +94,26 @@ module.exports = {
             ]
         }
     },
+    basicMessage: function () {
+        return {
+            "text": "",
+            "response_type": "in_channel",
+            "attachments": [
+                {
+                    "title": "",
+                    "title_link": "",
+                    "text": "",
+                    "pretext": "",
+                    "fallback": "",
+                    "color": "",
+                    "footer": "",
+                    "footer_icon": "",
+                    "mrkdwn_in": ["text", "pretext", "fields"]
+
+                }
+            ]
+        }
+    },
 
     githubEvent: function () {
         return {
@@ -137,7 +157,7 @@ module.exports = {
             ]
         }
     },
-    "attachment": function () {
+    attachment: function () {
         return {
             "title": "",
             "pretext": "",
@@ -146,24 +166,6 @@ module.exports = {
             "color": "#111111",
             "text": "",
             "mrkdwn_in": ["text", "pretext", "fields"]
-        }
-    },
-
-    basicMessage: function () {
-        return {
-            "attachments": [
-                {
-                    "fallback": "",
-                    "mrkdwn_in": ["text", "pretext"],
-                    "color": "#36a64f",
-                    "pretext": "Please get a token to authorize your Trello account",
-                    "title": "Slack API Documentation",
-                    "title_link": "",
-                    "text": "Copy the token from the link above and run\n *trello add token <YOUR TOKEN>*",
-                    "footer": "Trello Authorization",
-                    "footer_icon": "https://d2k1ftgv7pobq7.cloudfront.net/meta/u/res/images/b428584f224c42e98d158dad366351b0/trello-mark-blue.png"
-                }
-            ]
         }
     },
 

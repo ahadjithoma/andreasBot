@@ -12,6 +12,7 @@ Promise.promisifyAll(mongoskin)
 
 // config
 var mongodb_uri = process.env.MONGODB_URI
+var bot_host_url = process.env.HUBOT_HOST_URL;
 
 module.exports = function (robot) {
 
@@ -60,29 +61,56 @@ module.exports = function (robot) {
 		getRepos(res)
 	})
 
+
 	function getRepos(res) {
-		var userID = res.message.user.id;
-		var token = robot.brain.get(userID).github_token
+
+		var msg = slackMsgs.basicMessage()
+		var userID = res.message.user.id
+		var token
+		console.log('DATA', robot.brain.data)
+		console.log('GET ID', robot.brain.get(userID))
+		try {
+			token = robot.brain.get(userID).github_token
+		}
+		catch (e) {
+			token = null
+		}
 		if (!token) {
+			robot.messageRoom(userID, 'you are not logged in')
+			oauthLogin(res)
 			// TODO 
 			// tell user to login 
 			// (maybe emit e message and do it somewhere else)
 			// maybe cancel api.ai context
 			return
 		}
+
 		githubAuthApp(robot.brain.get('GithubApp'))
 
 		var repos = [];
 		ghApp.integrations.getInstallationRepositories({ user_id: 'andreash92' })
 			.then(res => {
 				(res.data.repositories).forEach(function (repo) {
-					repos.push(`• ${repo.full_name}`)
+					// TODO: add link to repo 
+					msg.attachments[0].text += (`${repo.full_name}\n`)
 				})
 			})
-			.then(()=>{
-				console.log(repos)
-				robot.messageRoom(userID, repos)
+			.then(() => {
+				msg.text = 'Your accessible Repositories: '
+				console.log(msg)
+				robot.messageRoom(userID, msg)
 			})
+	}
+
+	robot.respond('gh oauth', function (res) {
+		oauthLogin(res)
+	})
+
+	function oauthLogin(res) {
+		var userId = res.message.user.id;
+		var username = res.message.user.name;
+		// TODO add var to url. make use of env for better modularity
+		res.send(`<${bot_host_url}/auth/github?userid=${userId}&username=${username}|login>`);
 	}
 
 	function getAppToken(appID) {
@@ -112,58 +140,9 @@ module.exports = function (robot) {
 		})
 	}
 
-	/* oauth autentication using github personal token */
-	// github.authenticate({
-	// 	"type": "oauth",
-	// 	"token": process.env.HUBOT_GITHUB_TOKEN
-	// })
-
-	// oauth key/secret (to get a token)
-	// github.authenticate({
-	// 	type: "oauth",
-	// 	key: process.env.GITHUB_APP_CLIENT_ID,
-	// 	secret: process.env.GITHUB_APP_CLIENT_SECRET
-	// })
-	robot.hear(/gh auth/i, function (res_r) {
-
-		var client_id = process.env.GITHUB_APP_CLIENT_ID;
-		var client_secret = process.env.GITHUB_APP_CLIENT_SECRET;
-
-		github.authorization.getOrCreateAuthorizationForApp({
-			client_secret: client_secret,
-			client_id: client_id,
-			note: 'some note'
-		}).then(res => {
-			robot.logger.info(res);
-		}).catch(err => {
-			robot.logger.error(err);
-		});
-
-
-		// var data = { client_id: client_id,
-		// redirect_uri: "https://andreasbot.herokuapp.com/hubot/github-oauth"};
-		// var headers = {  'Accept': 'application/vnd.github.machine-man-preview+json'};
-
-
-		// robot.http("http://github.com/login/oauth/authorize")
-		// .headers(headers)
-		// .post(data)(function (err, res, body) {
-		// 	if (err){
-		// 		robot.logger.error(err)
-		// 		return 0;
-		// 	}
-		// 	robot.logger.info(res)
-		// 	robot.logger.warning(body)
-		// 				robot.logger.error(res.req.ClientRequest._events.response)
-
-		// })
+	robot.on('githubOAuthLogin', function (res) {
+		oauthLogin(res)
 	})
-	/* basic autentication using github's username & password */
-	// github.authenticate({
-	//     type: "basic",
-	//     username: '',
-	//     password: ''
-	// });
 
 	function pushEvent(payload) {
 		var room = "random";
@@ -315,26 +294,6 @@ module.exports = function (robot) {
 				robot.messageRoom(room, `event: ${data.eventType}`);
 				break;
 		}
-	})
-
-	robot.respond(/gh hook/i, function (res_r) {
-
-		github.repos.createHook({
-			"owner": "andreash92",
-			"repo": "andreasBot",
-			"name": "andreasBot-hook",
-			"config": {
-				"url": "https://andreasbot.herokuapp.com/hubot/github-hooks",
-				"content_type": "json"
-			}
-		},
-			function (err, res) {
-				if (err) {
-					robot.logger.error(err);
-					return 0;
-				}
-				robot.logger.info(res);
-			});
 	})
 
 	// get user's followers. Developed for testing purposes
