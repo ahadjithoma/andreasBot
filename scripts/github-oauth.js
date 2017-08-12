@@ -62,11 +62,16 @@ module.exports = function (robot) {
                 console.log(err);
             }
 
+            // ****
+            // TODO:
+            // BETTER Handling of promises!!
+            // ****
+
             var db = require('./mlab-login.js').db();
 
             github.authenticate({
-                "type":"token",
-                "token":access_token
+                "type": "token",
+                "token": access_token
             })
             github.users.get({}, function (err, res) {
                 var username = res.data.login
@@ -84,28 +89,26 @@ module.exports = function (robot) {
                         }
                     })
             })
-
-
-                encryption.encrypt(access_token).then(encryptedToken => {
-                    // TODO: Get github login user name as well 
-                    db.bind(users).findAndModify(
-                        { _id: userid },
-                        [["_id", 1]],
-                        { $set: { github_token: encryptedToken } },
-                        { upsert: true },
-                        function (err, result) {
-                            if (err)
-                                robot.logger.error(err);
-                            if (result) {
-                                robot.logger.info(`${username}'s GitHub Token Added to DB!`)
-                                robot.emit('refreshBrain') //refresh brain to update tokens 
-                            }
-                            db.close();
+            encryption.encrypt(access_token).then(encryptedToken => {
+                // TODO: Get github login user name as well 
+                db.bind(users).findAndModify(
+                    { _id: userid },
+                    [["_id", 1]],
+                    { $set: { github_token: encryptedToken } },
+                    { upsert: true },
+                    function (err, result) {
+                        if (err)
+                            robot.logger.error(err);
+                        if (result) {
+                            robot.logger.info(`${username}'s GitHub Token Added to DB!`)
+                            robot.emit('refreshBrain') //refresh brain to update tokens 
                         }
-                    )
-                });
+                        db.close();
+                    }
+                )
             });
-            res.redirect('');
         });
+        res.redirect('');
+    });
 
-    }
+}

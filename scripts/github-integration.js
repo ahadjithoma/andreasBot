@@ -90,7 +90,7 @@ module.exports = function (robot) {
 		githubAuthApp(robot.brain.get('GithubApp'))
 
 		var repos = [];
-		ghApp.integrations.getInstallationRepositories({ user_id: 'andreash92' })
+		ghApp.integrations.getInstallationRepositories({ user_id: githubUsername })
 			.then(res => {
 				(res.data.repositories).forEach(function (repo) {
 					// TODO: add link to repo 
