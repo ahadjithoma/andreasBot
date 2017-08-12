@@ -10,11 +10,7 @@ var mongodb_uri = process.env.MONGODB_URI
 
 
 module.exports = (robot) => {
-    robot.brain.constructor(robot)  // new Brain with no external storage.
-    console.log('BEFORE ', robot.brain.data._private)
-
     refreshBrain()
-
 
     robot.on('refreshBrain', function () {
         refreshBrain()
@@ -60,8 +56,6 @@ module.exports = (robot) => {
                         + `Script: ${path.basename(__filename)}`)
             }).done(() => {
                 db.close()
-                robot.brain.constructor(robot)  // new Brain with no external storage.
-
                 console.log('AFTER', robot.brain.data._private)
             })
     }
