@@ -7,7 +7,22 @@ module.exports = function (robot) {
     var authorization_base_url = 'https://github.com/login/oauth/authorize'
     var token_url = 'https://github.com/login/oauth/access_token'
     var bot_host = process.env.HUBOT_HOST_URL
+    var GithubApi = require('github')
 
+    var github = new GitHubApi({
+        /* optional */
+        // debug: true,
+        protocol: "https",
+        host: "api.github.com", // should be api.github.com for GitHub
+        thPrefix: "/api/v3", // for some GHEs; none for GitHub
+        headers: {
+            "Accept": "application/vnd.github.machine-man-preview+json",
+            "user-agent": "Hubot-GitHub" // GitHub is happy with a unique user agent
+        },
+        Promise: require('bluebird'),
+        followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
+        timeout: 5000
+    })
 
     var oauth = require("oauth").OAuth2;
     var OAuth2 = new oauth(
@@ -41,20 +56,20 @@ module.exports = function (robot) {
         var username = JSON.parse(req.query.state).username;
 
         var code = req.query.code;
-        // return console.log("CODE: ",code)
 
         OAuth2.getOAuthAccessToken(code, {}, function (err, access_token) {
             if (err) {
                 console.log(err);
             }
-            encryption.encrypt(access_token).then(encryptedToken => {
-                // TODO: Get github login user name as well 
-                var db = require('./mlab-login.js').db();
-                db.bind('users')
-                db.users.findAndModify(
+
+            var db = require('./mlab-login.js').db();
+
+            github.users.get({}, function (err, res) {
+                var username = res.data.login
+                db.bind(users).findAndModify(
                     { _id: userid },
                     [["_id", 1]],
-                    { $set: { github_token: encryptedToken } },
+                    { $set: { github_username: username } },
                     { upsert: true },
                     function (err, result) {
                         if (err)
@@ -63,14 +78,30 @@ module.exports = function (robot) {
                             robot.logger.info(`${username}'s GitHub Token Added to DB!`)
                             robot.emit('refreshBrain') //refresh brain to update tokens 
                         }
-                        db.close();
-                    }
-                )
+                    })
+
+
+
+                encryption.encrypt(access_token).then(encryptedToken => {
+                    // TODO: Get github login user name as well 
+                    db.bind(users).findAndModify(
+                        { _id: userid },
+                        [["_id", 1]],
+                        { $set: { github_token: encryptedToken } },
+                        { upsert: true },
+                        function (err, result) {
+                            if (err)
+                                robot.logger.error(err);
+                            if (result) {
+                                robot.logger.info(`${username}'s GitHub Token Added to DB!`)
+                                robot.emit('refreshBrain') //refresh brain to update tokens 
+                            }
+                            db.close();
+                        }
+                    )
+                });
             });
-
-
+            res.redirect('');
         });
-        res.redirect('');
-    });
 
-}
+    }

@@ -66,11 +66,13 @@ module.exports = function (robot) {
 
 		var msg = slackMsgs.basicMessage()
 		var userID = res.message.user.id
-		var token
+		var token, githubUsername
 		console.log('DATA', robot.brain.data)
 		console.log('GET ID', robot.brain.get(userID))
 		try {
 			token = robot.brain.get(userID).github_token
+			githubUsername = robot.brain.get(userID).github_username
+
 		}
 		catch (e) {
 			token = null
