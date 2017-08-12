@@ -15,17 +15,6 @@ module.exports = function (robot) {
     res.reply('zzzzz');
   });
 
-  var mongoskin = require('mongoskin')
-  var mongodb_uri = process.env.MONGODB_URI
-  var db = mongoskin.MongoClient.connect(mongodb_uri)
-
-  robot.respond('mydb', function (res) {
-    db.bind('users').find().toArray((err, res) => {
-      if (err) throw err
-      console.log(res)
-    })
-    db.close()
-  })
 
 
 };

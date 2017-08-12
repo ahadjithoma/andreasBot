@@ -91,7 +91,7 @@ module.exports = function (robot) {
             })
             encryption.encrypt(access_token).then(encryptedToken => {
                 // TODO: Get github login user name as well 
-                db.bind(users).findAndModify(
+                db.bind('users').findAndModify(
                     { _id: userid },
                     [["_id", 1]],
                     { $set: { github_token: encryptedToken } },
