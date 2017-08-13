@@ -9,6 +9,7 @@ var path = require('path')
 var request = require('request-promise')
 var c = require('./config.json')
 var encryption = require('./encryption.js')
+var cache = require('./cache.js').getCache()
 Promise.promisifyAll(mongoskin)
 
 // config
@@ -58,35 +59,28 @@ module.exports = function (robot) {
 
 		var msg = slackMsgs.basicMessage()
 		var userID = res.message.user.id
-		var token, githubUsername
-		console.log('REPOS FOR USER:', robot.brain.get(userID))
+
 		try {
-			token = robot.brain.get(userID).github_token
-			githubUsername = robot.brain.get(userID).github_username
+			var token = cache.get(userID).github_token //robot.brain.get(userID).github_token
+			var githubUsername = robot.brain.get(userID).github_username
 		}
 		catch (e) {
-			token = null
+			var token = null
+			var githubUsername = null
 		}
+		console.log(token)
 		if (!token) {
 			robot.messageRoom(userID, 'you are not logged in')
 			oauthLogin(res)
 			// TODO 
-			// tell user to login 
-			// (maybe emit e message and do it somewhere else)
 			// maybe cancel api.ai context
 			return
 		}
 
 		var installation_id = 44065 //TODO must fetch it dyamically
-
-		var headers = {
-			'Authorization': `token ${token}`,
-			'Accept': 'application/vnd.github.machine-man-preview+json',
-			'User-Agent': 'Hubot For Github'
-		};
 		var options = {
 			url: `https://api.github.com/user/installations/${installation_id}/repositories`,
-			headers: headers,
+			headers: getUserHeaders(token),
 			json: true
 		};
 
@@ -105,25 +99,28 @@ module.exports = function (robot) {
 			.catch(err => {
 				console.log(err)
 			})
-
-		// var repos = [];
-		// ghApp.integrations.getInstallationRepositories({ user_id: 28298501 })
-		// 	.then(res => {
-		// 		(res.data.repositories).forEach(function (repo) {
-		// 			// TODO: add link to repo 
-		// 			msg.attachments[0].text += (`${repo.full_name}\n`)
-		// 		})
-		// 	})
-		// 	.then(() => {
-		// 		msg.text = 'Your accessible Repositories: '
-		// 		console.log(msg)
-		// 		robot.messageRoom(userID, msg)
-		// 	})
 	}
 
 	robot.respond(/gh oauth/, function (res) {
 		oauthLogin(res)
 	})
+
+
+	function getUserHeaders(token) {
+		return {
+			'Authorization': `token ${token}`,
+			'Accept': 'application/vnd.github.machine-man-preview+json',
+			'User-Agent': 'Hubot For Github'
+		}
+	}
+
+	function getAppHeaders(token) {
+		return {
+			'Authorization': `Bearer ${token}`,
+			'Accept': 'application/vnd.github.machine-man-preview+json',
+			'User-Agent': 'Hubot For Github'
+		}
+	}
 
 	function oauthLogin(res) {
 		var userId = res.message.user.id;

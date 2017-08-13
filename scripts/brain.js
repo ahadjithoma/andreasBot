@@ -3,6 +3,7 @@ var Promise = require('bluebird')
 var encryption = require('./encryption.js')
 var c = require('./config.json')
 var path = require('path')
+var cache = require('./cache.js').getCache()
 Promise.promisifyAll(mongoskin)
 
 // config
@@ -10,7 +11,6 @@ var mongodb_uri = process.env.MONGODB_URI
 
 
 module.exports = (robot) => {
-
     refreshBrain()
 
     robot.on('refreshBrain', function () {
@@ -18,8 +18,6 @@ module.exports = (robot) => {
     })
 
     function refreshBrain() {
-        robot.brain.constructor(robot)  // new Brain with no external storage.
-
         var db = mongoskin.MongoClient.connect(mongodb_uri)
         db.collection('users').find().toArrayAsync()
             .then(data => {
@@ -40,7 +38,8 @@ module.exports = (robot) => {
                         }
                     }).then(values => {
                         var id = document._id
-                        robot.brain.set(id, values) // (key, value)
+                        cache.set(id, values)
+                        // robot.brain.set(id, values) // (key, value)
                     }).then(() => {
                         // robot.emit('generateJWToken')
                     }).catch(err => {
@@ -60,8 +59,12 @@ module.exports = (robot) => {
             })
     }
 
-    robot.respond(/show brain/, function (res) {
-        robot.logger.info(robot.brain.data._private)
+    robot.respond(/show brain u/, function (res) {
+        console.log('\nusers: ', robot.brain.data.users)
+    })
+
+    robot.respond(/show brain p/, function (res) {
+        console.log('\n_private', robot.brain.data._private)
     })
 
     robot.respond(/clear brain/, function (res) {
@@ -71,5 +74,56 @@ module.exports = (robot) => {
     robot.respond(/refresh brain/, function (res) {
         refreshBrain()
     })
+
+    robot.respond(/write brain/, function (res) {
+        var id = res.message.user.id
+        robot.brain.set('KEYYY', 'something')
+    })
+
+    robot.respond(/delete users/, function (res) {
+        delete robot.brain.data.users
+    })
+
+    robot.respond(/delete private/, function (res) {
+        robot.brain.remove[!'GithubApp']
+    })
+
+
+
+
+
+    var cb = require('./cache.js').getCache()
+
+    robot.respond(/cache set/, function (res) {
+        var id = res.message.user.id
+        cb.set(`${id}`, {a: 'mytrellotoken'})
+        console.log('SETTED: ', cb.data)
+    })
+
+
+    robot.respond(/cache set a/, function (res) {
+        var id = res.message.user.id
+
+        cb.set(`${id}.github`, 'mygithubstuff')
+        console.log('SETTED: ', cb.data)
+    })
+
+    robot.respond(/show cache/, function(res){
+        console.log( cb.data)
+    })
+
+
+
+
+
+
+
+
+
+
+
+
 }
+
+
 
