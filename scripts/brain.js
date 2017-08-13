@@ -10,6 +10,7 @@ var mongodb_uri = process.env.MONGODB_URI
 
 
 module.exports = (robot) => {
+
     refreshBrain()
 
     robot.on('refreshBrain', function () {
@@ -41,7 +42,7 @@ module.exports = (robot) => {
                         var id = document._id
                         robot.brain.set(id, values) // (key, value)
                     }).then(() => {
-                        robot.emit('generateJWToken')
+                        // robot.emit('generateJWToken')
                     }).catch(err => {
                         robot.logger.error(err)
                         if (c.errorsChannel)
@@ -56,9 +57,19 @@ module.exports = (robot) => {
                         + `Script: ${path.basename(__filename)}`)
             }).done(() => {
                 db.close()
-                console.log('AFTER', robot.brain.data._private)
             })
     }
 
+    robot.respond(/show brain/, function (res) {
+        robot.logger.info(robot.brain.data._private)
+    })
+
+    robot.respond(/clear brain/, function (res) {
+        robot.brain.constructor(robot)
+    })
+
+    robot.respond(/refresh brain/, function (res) {
+        refreshBrain()
+    })
 }
 

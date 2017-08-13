@@ -6,6 +6,7 @@ var slackMsgs = require('./slackMsgs.js');
 var mongoskin = require('mongoskin')
 var Promise = require('bluebird')
 var path = require('path')
+var request = require('request-promise')
 var c = require('./config.json')
 var encryption = require('./encryption.js')
 Promise.promisifyAll(mongoskin)
@@ -15,15 +16,6 @@ var mongodb_uri = process.env.MONGODB_URI
 var bot_host_url = process.env.HUBOT_HOST_URL;
 
 module.exports = function (robot) {
-
-
-	robot.on('getbrain', function () {
-		getBrain();
-	})
-	function getBrain() {
-		var u = robot.brain.get('U514U4XDF')
-		console.log('AFTER: ', u)
-	}
 
 	/* set Github Accounts for Users and App (bot) */
 	var github = new GitHubApi({
@@ -67,12 +59,10 @@ module.exports = function (robot) {
 		var msg = slackMsgs.basicMessage()
 		var userID = res.message.user.id
 		var token, githubUsername
-		console.log('DATA', robot.brain.data)
-		console.log('GET ID', robot.brain.get(userID))
+		console.log('REPOS FOR USER:', robot.brain.get(userID))
 		try {
 			token = robot.brain.get(userID).github_token
 			githubUsername = robot.brain.get(userID).github_username
-
 		}
 		catch (e) {
 			token = null
@@ -87,21 +77,48 @@ module.exports = function (robot) {
 			return
 		}
 
-		githubAuthApp(robot.brain.get('GithubApp'))
+		var installation_id = 44065 //TODO must fetch it dyamically
 
-		var repos = [];
-		ghApp.integrations.getInstallationRepositories({ user_id: githubUsername })
+		var headers = {
+			'Authorization': `token ${token}`,
+			'Accept': 'application/vnd.github.machine-man-preview+json',
+			'User-Agent': 'Hubot For Github'
+		};
+		var options = {
+			url: `https://api.github.com/user/installations/${installation_id}/repositories`,
+			headers: headers,
+			json: true
+		};
+
+		request(options)
 			.then(res => {
-				(res.data.repositories).forEach(function (repo) {
+				// console.log(res)
+				(res.repositories).forEach(function (repo) {
 					// TODO: add link to repo 
 					msg.attachments[0].text += (`${repo.full_name}\n`)
 				})
 			})
 			.then(() => {
 				msg.text = 'Your accessible Repositories: '
-				console.log(msg)
 				robot.messageRoom(userID, msg)
 			})
+			.catch(err => {
+				console.log(err)
+			})
+
+		// var repos = [];
+		// ghApp.integrations.getInstallationRepositories({ user_id: 28298501 })
+		// 	.then(res => {
+		// 		(res.data.repositories).forEach(function (repo) {
+		// 			// TODO: add link to repo 
+		// 			msg.attachments[0].text += (`${repo.full_name}\n`)
+		// 		})
+		// 	})
+		// 	.then(() => {
+		// 		msg.text = 'Your accessible Repositories: '
+		// 		console.log(msg)
+		// 		robot.messageRoom(userID, msg)
+		// 	})
 	}
 
 	robot.respond(/gh oauth/, function (res) {

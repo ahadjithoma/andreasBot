@@ -28,11 +28,11 @@ module.exports = robot => {
 
 
     generateJWToken()
-    
-    robot.on('generateJWToken', ()=>{
+
+    robot.on('generateJWToken', () => {
         generateJWToken()
     })
-    
+
     function generateJWToken() {
         // TODO
         var privateKeyDir = (c.GithubApp.privateKeyDir || process.env.GITHUB_KEY_DIR)
