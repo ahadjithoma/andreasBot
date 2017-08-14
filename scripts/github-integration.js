@@ -67,15 +67,18 @@ module.exports = function (robot) {
 		catch (e) {
 			var token = null
 			var githubUsername = null
-		}
-		console.log(token)
-		if (!token) {
 			robot.messageRoom(userID, 'you are not logged in')
 			oauthLogin(res)
-			// TODO 
-			// maybe cancel api.ai context
 			return
 		}
+		console.log(token)
+		// if (!token) {
+			// robot.messageRoom(userID, 'you are not logged in')
+			// oauthLogin(res)
+			// TODO 
+			// maybe cancel api.ai context
+			// return
+		// }
 
 		var installation_id = 44065 //TODO must fetch it dyamically
 		var options = {

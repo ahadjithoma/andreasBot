@@ -8,6 +8,7 @@ var request = require('request-promise')
 var CronJob = require('cron').CronJob
 var Promise = require('bluebird')
 var mongoskin = require('mongoskin')
+var cache = require('./cache.js').getCache()
 Promise.promisifyAll(mongoskin)
 
 // config
@@ -60,19 +61,23 @@ module.exports = robot => {
 
         request(options)
             .then(function (body) {
-                var i = 0; //TODO
-                var id = body[i].id
-                generateInstallationToken(id, JWToken)
+                var installations = body.length
+                for (var i = 0; i < installations; i++) {
+                    var installation_id = body[i].id
+                    var installation_account = body[i].account.login
+                    generateInstallationToken(installation_id, installation_account, JWToken)
+                }
+
             })
             .catch(function (err) {
                 console.log(err)
             });
     }
 
-    function generateInstallationToken(id, JWToken) {
+    function generateInstallationToken(installation_id, installation_account, JWToken) {
         var options = {
             method: 'POST',
-            url: `https://api.github.com/installations/${id}/access_tokens`,
+            url: `https://api.github.com/installations/${installation_id}/access_tokens`,
             headers: {
                 Authorization: `Bearer ${JWToken}`,
                 'Accept': 'application/vnd.github.machine-man-preview+json',
@@ -83,44 +88,13 @@ module.exports = robot => {
 
         request(options)
             .then(function (res) {
+                // store token in cache
                 var token = res.token;
-                storeToken(id, token)
-                console.log('TOKEN: ', token)
+                cache.set(`GithubApp.${installation_id}`, { account: installation_account, token: token})
             })
             .catch(function (err) {
                 // print eror 
                 console.log('ERROR: ', err)
-            })
-    }
-
-
-    function storeToken(installation_id, token) {
-
-        // var brainValue = {installation_id:token}
-        robot.brain.set('GithubApp', token)
-
-        var encryption = require('./encryption.js')
-        encryption.encrypt(token)
-            .then(encryptedToken => {
-                db.bind('GithubApp')
-                db.GithubApp.saveAsync({ _id: installation_id, token: encryptedToken })
-                    .then(res => {
-                        robot.logger.info(c.GithubApp.tokenStoredMsg)
-                    })
-                    .catch(dbError => {
-                        robot.logger.error(dbError)
-                        if (c.errorsChannel) {
-                            robot.messageRoom(c.errorsChannel, c.errorMessage
-                                + `Script: ${path.basename(__filename)}`)
-                        }
-                    })
-            })
-            .catch(encrError => {
-                robot.logger.error(encrError)
-                if (c.errorsChannel) {
-                    robot.messageRoom(c.errorsChannel, c.errorMessage
-                        + 'Script: ' + path.basename(__filename))
-                }
             })
     }
 }

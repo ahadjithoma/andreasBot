@@ -7,7 +7,7 @@ const algorithm = process.env.ENCRYPTION_ALGORITHM
 
 function encrypt(text) {
   return new Promise((resolve, reject) => {
-    if (!text) resolve(false)
+    if (!text) resolve()
     var cipher = crypto.createCipher(algorithm, key)
     var crypted = cipher.update(text, 'utf8', 'hex')
     crypted += cipher.final('hex');
@@ -17,7 +17,7 @@ function encrypt(text) {
 
 function decrypt(text) {
   return new Promise((resolve, reject) => {
-    if (!text) resolve(false)
+    if (!text) resolve()
     var decipher = crypto.createDecipher(algorithm, key)
     var decrypted = decipher.update(text, 'hex', 'utf8')
     decrypted += decipher.final('utf8');
@@ -25,4 +25,14 @@ function decrypt(text) {
   })
 }
 
-module.exports = { decrypt, encrypt };
+
+
+function decryptSync(text) {
+  if (!text) return null;
+  var decipher = crypto.createDecipher(algorithm, key)
+  var decrypted = decipher.update(text, 'hex', 'utf8')
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}
+
+module.exports = { decrypt, encrypt, decryptSync };
