@@ -41,6 +41,8 @@ module.exports = function (robot) {
     })
 
     robot.router.get('/hubot/trello-token', function (req, res_r) {
+        var db = mongo.MongoClient.connect(uri);
+
         let args = req.query;
         let query = url.parse(req.url, true).query;
         let token = query.oauth_token;
@@ -52,15 +54,28 @@ module.exports = function (robot) {
 
             var options = {
                 method: 'GET',
-                url: `${trello_url}/1/members/me?key=${trelloKey}&token=${data['oauth_access_token']}`
-                // key: trelloKey,
-                // token: data['oauth_access_token']
+                url: `${trello_url}/1/members/me?key=${trelloKey}&token=${data['oauth_access_token']}`,
+                json: true
             }
-            request(options).then(res => { console.log(res) }).catch(err => { console.log(err) })
+            request(options).then(res => {
+                console.log(res)
+             db.bind('users').findAndModifyAsync(
+                    { _id: userId },
+                    [["_id", 1]],
+                    { $set: { trello_username: res.username } },
+                    { upsert: true })
+                    .then(res => {
+                        // console.log(res)
+                    }).catch(err => { //TODO better error handling
+                        console.log(err)
+                    }).done(() => {
+                        db.close();
+                    })
+            }).catch(err => {
+                console.log(err)
+            })
 
             encryption.encrypt(data['oauth_access_token']).then(token => {
-                var trelloUsername = data.username
-                var db = mongo.MongoClient.connect(uri);
                 db.bind('users');
                 db.users.findAndModifyAsync(
                     { _id: userId },
