@@ -5,6 +5,7 @@ var Promise = require('bluebird');
 var request = require('request-promise');
 var encryption = require('./encryption.js');
 var mongo = require('mongoskin');
+var cache = require('./cache.js').getCache()
 Promise.promisifyAll(mongo);
 
 // config
@@ -58,6 +59,12 @@ module.exports = function (robot) {
                 json: true
             }
             request(options).then(res => {
+                var values = {
+                    trello_username: res.username,
+                    trello_token: data['oauth_access_token']
+                }
+                cache.set(userId, values)
+
                 encryption.encrypt(data['oauth_access_token'])
                     .then(token => {
                         db.bind('users');
@@ -74,24 +81,9 @@ module.exports = function (robot) {
                                 db.close();
                             })
                     });
-                // db.bind('users').findAndModifyAsync(
-                //     { _id: userId },
-                //     [["_id", 1]],
-                //     { $set: { trello_username: res.username } },
-                //     { upsert: true })
-                //     .then(res => {
-                //         // console.log(res)
-                //     }).catch(err => { //TODO better error handling
-                //         console.log(err)
-                //     }).done(() => {
-                //         db.close();
-                //     })
             }).catch(err => {
                 console.log(err)
             })
-
-
-            // TODO: get trello username and save
             //TODO error
 
         })

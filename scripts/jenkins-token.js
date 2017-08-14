@@ -3,6 +3,7 @@
 // init
 var mongo = require('mongoskin');
 var encryption = require('./encryption.js');
+var cache = require('./cache.js').getCache()
 
 // config
 var mongodb_uri = process.env.MONGODB_URI
@@ -21,17 +22,24 @@ module.exports = robot => {
     function getJenkinsToken(res) {
         var userId = res.message.user.id;
         var url = process.env.JENKINS_URL + '/me/configure'
-        var msg = `Please <${url}|login> to your Jenkins account and copy-paste immediately the API Token here.`
-        msg += '\n Or you can provide the token anytime by telling me `jenkins token "YOUR_TOKEN"` (quotation marks included).'
+        var msg = `Please <${url}|login> to your Jenkins account and provide me the API Token here`
+        msg += ' by telling me something like `jenkins token "YOUR_TOKEN"` (quotation marks included).'
         msg += `\nAfter that, i will encrypt and store it somewhere safe for later use :slightly_smiling_face:`
         robot.messageRoom(userId, msg)
     }
 
     function setJenkinsToken(token, res) {
+        var userId = res.message.user.id;
+        var jenkins_username = null //TODO // maybe not needed
+
+        var values = {
+            jenkins_token: token,
+            jenkins_username: jenkins_username
+        }
+        cache.set(userId, values)
         encryption.encrypt(token)
             .then(encryptedToken => {
                 //TODO find jenkins username and store it
-                var userId = res.message.user.id;
                 var c = require('./config.json');
 
                 var db = mongo.MongoClient.connect(mongodb_uri);
