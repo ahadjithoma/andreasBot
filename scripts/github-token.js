@@ -16,6 +16,21 @@ var OAuth2 = new oauth(
     "login/oauth/authorize",
     "login/oauth/access_token");
 
+var github = new GitHubApi({
+    /* optional */
+    // debug: true,
+    protocol: "https",
+    host: "api.github.com", // should be api.github.com for GitHub
+    thPrefix: "/api/v3", // for some GHEs; none for GitHub
+    headers: {
+        "Accept": "application/vnd.github.machine-man-preview+json",
+        "user-agent": "Hubot-GitHub" // GitHub is happy with a unique user agent
+    },
+    Promise: require('bluebird'),
+    followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
+    timeout: 5000
+})
+
 module.exports = (robot) => {
 
     robot.router.get('/auth/github/callback', function (req, res) {
