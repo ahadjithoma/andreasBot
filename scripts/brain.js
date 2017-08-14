@@ -48,6 +48,8 @@ module.exports = (robot) => {
                         cache.set(id, values)
                     }
 
+                    // Promise Version
+
                     // Promise.all([
                     //     encryption.decrypt(document.github_token),
                     //     encryption.decrypt(document.trello_token),
@@ -83,60 +85,13 @@ module.exports = (robot) => {
             })
     }
 
-    /*************************************************************/
-    // TO BE DELETED 
-
-
-    var cb = require('./cache.js').getCache()
-
-    robot.respond(/cache set/, function (res) {
-        var id = res.message.user.id
-        cb.set(`${id}`, { a: 'mytrellotoken' })
-        console.log('SETTED: ', cb.data)
-    })
-
-
-    robot.respond(/cache set a/, function (res) {
-        var id = res.message.user.id
-
-        cb.set(`${id}.github`, 'mygithubstuff')
-        console.log('SETTED: ', cb.data)
-    })
-
+    // ***********************************************
+    // TO BE DELETED
+    // FOR DEBUGGING
     robot.respond(/show cache/, function (res) {
-        console.log(cb.data)
-
-
-        console.log((cb.data))
+        console.log(cache.data)
     })
-
-    robot.respond(/do cache/, function (res) {
-        var id1 = 1234
-        var id2 = 5678
-        // cb.union('githubApp', { id: id1, token:'id1token' })
-        // cb.union('githubApp', { id: id2, token:'id2token' })
-        // cb.set('githubApp', { id: id2, token:'newtoken' })
-
-        cb.set(`GHAPP.${id1}`, { token: 'fardsgfv', name: 'org' })
-        cb.set(`GHAPP.${id2}`, { token: 'fardsgfv', name: "andreas" })
-        cb.set(`GHAPP.${id2}`, { token: 'fardsgfv', name: "neeew" })
-
-        // cb.set(`GHAPP`, [{ token: 'fardsgfv', name: 'org' }])
-        console.log((cb.data.GHAPP['1234']))
-
-    })
-    /*************************************************************/
-
-
-
-
-
-
-
-
-
-
-
+    // ***********************************************
 }
 
 

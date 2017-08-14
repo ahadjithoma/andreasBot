@@ -8,7 +8,7 @@ module.exports = function (robot) {
     var token_url = 'https://github.com/login/oauth/access_token'
     var bot_host = process.env.HUBOT_HOST_URL
     var GitHubApi = require('github')
-
+    var cache = require('./cache.js').getCache()
     var github = new GitHubApi({
         /* optional */
         // debug: true,
@@ -74,23 +74,29 @@ module.exports = function (robot) {
                 "token": access_token
             })
             github.users.get({}, function (err, res) {
-                var username = res.data.login
-                db.bind('users').findAndModify(
+                var github_username = res.data.login
+                db.bind('users').findAndModifyAsync(
                     { _id: userid },
                     [["_id", 1]],
-                    { $set: { github_username: username } },
-                    { upsert: true },
-                    function (err, result) {
-                        if (err)
-                            robot.logger.error(err);
-                        if (result) {
-                            robot.logger.info(`${username}'s GitHub Token Added to DB!`)
-                            robot.emit('refreshBrain') //refresh brain to update tokens 
+                    { $set: { github_username: github_username } },
+                    { upsert: true })
+                    .then(res => { })
+                    .catch(err => {
+                        robot.logger.error(err)
+                        if (c.errorsChannel) {
+                            robot.messageRoom(c.errorsChannel, c.errorMessage
+                                + `Script: ${path.basename(__filename)}`)
                         }
                     })
+                var values = {
+                    github_username: github_username,
+                    github_token: access_token
+                }
+                cache.set(userid, values)
             })
             encryption.encrypt(access_token).then(encryptedToken => {
-                // TODO: Get github login user name as well 
+
+                //TODO -> convert to promise
                 db.bind('users').findAndModify(
                     { _id: userid },
                     [["_id", 1]],
