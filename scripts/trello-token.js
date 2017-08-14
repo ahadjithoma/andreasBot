@@ -58,38 +58,39 @@ module.exports = function (robot) {
                 json: true
             }
             request(options).then(res => {
-                console.log(res)
-             db.bind('users').findAndModifyAsync(
-                    { _id: userId },
-                    [["_id", 1]],
-                    { $set: { trello_username: res.username } },
-                    { upsert: true })
-                    .then(res => {
-                        // console.log(res)
-                    }).catch(err => { //TODO better error handling
-                        console.log(err)
-                    }).done(() => {
-                        db.close();
-                    })
+                encryption.encrypt(data['oauth_access_token'])
+                    .then(token => {
+                        db.bind('users');
+                        db.users.findAndModifyAsync(
+                            { _id: userId },
+                            [["_id", 1]],
+                            { $set: { trello_token: token, trello_username: res.username } },
+                            { upsert: true })
+                            .then(res => {
+                                // console.log(res)
+                            }).catch(err => { //TODO better error handling
+                                console.log(err)
+                            }).done(() => {
+                                db.close();
+                            })
+                    });
+                // db.bind('users').findAndModifyAsync(
+                //     { _id: userId },
+                //     [["_id", 1]],
+                //     { $set: { trello_username: res.username } },
+                //     { upsert: true })
+                //     .then(res => {
+                //         // console.log(res)
+                //     }).catch(err => { //TODO better error handling
+                //         console.log(err)
+                //     }).done(() => {
+                //         db.close();
+                //     })
             }).catch(err => {
                 console.log(err)
             })
 
-            encryption.encrypt(data['oauth_access_token']).then(token => {
-                db.bind('users');
-                db.users.findAndModifyAsync(
-                    { _id: userId },
-                    [["_id", 1]],
-                    { $set: { trello_token: token } },
-                    { upsert: true })
-                    .then(res => {
-                        // console.log(res)
-                    }).catch(err => { //TODO better error handling
-                        console.log(err)
-                    }).done(() => {
-                        db.close();
-                    })
-            });
+
             // TODO: get trello username and save
             //TODO error
 
