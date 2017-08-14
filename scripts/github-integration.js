@@ -57,7 +57,6 @@ module.exports = function (robot) {
 
 	function getRepos(res) {
 
-		var msg = slackMsgs.basicMessage()
 		var userID = res.message.user.id
 
 		try {
@@ -73,35 +72,44 @@ module.exports = function (robot) {
 		}
 		console.log(token)
 		// if (!token) {
-			// robot.messageRoom(userID, 'you are not logged in')
-			// oauthLogin(res)
-			// TODO 
-			// maybe cancel api.ai context
-			// return
+		// robot.messageRoom(userID, 'you are not logged in')
+		// oauthLogin(res)
+		// TODO 
+		// maybe cancel api.ai context
+		// return
 		// }
 
-		var installation_id = 44065 //TODO must fetch it dyamically
-		var options = {
-			url: `https://api.github.com/user/installations/${installation_id}/repositories`,
-			headers: getUserHeaders(token),
-			json: true
-		};
+		var installations = Object.keys(cache.get('GithubApp')).length
+		for (var i = 0; i < installations; i++) {
+			var ghApp = cache.get('GithubApp')
+			var installation_id = Object.keys(ghApp)[i]
 
-		request(options)
-			.then(res => {
-				// console.log(res)
-				(res.repositories).forEach(function (repo) {
-					// TODO: add link to repo 
-					msg.attachments[0].text += (`${repo.full_name}\n`)
+			var options = {
+				url: `https://api.github.com/user/installations/${installation_id}/repositories`,
+				headers: getUserHeaders(token),
+				json: true,
+			};
+
+			request(options)
+				.then(res => {
+					console.log(res)
+
+					var msg = slackMsgs.basicMessage();
+					res.repositories.forEach(function (repo) {
+						// TODO: add link to repo 
+						msg.attachments[0].text += (`${repo.full_name}\n`)
+					})
+					return { msg: msg }
 				})
-			})
-			.then(() => {
-				msg.text = 'Your accessible Repositories: '
-				robot.messageRoom(userID, msg)
-			})
-			.catch(err => {
-				console.log(err)
-			})
+				.then((data) => {
+					data.msg.text = `Your accessible Repositories: `
+					robot.messageRoom(userID, data.msg)
+				})
+				.catch(err => {
+					//TODO handle error codes: i.e. 404 not found -> dont post
+					console.log(err)
+				})
+		}
 	}
 
 	robot.respond(/gh oauth/, function (res) {

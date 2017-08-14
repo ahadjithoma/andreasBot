@@ -2,21 +2,19 @@ var slackMsgs = require('./slackMsgs.js');
 var url = require('url');
 var Trello = require('node-trello');
 var Promise = require('bluebird');
+var request = require('request-promise');
+var encryption = require('./encryption.js');
 var mongo = require('mongoskin');
 Promise.promisifyAll(mongo);
 
 // config
 var uri = process.env.MONGODB_URI;
 var trelloKey = process.env.HUBOT_TRELLO_KEY;
-
-
-var bcrypt = require('bcryptjs');
-var request = require('request-promise');
-var encryption = require('./encryption.js');
-
+var trello_url = 'https://api.trello.com'
 var app_key = process.env.HUBOT_TRELLO_KEY;
 var oauth_secret = process.env.HUBOT_TRELLO_OAUTH;
 var host_url = process.env.HUBOT_HOST_URL
+
 module.exports = function (robot) {
 
     var oauth_secrets = {};
@@ -37,6 +35,11 @@ module.exports = function (robot) {
         })
     })
 
+
+    robot.respond(/do trello/, function (err, res) {
+
+    })
+
     robot.router.get('/hubot/trello-token', function (req, res_r) {
         let args = req.query;
         let query = url.parse(req.url, true).query;
@@ -46,6 +49,14 @@ module.exports = function (robot) {
             if (err) throw err;
             let userName = oauth_secrets['username'];
             let userId = oauth_secrets['id'];
+
+            var options = {
+                method: 'GET',
+                url: trello_url + '/1/members/me',
+                key: trelloKey,
+                token: data['oauth_access_token']
+            }
+            request(options).then(res => { console.log(res) }).catch(err => { console.log(err) })
 
             encryption.encrypt(data['oauth_access_token']).then(token => {
                 var trelloUsername = data.username
@@ -64,8 +75,6 @@ module.exports = function (robot) {
                         db.close();
                     })
             });
-            // encrypt token before storing it
-            // TODO: encryption -> return promise
             // TODO: get trello username and save
             //TODO error
 

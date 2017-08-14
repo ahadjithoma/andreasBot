@@ -90,8 +90,12 @@ module.exports = (robot) => {
     // FOR DEBUGGING
     robot.respond(/show cache/, function (res) {
         console.log(cache.data)
+        var gh = cache.get('GithubApp')
+        console.log(Object.keys(gh))
     })
     // ***********************************************
+    
+
 }
 
 
