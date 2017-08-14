@@ -52,9 +52,9 @@ module.exports = function (robot) {
 
             var options = {
                 method: 'GET',
-                url: trello_url + '/1/members/me',
-                key: trelloKey,
-                token: data['oauth_access_token']
+                url: `${trello_url}/1/members/me?key=${trelloKey}&${data['oauth_access_token']}`
+                // key: trelloKey,
+                // token: data['oauth_access_token']
             }
             request(options).then(res => { console.log(res) }).catch(err => { console.log(err) })
 
@@ -68,7 +68,7 @@ module.exports = function (robot) {
                     { $set: { trello_token: token } },
                     { upsert: true })
                     .then(res => {
-                        console.log(res)
+                        // console.log(res)
                     }).catch(err => { //TODO better error handling
                         console.log(err)
                     }).done(() => {
