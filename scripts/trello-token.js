@@ -52,7 +52,7 @@ module.exports = function (robot) {
 
             var options = {
                 method: 'GET',
-                url: `${trello_url}/1/members/me?key=${trelloKey}&${data['oauth_access_token']}`
+                url: `${trello_url}/1/members/me?key=${trelloKey}&token=${data['oauth_access_token']}`
                 // key: trelloKey,
                 // token: data['oauth_access_token']
             }
