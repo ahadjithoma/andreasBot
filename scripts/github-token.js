@@ -1,4 +1,18 @@
- robot.router.get('/auth/github/callback', function (req, res) {
+var encryption = require('./encryption.js');
+
+var client_id = process.env.GITHUB_APP_CLIENT_ID;
+var client_secret = process.env.GITHUB_APP_CLIENT_SECRET;
+var hostUrl = 'http://github.com/login/oauth/authorize';
+var authorization_base_url = 'https://github.com/login/oauth/authorize'
+var token_url = 'https://github.com/login/oauth/access_token'
+var bot_host = process.env.HUBOT_HOST_URL
+var GitHubApi = require('github')
+var cache = require('./cache.js').getCache()
+
+
+module.exports = (robot) => {
+
+    robot.router.get('/auth/github/callback', function (req, res) {
         var userid = JSON.parse(req.query.state).userid;
         var username = JSON.parse(req.query.state).username;
 
@@ -67,3 +81,5 @@
         });
         res.redirect('');
     });
+
+}
