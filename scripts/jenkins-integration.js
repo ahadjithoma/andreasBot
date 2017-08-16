@@ -82,7 +82,6 @@ module.exports = function (robot) {
                 //changes
                 if (item.changeSet.items) {
                     console.log('\n', item.changeSet.items)
-
                     console.log('\n', item.changeSet.items[0])
                 }
 
