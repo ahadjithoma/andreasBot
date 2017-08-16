@@ -5,8 +5,8 @@
 # #   None
 # #
 # # Configuration:
-# #   export HUBOT_JENKINS_URL=https://ermis.ee.auth.gr:2121/
-# #   export HUBOT_JENKINS_AUTH=andreas_hadj:topsecret
+# # export HUBOT_JENKINS_URL=http://127.0.0.1:9999
+# # export HUBOT_JENKINS_AUTH=andreas_h92:aA_941293
 # #
 # #   Auth should be in the "user:password" format.
 # #

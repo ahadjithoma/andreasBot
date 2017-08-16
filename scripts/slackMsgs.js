@@ -108,8 +108,8 @@ module.exports = {
                     "color": "",
                     "footer": "",
                     "footer_icon": "",
-                    "mrkdwn_in": ["text", "pretext", "fields"]
-
+                    "mrkdwn_in": ["text", "pretext", "fields"],
+                    "fields":[]
                 }
             ]
         }

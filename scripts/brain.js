@@ -23,7 +23,8 @@ module.exports = (robot) => {
             .then(data => {
                 data.forEach(function (document) {
                     var github_token = document.github_token
-                    var jenkins_token = document.jenkins_token
+                    var jenkins_token = document.jenkins_token          // jenkins token and ...
+                    var jenkins_username = document.jenkins_username    // ... username are indepented additions
                     var trello_token = document.trello_token
                     var id = document._id
 
@@ -34,11 +35,12 @@ module.exports = (robot) => {
                         }
                         cache.set(id, values)
                     }
-                    if (jenkins_token) {
+                    if (jenkins_token || jenkins_username) { // it's an OR because jenkins username and token are added separately
                         var values = {
                             jenkins_username: document.jenkins_username,
                             jenkins_token: encryption.decryptSync(jenkins_token)
                         }
+                        cache.set(id, values)
                     }
                     if (trello_token) {
                         var values = {
@@ -47,33 +49,6 @@ module.exports = (robot) => {
                         }
                         cache.set(id, values)
                     }
-
-                    // Promise Version
-
-                    // Promise.all([
-                    //     encryption.decrypt(document.github_token),
-                    //     encryption.decrypt(document.trello_token),
-                    //     encryption.decrypt(document.jenkins_token)
-                    // ]).then(t => {
-                    //     var values
-                    //     return values = {
-                    //         github_username: document.github_username,
-                    //         jenkins_username: document.jenkins_username,
-                    //         trello_username: document.trello_username,
-                    //         github_token: t[0],
-                    //         jenkins_token: t[1],
-                    //         trello_token: t[2]
-                    //     }
-                    // }).then(values => {
-                    //     var id = document._id
-                    //     cache.set(id, values)
-                    //     // robot.brain.set(id, values) // (key, value)
-                    // }).catch(err => {
-                    //     robot.logger.error(err)
-                    //     if (c.errorsChannel)
-                    //         robot.messageRoom(c.errorsChannel, c.errorMessage
-                    //             + `Script: ${path.basename(__filename)}`)
-                    // })
                 })
             }).catch(dbError => {
                 robot.logger.error(err)
@@ -90,11 +65,9 @@ module.exports = (robot) => {
     // FOR DEBUGGING
     robot.respond(/show cache/, function (res) {
         console.log(cache.data)
-        var gh = cache.get('GithubApp')
-        console.log(Object.keys(gh))
     })
     // ***********************************************
-    
+
 
 }
 

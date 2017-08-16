@@ -15,13 +15,20 @@ module.exports = robot => {
         apiaiAsk(msg, res);
     })
 
+    robot.catchAll(function (res) {
+        var regexp = new RegExp("^(?:" + robot.alias + "|" + robot.name + ") (.*)", "i");
+        var msg = res.message.text.match(regexp)[1];
+        // apiaiAsk(msg, res);
+    });
+
+
     // sending a msg to api.ai from other scripts
     robot.on('ask-api.ai', function (msg, res) {
         apiaiAsk(msg, res);
     })
-    
+
     // trigger an event to api.ai from other scripts
-    robot.on('event-api.ai', function(eventName, userId){
+    robot.on('event-api.ai', function (eventName, userId) {
         console.log(eventName, userId)
         apiaiEvent(eventName)
     })
@@ -64,7 +71,7 @@ module.exports = robot => {
 
     function apiaiEvent(eventName, userId, data = {}) {
         var userId = userId;
-     
+
         var event = {
             name: eventName,
             data: data
