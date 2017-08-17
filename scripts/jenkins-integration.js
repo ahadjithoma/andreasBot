@@ -57,15 +57,15 @@ module.exports = function (robot) {
                 var msg = { attachments: [] }
                 var att = slackmsg.attachment()
 
-                // title: Build #num (timestamp)
+                // msg text: Build #num (timestamp)
                 var date = new Date(item.timestamp)
-                att.title = `<${item.url}|Build #${item.id}>`
-                    + ` (${dateFormat(date, df)})`
+                msg.text = `*<${item.url}|Build #${item.id}>`
+                    + ` (${dateFormat(date, df)})*`
 
                 // fallback
-                att.fallback = att.title
+                att.fallback = msg.text
 
-                // text: Result: <result> | Duration: #.### s
+                // attachment text: Result: <result> | Duration: #.### s
                 att.text = `Result: ${item.result} | Duration: ${item.duration / 1000} s`
 
                 // color
@@ -77,15 +77,24 @@ module.exports = function (robot) {
                     att.color = 'warning'
                 }
 
-                // description
+                // fields: description
 
-                //changes
-                if (item.changeSet.items) {
-                    console.log('\n', item.changeSet.items)
-                    console.log('\n', item.changeSet.items[0])
+                // fileds: changes
+                var fieldTitle2 = '', value2 = ''
+                if (item.changeSet.items.length) {
+                    fieldTitle2 = 'Changes:'
                 }
+                item.changeSet.items.forEach(function (change) {
+                    value2 += change.comment
+                })
+                att.fields.push({
+                    title:fieldTitle2,
+                    value: value2,
+                    short: false
+                })
 
                 msg.attachments.push(att)
+                console.log(JSON.stringify(msg))
                 return msg
             })
             .then(msg => { robot.messageRoom(userid, msg) })

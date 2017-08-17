@@ -165,6 +165,7 @@ module.exports = {
             "fallback": null,
             "color": "#111111",
             "text": "",
+            "fields":[],
             "mrkdwn_in": ["text", "pretext", "fields"]
         }
     },
