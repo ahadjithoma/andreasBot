@@ -1,132 +1,159 @@
 'use strict'
 
-const Conversation = require('hubot-conversation');
-var CronJob = require('cron').CronJob;
-var db = require('./mlab-login.js').db();
-var errorChannel = process.env.HUBOT_ERRORS_CHANNEL;
+const Conversation = require('./hubot-conversation/index.js')
+var slackMsg = require('./slackMsgs.js')
+var cache = require('./cache.js').getCache()
+var c = require('./config.json')
+var CronJob = require('cron').CronJob
+var path = require("path")
+var dateFormat = require('dateformat')
+var Promise = require('bluebird')
+var mongoskin = require('mongoskin')
+Promise.promisifyAll(mongoskin)
 
-var path = require("path");
-
+// config
+var mongodb_uri = process.env.MONGODB_URI
+var errorChannel = process.env.HUBOT_ERRORS_CHANNEL || null
 
 module.exports = function (robot) {
 
 
-    var job = new CronJob('30 * 24 * * *', // note that heroku free plan is not running 24/7
-        function () { getStandupData() },
-        function () { return null; }, /* This function is executed when the job stops */
-        false, /* Start the job right now */
-        'Europe/Athens' /* Time zone of this job. */
-    );
-
-
-    // getStandupData();
-    function getStandupData() {
-        db.bind('standups');
-        db.standups.find().toArrayAsync().then(dbData => {
-            startReport(dbData);
+    // when updating existing standups CronJobs or adding new ones -> should fire this listener here
+    robot.on(/updateStandupsCronJobs/, function (res) {
+        // stop all the previous jobs and reset them 
+        Promise.each(Object.keys(cronJobs), function (standupName) {
+            cronJobs[standupName].stop()
         }).catch(err => {
-            robot.logger.error(err);
-            if (errorChannel != null)
-                robot.messageRoom(errorChannel, `Error in ${path.basename(__filename)} script. Please check the Server Log for more details.`)
+            console.log(err)
+        }).done(() => {
+            console.log('done')
+            getAllStandupsData()
+        })
+
+    })
+
+    var switchBoard = new Conversation(robot)
+
+
+    // db -> all standups data -> create cron jobs
+    getAllStandupsData()
+    function getAllStandupsData() {
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
+        db.bind('standups').find().toArrayAsync()
+            .then(dbData => {
+                createCronJobs(dbData)
+            })
+            .catch(dbError => {
+
+            })
+    }
+
+
+    // standup Data -> cronJobs
+    // -> getStandup data() -> provide standup id
+    // fetchStandupsDbData() <-> robot.on in case of new standup 
+    var cronJobs = {}
+    function createCronJobs(data) {
+        data.forEach(function (standup) {
+            var days = standup.days
+            var time = standup.time.split(':')
+            var standupId = standup._id
+            cronJobs[standup.name] = new CronJob(`${time[2]} ${time[1]} ${time[0]} * * *`, /* ss mm hh daysOfMonth MM daysOFWeek */
+                function () { getStandupData(standupId) },   /* This function is executed when the job starts */
+                function () { return null },               /* This function is executed when the job stops */
+                true,           /* Start the job right now */
+                'Europe/Athens' /* Time zone of this job. */
+            )
         })
     }
 
-    function startReport(data) {
-        console.log(data);
-        var i = 0;
-        var j = 0;
-        var channel = data[i]['broadcast-channel'];
-        var standupName = data[i]['standup-name'];
-        var question = data[i].questions[j];
-        var questionsNum = data[i].questions.length;
+    // getStandupData() 
+    function getStandupData(standupId) {
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
 
-        var funcArray = [];
-        var q = { questions: ["first", "second"] }
+        db.bind('standups').findOneAsync({ _id: standupId })
+            .then(standupData => {
+                // TODO channel name -> process env 
+                var channelMembers = (robot.adapter.client.rtm.dataStore.getChannelByName('general')).members
 
-        for (var j = 0; j < questionsNum; j++) {
-            funcArray[j] = function (done) {conv(q.questions[j], done)}
-        }
+                channelMembers.forEach(function (id) {
+                    var user = robot.brain.userForId(id)
+                    if (!user[robot.adapterName].is_bot && !user[robot.adapterName].is_app_user) {
+                        startReport(id, standupData, 0)
+                    }
+                })
+            })
+            .catch(dbError => {
+                robot.logger.error(dbError)
+                if (errorChannel != null)
+                    robot.messageRoom(errorChannel, `Error in ${path.basename(__filename)} script. Please check the Server Log for more details.`)
+            })
+    }
+
+
+    function startReport(userid, standup, qstCnt) {
+
+        var question = standup.questions[qstCnt].text
+        var attachmentColor = standup.questions[qstCnt].color
+        var questionsNum = standup.questions.length
+
+
         //to get the users -> robot.adapter.client.rtm.dataStore.users
-        var userId = 'U514U4XDF' 
-        //TODO: userId ^^^ must change
-        robot.messageRoom(userId, question);
-
-        var eventName = 'standup_report'
-        var handled = robot.emit('event-api.ai', eventName, userId);
-        if (!handled) {
-            // TODO
-        }
-    }
-
-    function conv(question, done) {
-        var dialog = switchBoard.startDialog(msg, 5 * 5000);
-        msg.reply(question)
-
-        dialog.addChoice(/(.*)/i, function (msg2) {
-            msg2.reply('ok')
-            done()
-        });
-    }
-
-
-
-
-    robot.on('standup.create', function (data, res) {
-        createStandup(data);
-    })
-
-    robot.on('standup.report', function (data, res) {
-        console.log(data);
-        // save the report
-        // TODO
-
-        // check if there are any remaining questions
-
-
-        // post question || post end message 
-        // TODO
-    })
-
-    function createStandup(data) {
-        var db = require('./mlab-login.js').db();
-        db.bind('standups');
-    }
-
-    function createCronJob(data) {
-
-        var hours = 19; //data... 
-        var minutes = 18; //data...
-        var dates = '1-5';//data...
-
-
-        // check if standup feature is enabled
-        db.bind('settings');
-        db.settings.findOneAsync({ "_id": "settings_doc" }).then(dbData => {
-            console.log(dbData)
-            if (dbData.standups) {
-                job.start();
-            } else {
-                job.stop();
+        var msg = {
+            message: {
+                user: { id: userid }
+            },
+            reply(text) {
+                robot.messageRoom(userid, text)
             }
-        }).catch(dbError => {
-            robot.logger.info(dbError)
-        });
+        }
+
+        var timeout = c.standups.timeout
+        var dialog = switchBoard.startDialog(msg, timeout)
+        msg.reply(`*${standup.name}* ${question}`)
+        var regex = new RegExp(robot.name + " (.*)", "i")
+        dialog.addChoice(regex, function (msg2) {
+
+            var answer = msg2.match[1]
+
+            // save the answer in cache
+            cache.union(`${userid}.${standup.name}`, { q: question, a: answer, c: attachmentColor })
+
+            // move to next question 
+            dialog.finish()
+            qstCnt++
+            if (qstCnt < standup.questions.length) {
+                startReport(userid, standup, qstCnt)
+            } else {
+                var user = robot.brain.userForId(userid).real_name
+                var username = robot.brain.userForId(userid).name
+
+                var reportMsg = { attachments: [] }
+                var report = cache.data[userid][standup.name]
+
+                msg.reply(`Thanks for reporting on ${standup.name} standup! Keep up the good work :wink:`)
+
+                Promise.each(report, function (element) {
+                    var attachment = slackMsg.attachment()
+                    attachment.title = element.q
+                    attachment.text = element.a
+                    attachment.color = element.c
+                    reportMsg.attachments.push(attachment)
+                }).then(() => {
+                    var date = dateFormat(new Date(), "dd/mm/yyyy")
+                    reportMsg.text = `*${user}* (${username}) posted a status update for *${date}* on *${standup.name}* standup`
+                    robot.messageRoom(standup.channel, reportMsg)
+                }).catch(err => {
+                    console.log(err)
+                })
+
+
+                // TODO (Feature): Save in DB
+
+                // delete after save in DB
+                delete cache.data[userid][standup.name]
+            }
+        })
     }
 
-
-
-
-    var type = 'user' //Type parameter can take one of two values: user (default) or room 
-    var switchBoard = new Conversation(robot, type);
-
-    robot.respond(/setup standup/, function (res) {
-        var timeout = 1000 * 60; //60 seconds timeout. Default = 30 sec
-        var dialog = switchBoard.startDialog(res, timeout);
-        res.reply('Sure, please give me the *name* of your new standup');
-
-        dialog.addChoice(/([a-zA-Z0-9$-/:-?{-~!"^_`\[\]]+)/g, function (res) {
-            var name = res.match[1];
-            res.reply('name = ' + name);
-        });
-    });
 }

@@ -25,6 +25,7 @@ module.exports = (robot) => {
                     var github_token = document.github_token
                     var jenkins_token = document.jenkins_token          // jenkins token and ...
                     var jenkins_username = document.jenkins_username    // ... username are indepented additions
+                    var jenkins_crumb = document.jenkins_crumb
                     var trello_token = document.trello_token
                     var id = document._id
 
@@ -35,12 +36,14 @@ module.exports = (robot) => {
                         }
                         cache.set(id, values)
                     }
-                    if (jenkins_token || jenkins_username) { // it's an OR because jenkins username and token are added separately
-                        var values = {
-                            jenkins_username: document.jenkins_username,
-                            jenkins_token: encryption.decryptSync(jenkins_token)
-                        }
-                        cache.set(id, values)
+                    if (jenkins_token) {
+                        cache.set(id, { jenkins_token: encryption.decryptSync(jenkins_token) })
+                    }
+                    if (jenkins_username) {
+                        cache.set(id, { jenkins_username: jenkins_username })
+                    }
+                    if (jenkins_crumb) {
+                        cache.set(id, { jenkins_crumb: jenkins_crumb })
                     }
                     if (trello_token) {
                         var values = {
@@ -51,7 +54,7 @@ module.exports = (robot) => {
                     }
                 })
             }).catch(dbError => {
-                robot.logger.error(err)
+                robot.logger.error(dbError)
                 if (c.errorsChannel)
                     robot.messageRoom(c.errorsChannel, c.errorMessage
                         + `Script: ${path.basename(__filename)}`)

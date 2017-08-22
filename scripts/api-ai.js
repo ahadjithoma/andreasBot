@@ -1,6 +1,7 @@
 var apiai = require('apiai');
 var util = require('util');
 var path = require('path');
+var cache = require('./cache.js').getCache()
 
 var apiai_token = process.env.APIAI_TOKEN;
 var errorChannel = process.env.HUBOT_ERRORS_CHANNEL;
@@ -16,11 +17,19 @@ module.exports = robot => {
     })
 
     robot.catchAll(function (res) {
-        var regexp = new RegExp("^(?:" + robot.alias + "|" + robot.name + ") (.*)", "i");
-        var msg = res.message.text.match(regexp)[1];
-        // apiaiAsk(msg, res);
+        // var regexp = new RegExp("^(?:" + robot.alias + "|" + robot.name + ") (.*)", "i");
+        var regex = new RegExp(robot.name + " (.*)", "i")
+        if (res.message.text.match(regex)) { // captures only direct messages and not messages in channels 
+            var msg = res.message.text.match(regex)[1]
+            console.log(msg)
+            // apiaiAsk(msg, res);
+        }
+
     });
 
+    // robot.respond(/(.*)/, function(res){
+    //     console.log('robot respond (.*)')
+    // })
 
     // sending a msg to api.ai from other scripts
     robot.on('ask-api.ai', function (msg, res) {

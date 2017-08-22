@@ -3,13 +3,13 @@
 // init
 var GitHubApi = require("github");
 var slackMsgs = require('./slackMsgs.js');
-var mongoskin = require('mongoskin')
-var Promise = require('bluebird')
 var path = require('path')
 var request = require('request-promise')
 var c = require('./config.json')
 var encryption = require('./encryption.js')
 var cache = require('./cache.js').getCache()
+var Promise = require('bluebird')
+var mongoskin = require('mongoskin')
 Promise.promisifyAll(mongoskin)
 
 // config
@@ -17,6 +17,80 @@ var mongodb_uri = process.env.MONGODB_URI
 var bot_host_url = process.env.HUBOT_HOST_URL;
 
 module.exports = function (robot) {
+
+
+	robot.respond(/github login/, function (res) {
+		oauthLogin(res)
+	})
+
+	robot.on('githubOAuthLogin', function (res) {
+		oauthLogin(res)
+	})
+
+	robot.respond(/github repos/, (res) => {
+		getRepos(res)
+	})
+
+	robot.on('getRepos', (data, res) => {
+		getRepos(res)
+	})
+
+
+	robot.on('github-webhook-event', function (data) {
+
+		switch (data.eventType) {
+			case 'push':
+				pushEvent(data.payload);
+				break;
+			case 'deployment':
+				developmentEvent(data.payload);
+				break;
+			case 'deployment_status':
+				developmentStatusEvent(data.payload);
+				break;
+			case 'issues':
+				issuesEvent(data.payload);
+				break;
+			case 'issue_comment':
+				issueCommentEvent(data.payload);
+				break;
+			case 'fork':
+				break;
+			case 'pull':
+				break;
+			case '':
+				break;
+
+			default:
+				let room = "random";
+				robot.messageRoom(room, `event: ${data.eventType}`);
+				break;
+		}
+	})
+
+	// get user's followers. Developed for testing purposes
+	robot.respond(/gh followers (.*)/, function (res_r) {
+		var username = res_r.match[1];
+		github.users.getFollowersForUser({
+			"username": username
+		}).then(function (res) {
+			var jsonsize = Object.keys(res.data).length;
+			let menu = slackMsgs.menu();
+			let login;
+			for (var i = 0; i < jsonsize; i++) {
+				login = res.data[i].login;
+				menu.attachments[0].actions[0]['options'].push({ "text": login, "value": login });
+			}
+			menu.attachments[0].text = "Followers of " + "*" + username + "*";
+			menu.attachments[0].fallback = 'Github followers of ' + username;
+			menu.attachments[0].callback_id = 'followers_cb_id';
+			menu.attachments[0].actions[0].name = ' ';
+			menu.attachments[0].actions[0].text = ' ';
+			res_r.reply(menu);
+		}).catch(function (err) {
+			res_r.send('Error: ' + JSON.parse(err).message);
+		})
+	})
 
 	/* set Github Accounts for Users and App (bot) */
 	var github = new GitHubApi({
@@ -50,14 +124,14 @@ module.exports = function (robot) {
 		timeout: 5000
 	})
 
-	robot.on('getRepos', (data, res) => {
-		getRepos(res)
-	})
 
 
 	function getRepos(res) {
 
 		var userID = res.message.user.id
+
+		var cred = getCredentials(res)
+		if (!cred) { return 0 }
 
 		try {
 			var token = cache.get(userID).github_token //robot.brain.get(userID).github_token
@@ -112,9 +186,6 @@ module.exports = function (robot) {
 		}
 	}
 
-	robot.respond(/gh oauth/, function (res) {
-		oauthLogin(res)
-	})
 
 
 	function getUserHeaders(token) {
@@ -136,7 +207,7 @@ module.exports = function (robot) {
 	function oauthLogin(res) {
 		var userId = res.message.user.id;
 		var username = res.message.user.name;
-		// TODO add var to url. make use of env for better modularity
+		// TODO change message text 
 		res.send(`<${bot_host_url}/auth/github?userid=${userId}&username=${username}|login>`);
 	}
 
@@ -167,9 +238,6 @@ module.exports = function (robot) {
 		})
 	}
 
-	robot.on('githubOAuthLogin', function (res) {
-		oauthLogin(res)
-	})
 
 	function pushEvent(payload) {
 		var room = "random";
@@ -291,59 +359,41 @@ module.exports = function (robot) {
 		//TODO
 	};
 
-	robot.on('github-webhook-event', function (data) {
 
-		switch (data.eventType) {
-			case 'push':
-				pushEvent(data.payload);
-				break;
-			case 'deployment':
-				developmentEvent(data.payload);
-				break;
-			case 'deployment_status':
-				developmentStatusEvent(data.payload);
-				break;
-			case 'issues':
-				issuesEvent(data.payload);
-				break;
-			case 'issue_comment':
-				issueCommentEvent(data.payload);
-				break;
-			case 'fork':
-				break;
-			case 'pull':
-				break;
-			case '':
-				break;
 
-			default:
-				let room = "random";
-				robot.messageRoom(room, `event: ${data.eventType}`);
-				break;
-		}
-	})
+	/*************************************************************************/
+	/*                          helpful functions                            */
+	/*************************************************************************/
 
-	// get user's followers. Developed for testing purposes
-	robot.respond(/gh followers (.*)/, function (res_r) {
-		var username = res_r.match[1];
-		github.users.getFollowersForUser({
-			"username": username
-		}).then(function (res) {
-			var jsonsize = Object.keys(res.data).length;
-			let menu = slackMsgs.menu();
-			let login;
-			for (var i = 0; i < jsonsize; i++) {
-				login = res.data[i].login;
-				menu.attachments[0].actions[0]['options'].push({ "text": login, "value": login });
+
+	function getCredentials(res) {
+		var userid = res.message.user.id
+
+		try {
+			var token = cache.get(userid).github_token
+			var username = cache.get(userid).github_username
+
+			if (!token || !username) { // catch the case where username or token are null/undefined
+				throw error
 			}
-			menu.attachments[0].text = "Followers of " + "*" + username + "*";
-			menu.attachments[0].fallback = 'Github followers of ' + username;
-			menu.attachments[0].callback_id = 'followers_cb_id';
-			menu.attachments[0].actions[0].name = ' ';
-			menu.attachments[0].actions[0].text = ' ';
-			res_r.reply(menu);
-		}).catch(function (err) {
-			res_r.send('Error: ' + JSON.parse(err).message);
-		})
-	})
+		} catch (error) {
+			oauthLogin(res)
+			return false
+		}
+		return {
+			username: username,
+			token: token
+		}
+	}
+
+	function errorHandler(userid, error) {
+		if (error.statusCode == 401) {
+			robot.messageRoom(userid, c.jenkins.badCredentialsMsg)
+		} else if (error.statusCode == 404) {
+			robot.messageRoom(userid, c.jenkins.jobNotFoundMsg)
+		} else {
+			robot.messageRoom(userid, c.errorMessage + 'Status Code: ' + error.statusCode)
+			robot.logger.error(error)
+		}
+	}
 }

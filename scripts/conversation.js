@@ -1,10 +1,10 @@
 module.exports = function (robot) {
 
-    const Conversation = require('hubot-conversation');
+    const Conversation = require('./hubot-conversation/index.js');
     var switchBoard = new Conversation(robot);
 
     robot.respond(/jump/, function (msg) {
-        var dialog = switchBoard.startDialog(msg);
+        var dialog = switchBoard.startDialog(msg, 1);
         msg.reply('Sure, How many times?');
 
         dialog.addChoice(/([0-9]+)/i, function (msg2) {
@@ -17,20 +17,22 @@ module.exports = function (robot) {
 
 
     robot.respond(/clean the house/, function (msg) {
-        var dialog = switchBoard.startDialog(msg, 5000);
+        var dialog = switchBoard.startDialog(msg, 10000);
 
         msg.reply('Sure, where should I start? Kitchen or Bathroom');
         dialog.addChoice(/kitchen/i, function (msg2) {
             msg2.reply('On it boss!');
         });
-        dialog.timeout = function (msg2) {
-            msg2.emote('yoyoyoyoyoyoyo');
-        }
         dialog.addChoice(/bathroom/i, function (msg2) {
             msg.reply('Do I really have to?');
             dialog.addChoice(/yes/, function (msg3) {
-                msg3.reply('Fine, Mom!');
+                msg3.reply('sure?');
+                dialog.addChoice(/yes/, function (msg4) {
+                    msg4.reply('Fine, Mom!');
+                    dialog.finish()
+                })
             })
+
         });
     });
 

@@ -3,9 +3,19 @@
     "errorsChannel": "hubot-errors",
     "errorMessage": ":disappointed: An error occured. Please check server's Logs. ",
     "tokenAddedMessage": "Your token has been succesfully received! :thumbsup:",
+
     "GithubApp": {
         "tokenStoredMsg": "Github App Generated and Stored a new Token",
         "privateKeyDir": "hubot-integration.2017-07-25.private-key.pem",
         "AppId": 3559
+    },
+
+    "jenkins":{
+        "jobNotFoundMsg": "Job/Build not found. :thinking_face: Please try again.\nMake sure to tell me the correct job/build name.",
+        "badCredentialsMsg":"Hey, it seems that your Jenkins credentials are wrong!\nSay `jenkins login` to login again.",
+        "somthing":""
+    },
+    "standups":{
+        "timeout": 600000
     }
 }
