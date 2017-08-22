@@ -17,6 +17,14 @@ var appID = (process.env.GITHUB_APP_ID || c.GithubApp.AppId)
 var db = mongoskin.MongoClient.connect(mongodb_uri)
 
 module.exports = robot => {
+    
+    // runs once the bot starts 
+    generateJWToken()
+
+    // runs on demand
+    robot.on('generateJWToken', () => {
+        generateJWToken()
+    })
 
     // generate a new token every 55 minutes. (Tokens expire after 60 minutes)
     var job = new CronJob('00 */55 * * * *',
@@ -26,13 +34,6 @@ module.exports = robot => {
         'Europe/Athens' /* Time zone of this job. */
     );
 
-
-
-    generateJWToken()
-
-    robot.on('generateJWToken', () => {
-        generateJWToken()
-    })
 
     function generateJWToken() {
         // TODO
@@ -47,13 +48,13 @@ module.exports = robot => {
             iss: appID
         }
         var JWToken = jwt.sign(payload, cert, { algorithm: 'RS256' })
-
+        console.log('\n\nJWT='+JWToken)
         var options = {
             url: 'https://api.github.com/app/installations',
             headers: {
                 Authorization: `Bearer ${JWToken}`,
                 'Accept': 'application/vnd.github.machine-man-preview+json',
-                'User-Agent': 'Hubot-integration'
+                'User-Agent': 'myHubot'
             },
             json: true,
             // resolveWithFullResponse: true // Get the full response instead of just the body (DEFAULT: False)
@@ -67,7 +68,6 @@ module.exports = robot => {
                     var installation_account = body[i].account.login
                     generateInstallationToken(installation_id, installation_account, JWToken)
                 }
-
             })
             .catch(function (err) {
                 console.log(err)
@@ -90,7 +90,7 @@ module.exports = robot => {
             .then(function (res) {
                 // store token in cache
                 var token = res.token;
-                cache.set(`GithubApp.${installation_id}`, { account: installation_account, token: token})
+                cache.set(`GithubApp.${installation_id}`, { account: installation_account, token: token })
             })
             .catch(function (err) {
                 // print eror 

@@ -3,11 +3,11 @@
 // init
 var GitHubApi = require("github");
 var slackMsgs = require('./slackMsgs.js');
-var path = require('path')
-var request = require('request-promise')
 var c = require('./config.json')
 var encryption = require('./encryption.js')
 var cache = require('./cache.js').getCache()
+var path = require('path')
+var request = require('request-promise')
 var Promise = require('bluebird')
 var mongoskin = require('mongoskin')
 Promise.promisifyAll(mongoskin)
@@ -144,14 +144,6 @@ module.exports = function (robot) {
 			oauthLogin(res)
 			return
 		}
-		console.log(token)
-		// if (!token) {
-		// robot.messageRoom(userID, 'you are not logged in')
-		// oauthLogin(res)
-		// TODO 
-		// maybe cancel api.ai context
-		// return
-		// }
 
 		var installations = Object.keys(cache.get('GithubApp')).length
 		for (var i = 0; i < installations; i++) {
