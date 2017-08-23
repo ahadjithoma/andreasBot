@@ -209,7 +209,7 @@ module.exports = function (robot) {
 			url: `${github_api_url}/repos/${owner}/${repo}/issues`,
 			method: 'POST',
 			body: dataString,
-			headers: getUserHeaders(cred.github_token),
+			headers: getUserHeaders(cred.token),
 			json: true
 
 		}
