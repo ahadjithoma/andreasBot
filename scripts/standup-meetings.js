@@ -17,6 +17,7 @@ var errorChannel = process.env.HUBOT_ERRORS_CHANNEL || null
 
 module.exports = function (robot) {
 
+    var switchBoard = new Conversation(robot)
 
     // when updating existing standups CronJobs or adding new ones -> should fire this listener here
     robot.on(/updateStandupsCronJobs/, function (res) {
@@ -32,7 +33,6 @@ module.exports = function (robot) {
 
     })
 
-    var switchBoard = new Conversation(robot)
 
 
     // db -> all standups data -> create cron jobs

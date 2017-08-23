@@ -17,7 +17,7 @@ var appID = (process.env.GITHUB_APP_ID || c.GithubApp.AppId)
 var db = mongoskin.MongoClient.connect(mongodb_uri)
 
 module.exports = robot => {
-    
+
     // runs once the bot starts 
     generateJWToken()
 
@@ -27,7 +27,7 @@ module.exports = robot => {
     })
 
     // generate a new token every 55 minutes. (Tokens expire after 60 minutes)
-    var job = new CronJob('00 */55 * * * *',
+    var job = new CronJob('0 */55 * * * *',
         function () { generateJWToken() },
         function () { return null; }, /* This function is executed when the job stops */
         true, /* Start the job right now */
@@ -48,7 +48,7 @@ module.exports = robot => {
             iss: appID
         }
         var JWToken = jwt.sign(payload, cert, { algorithm: 'RS256' })
-        console.log('\n\nJWT='+JWToken)
+        console.log('\n\nJWT=' + JWToken)
         var options = {
             url: 'https://api.github.com/app/installations',
             headers: {
@@ -90,7 +90,7 @@ module.exports = robot => {
             .then(function (res) {
                 // store token in cache
                 var token = res.token;
-                cache.set(`GithubApp.${installation_id}`, { account: installation_account, token: token })
+                cache.union(`GithubApp`, { id: installation_id, account: installation_account, token: token })
             })
             .catch(function (err) {
                 // print eror 

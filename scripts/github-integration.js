@@ -6,6 +6,9 @@ var slackMsgs = require('./slackMsgs.js');
 var c = require('./config.json')
 var encryption = require('./encryption.js')
 var cache = require('./cache.js').getCache()
+const Conversation = require('./hubot-conversation/index.js');
+var dialog = require('./dynamic-dialog.js')
+var convModel = require('./conversation-models.js')
 var path = require('path')
 var request = require('request-promise')
 var Promise = require('bluebird')
@@ -15,26 +18,44 @@ Promise.promisifyAll(mongoskin)
 // config
 var mongodb_uri = process.env.MONGODB_URI
 var bot_host_url = process.env.HUBOT_HOST_URL;
+var github_api_url = 'https://api.github.com'
 
 module.exports = function (robot) {
 
+	var switchBoard = new Conversation(robot);
 
 	robot.respond(/github login/, function (res) {
-		oauthLogin(res)
+		oauthLogin(res.message.user.id)
 	})
-
 	robot.on('githubOAuthLogin', function (res) {
-		oauthLogin(res)
+		oauthLogin(res.message.user.id)
 	})
 
 	robot.respond(/github repos/, (res) => {
-		getRepos(res)
+		getRepos(res.message.user.id)
 	})
-
 	robot.on('getRepos', (data, res) => {
-		getRepos(res)
+		getRepos(res.message.user.id)
 	})
 
+	robot.respond(/github (create|open)(| a new) issue/, function (res) {
+
+		var userid = res.message.user.id
+
+		dialog.startDialog(switchBoard, res, convModel.createIssue)
+			.then(data => {
+				var owner
+				var repo = data.repo.split('/')
+				if (repo[1]) {
+					repo = repo[1]
+					owner = repo[0]
+				} else {
+					repo = repo[0]
+					owner = cache.get('GithubApp')[0].account
+				}
+				createIssue(userid, repo, owner, data.title, data.body, data.assignees, data.milestone)
+			}).catch(err => console.log(err))
+	})
 
 	robot.on('github-webhook-event', function (data) {
 
@@ -126,40 +147,37 @@ module.exports = function (robot) {
 
 
 
-	function getRepos(res) {
+	function getRepos(userid) {
 
-		var userID = res.message.user.id
-
-		var cred = getCredentials(res)
+		var cred = getCredentials(userid)
 		if (!cred) { return 0 }
 
 		try {
-			var token = cache.get(userID).github_token //robot.brain.get(userID).github_token
-			var githubUsername = robot.brain.get(userID).github_username
+			var token = cache.get(userid).github_token //robot.brain.get(userid).github_token
+			var githubUsername = robot.brain.get(userid).github_username
 		}
 		catch (e) {
 			var token = null
 			var githubUsername = null
-			robot.messageRoom(userID, 'you are not logged in')
-			oauthLogin(res)
+			robot.messageRoom(userid, 'you are not logged in')
+			oauthLogin(userid)
 			return
 		}
 
-		var installations = Object.keys(cache.get('GithubApp')).length
+		/* (Possible feature) having more than one Github App installations  */
+		var installations = cache.get('GithubApp').length
 		for (var i = 0; i < installations; i++) {
 			var ghApp = cache.get('GithubApp')
-			var installation_id = Object.keys(ghApp)[i]
+			var installation_id = ghApp[i].id
 
 			var options = {
-				url: `https://api.github.com/user/installations/${installation_id}/repositories`,
+				url: `${github_api_url}/user/installations/${installation_id}/repositories`,
 				headers: getUserHeaders(token),
 				json: true,
 			};
 
 			request(options)
 				.then(res => {
-					console.log(res)
-
 					var msg = slackMsgs.basicMessage();
 					res.repositories.forEach(function (repo) {
 						// TODO: add link to repo 
@@ -169,7 +187,7 @@ module.exports = function (robot) {
 				})
 				.then((data) => {
 					data.msg.text = `Your accessible Repositories: `
-					robot.messageRoom(userID, data.msg)
+					robot.messageRoom(userid, data.msg)
 				})
 				.catch(err => {
 					//TODO handle error codes: i.e. 404 not found -> dont post
@@ -178,7 +196,32 @@ module.exports = function (robot) {
 		}
 	}
 
+	function createIssue(userid, repo, owner, title, body, assignees, milestone) {
 
+		var cred = getCredentials(userid)
+		if (!cred) { return 0 }
+
+		var dataString = { title: 'test issue through bot' }
+		var ghApp = cache.get('GithubApp')[0]
+
+
+		var options = {
+			url: `${github_api_url}/repos/${owner}/${repo}/issues`,
+			method: 'POST',
+			body: dataString,
+			headers: getUserHeaders(cred.github_token),
+			json: true
+
+		}
+		request(options)
+			.then(res => {
+				console.log(res)
+			})
+			.catch(err => {
+				//TODO handle error codes: i.e. 404 not found -> dont post
+				console.log(err)
+			})
+	}
 
 	function getUserHeaders(token) {
 		return {
@@ -195,41 +238,6 @@ module.exports = function (robot) {
 			'User-Agent': 'Hubot For Github'
 		}
 	}
-
-	function oauthLogin(res) {
-		var userId = res.message.user.id;
-		var username = res.message.user.name;
-		// TODO change message text 
-		res.send(`<${bot_host_url}/auth/github?userid=${userId}&username=${username}|login>`);
-	}
-
-	function getAppToken(appID) {
-		var db = mongoskin.MongoClient.connect(mongodb_uri)
-		db.bind('GithubApp')
-		return db.GithubApp.findOneAsync({ _id: appID })
-			.then(dbData => encryption.decrypt(dbData.token))
-			.catch(error => {
-				robot.logger.error(error)
-				if (c.errorsChannel) {
-					robot.messageRoom(c.errorsChannel, c.errorMessage
-						+ `Script: ${path.basename(__filename)}`)
-				}
-			})
-	}
-
-	function githubAuthUser(token) {
-		ghUser.authenticate({
-			"type": "token",
-			"token": token
-		})
-	}
-	function githubAuthApp(token) {
-		ghApp.authenticate({
-			"type": "integration",
-			"token": token
-		})
-	}
-
 
 	function pushEvent(payload) {
 		var room = "random";
@@ -358,8 +366,7 @@ module.exports = function (robot) {
 	/*************************************************************************/
 
 
-	function getCredentials(res) {
-		var userid = res.message.user.id
+	function getCredentials(userid) {
 
 		try {
 			var token = cache.get(userid).github_token
@@ -369,7 +376,7 @@ module.exports = function (robot) {
 				throw error
 			}
 		} catch (error) {
-			oauthLogin(res)
+			oauthLogin(userid)
 			return false
 		}
 		return {
@@ -377,8 +384,40 @@ module.exports = function (robot) {
 			token: token
 		}
 	}
+	function oauthLogin(userid) {
+		// TODO change message text 
+		robot.messageRoom(userid, `<${bot_host_url}/auth/github?userid=${userid}|login>`);
+	}
+
+	function getAppToken(appID) {
+		var db = mongoskin.MongoClient.connect(mongodb_uri)
+		db.bind('GithubApp')
+		return db.GithubApp.findOneAsync({ _id: appID })
+			.then(dbData => encryption.decrypt(dbData.token))
+			.catch(error => {
+				robot.logger.error(error)
+				if (c.errorsChannel) {
+					robot.messageRoom(c.errorsChannel, c.errorMessage
+						+ `Script: ${path.basename(__filename)}`)
+				}
+			})
+	}
+
+	function githubAuthUser(token) {
+		ghUser.authenticate({
+			"type": "token",
+			"token": token
+		})
+	}
+	function githubAuthApp(token) {
+		ghApp.authenticate({
+			"type": "integration",
+			"token": token
+		})
+	}
 
 	function errorHandler(userid, error) {
+		// TODO change the messages
 		if (error.statusCode == 401) {
 			robot.messageRoom(userid, c.jenkins.badCredentialsMsg)
 		} else if (error.statusCode == 404) {

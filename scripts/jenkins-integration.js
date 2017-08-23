@@ -24,7 +24,7 @@ module.exports = function (robot) {
     robot.respond(/jenkins builds of job (.*)/i, function (res) {
         getAllBuilds(res)
     })
-
+    
     robot.respond(/jenkins last success?f?u?l? build of job (.*)/i, function (res) {
         getLastSuccessfulBuild(res)
     })
