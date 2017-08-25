@@ -1,22 +1,41 @@
+'use strict'
+
+var slackmsg = require("./slackMsgs.js");
+var request = require('request-promise');
+var Trello = require('node-trello');
+var cache = require('./cache.js').getCache()
+var c = require('./config.json')
+
+// config
+var TRELLO_API = 'https://api.trello.com/1'
+var trello_headers = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+}
+// auth
+var trelloKey = process.env.HUBOT_TRELLO_KEY;
+var secret = process.env.HUBOT_TRELLO_OAUTH;
+var token = process.env.HUBOT_TRELLO_TOKEN;
+// TODO : login based on user
+var trelloAuth = new Trello(trelloKey, token);
+
+// convert node-trello callbacks to promises
+const Promise = require("bluebird");
+var trello = Promise.promisifyAll(trelloAuth);
+
 module.exports = function (robot) {
-    // 'use strict'
 
-    var slackmsg = require("./slackMsgs.js");
-    var request = require('request');
-    var rp = require('request-promise');
-    var Trello = require('node-trello');
+    robot.respond(/trello (all |unread |read |)notifications/i, function (res) {
+        var read_filter = res.match[1].trim()
+        var query = `read_filter=${read_filter}`
+        if (!read_filter) {
+            query = null
+        }
+        getNotifications(res.message.user.id, query)
+    })
 
-    // auth
-    var key = process.env.HUBOT_TRELLO_KEY;
-    var secret = process.env.HUBOT_TRELLO_OAUTH;
-    var token = process.env.HUBOT_TRELLO_TOKEN;
-    // TODO : login based on user
-    var trelloAuth = new Trello(key, token);
 
-    // convert node-trello callbacks to promises
-    const Promise = require("bluebird");
-    var trello = Promise.promisifyAll(trelloAuth);
-
+    // σηοθλ
     robot.hear(/trello hooks/, function (res) {
         let boardId = 'BE7seI7e';
         let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
@@ -47,15 +66,137 @@ module.exports = function (robot) {
                 robot.messageRoom(room, `updateList`);
                 break;
             case 'voteOnCard':
-                break;  
+                break;
             default:
                 robot.messageRoom(room, type.split(/(?=[A-Z])/).join(" ").toLowerCase());
                 break;
         }
     })
 
+
+    function getNotifications(userid, query) {
+        var credentials = getCredentials(userid)
+        if (!credentials) { return 0 }
+
+        var qs = { entities: true }
+
+        var options = {
+            url: `${TRELLO_API}/members/me/notifications?${credentials}&${null}`,
+            method: 'GET',
+            qs: qs,
+            headers: trello_headers,
+            json: true
+        }
+
+        request(options)
+            .then(notifications => {
+                displayNotifications(notifications)
+                // TODO : to be deleted ▼↡
+                console.log((notifications))
+            })
+            .catch(error => {
+                //TODO handle error codes: i.e. 404 not found -> dont post
+                errorHandler(userid, error)
+                console.log(error)
+            })
+    }
+
+    function displayNotifications(allNotifications) {
+
+        var msg = { attachments: [] }
+        var i = 0
+        Promise.each(allNotifications, function (notif) {
+            i++
+            console.log(i)
+            var text = ''
+            Promise.each(notif.entities, function (ent) {
+                if (ent.text) {
+                    if (ent.current) {
+                        text = text + ent.current + ' '
+                    } else {
+                        text = text + ent.text + ' '
+                    }
+                }
+            }).then(() => { console.log(text) })
+            // var attachment = slackmsg.attachment()
+            // switch (notif.type) {
+            //     case 'addAdminToBoard':
+            //     case 'addAdminToOrganization':
+            //         break
+            //     case 'addedAttachmentToCard':
+            //     var memberCreator = notif.memberCreator.fullName
+
+            //         attachment.pretext = `${memberCreator} attached ${'f'}`
+            //         break
+            //     case 'addedMemberToCard':
+            //     case 'addedToBoard':
+            //     case 'addedToCard':
+            //     case 'addedToOrganization':
+            //     case 'cardDueSoon':
+            //     case 'changeCard':
+            //     case 'closeBoard':
+            //     case 'commentCard':
+            //     case 'createdCard':
+            //     case 'declinedInvitationToBoard':
+            //     case 'declinedInvitationToOrganization':
+            //     case 'invitedToBoard':
+            //     case 'invitedToOrganization':
+            //     case 'makeAdminOfBoard':
+            //     case 'makeAdminOfOrganization':
+            //     case 'memberJoinedTrello':
+            //     case 'mentionedOnCard':
+            //     case 'removedFromBoard':
+            //     case 'removedFromCard':
+            //     case 'removedFromOrganization':
+            //     case 'removedMemberFromCard':
+            //     case 'unconfirmedInvitedToBoard':
+            //     case 'unconfirmedInvitedToOrganization':
+            //     case 'updateCheckItemStateOnCard':
+            // }
+        }).done(() => {
+        })
+    }
+
+
+    /*************************************************************************/
+    /*                          helpful functions                            */
+    /*************************************************************************/
+
+
+    function getCredentials(userid) {
+
+        try {
+            var token = cache.get(userid).trello_token
+            var username = cache.get(userid).trello_username
+
+            if (!token || !username) { // catch the case where username or token are null/undefined
+                throw error
+            }
+        } catch (error) {
+            robot.emit('trelloOAuthLogin', userid)
+            return false
+        }
+        return `token=${token}&key=${trelloKey}`
+
+    }
+
+
+    // TODO change the messages
+    function errorHandler(userid, error) {
+        if (error.statusCode == 401) {
+            robot.messageRoom(userid, c.jenkins.badCredentialsMsg)
+        } else if (error.statusCode == 404) {
+            robot.messageRoom(userid, c.jenkins.jobNotFoundMsg)
+        } else {
+            robot.messageRoom(userid, c.errorMessage + 'Status Code: ' + error.statusCode)
+            robot.logger.error(error)
+        }
+    }
+
+
     /*******************************************************************/
-    /*                   Slack Buttons Implementation                  */
+    /*          Slack Buttons Implementation - TEMPLATE                */
+    /*               (not in use - for future use)                     */
     /*******************************************************************/
 
     function sendMessageToSlackResponseURL(responseURL, JSONmessage) {
@@ -206,4 +347,5 @@ module.exports = function (robot) {
             sendMessageToSlackResponseURL(response_url, msg);
         })
     })
+
 }

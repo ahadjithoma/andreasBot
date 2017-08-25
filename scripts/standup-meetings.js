@@ -22,14 +22,17 @@ module.exports = function (robot) {
     // when updating existing standups CronJobs or adding new ones -> should fire this listener here
     robot.on(/updateStandupsCronJobs/, function (res) {
         // stop all the previous jobs and reset them 
-        Promise.each(Object.keys(cronJobs), function (standupName) {
-            cronJobs[standupName].stop()
-        }).catch(err => {
-            console.log(err)
-        }).done(() => {
-            console.log('done')
-            getAllStandupsData()
-        })
+        Promise.each(Object.keys(cronJobs),
+            function (standupName) {
+                cronJobs[standupName].stop()
+            })
+            .catch(err => {
+                console.log(err)
+            })
+            .done(() => {
+                console.log('done')
+                getAllStandupsData()
+            })
 
     })
 

@@ -23,11 +23,12 @@ module.exports = robot => {
 
     // runs on demand
     robot.on('generateJWToken', () => {
+        robot.logger.info('emit: generateJWToken')
         generateJWToken()
     })
 
     // generate a new token every 55 minutes. (Tokens expire after 60 minutes)
-    var job = new CronJob('0 */55 * * * *',
+    var job = new CronJob('0 */55 0 * * *',
         function () { generateJWToken() },
         function () { return null; }, /* This function is executed when the job stops */
         true, /* Start the job right now */

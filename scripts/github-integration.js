@@ -10,6 +10,7 @@ const Conversation = require('./hubot-conversation/index.js');
 var dialog = require('./dynamic-dialog.js')
 var convModel = require('./conversation-models.js')
 var path = require('path')
+var dateFormat = require('dateformat')
 var request = require('request-promise')
 var Promise = require('bluebird')
 var mongoskin = require('mongoskin')
@@ -18,7 +19,7 @@ Promise.promisifyAll(mongoskin)
 // config
 var mongodb_uri = process.env.MONGODB_URI
 var bot_host_url = process.env.HUBOT_HOST_URL;
-var github_api_url = 'https://api.github.com'
+var GITHUB_API = 'https://api.github.com'
 
 module.exports = function (robot) {
 
@@ -38,7 +39,23 @@ module.exports = function (robot) {
 		getRepos(res.message.user.id)
 	})
 
-	robot.respond(/github (create|open)(| a new) issue/, function (res) {
+	robot.respond(/github (open |closed |all |)issues( of)?( repo)? (.*)/i, function (res) {
+		var repo = res.match.pop()
+		var state = res.match[1].trim()
+		var userid = res.message.user.id
+		updateConversationContent(userid, { repo: repo })
+		listRepoIssues(userid, repo, state)
+	})
+
+	robot.respond(/github comments of issue ([0-9]) of repo (.*)/i, function (res) {
+		console.log(res.match)
+		var repo = res.match[2].trim()
+		var issueNum = res.match[1].trim()
+		listIssueComments(res.message.user.id, issueNum, repo)
+	})
+
+
+	robot.respond(/github (create|open)(| a new) issue\b/, function (res) {
 
 		var userid = res.message.user.id
 
@@ -53,41 +70,25 @@ module.exports = function (robot) {
 					repo = repo[0]
 					owner = cache.get('GithubApp')[0].account
 				}
-				createIssue(userid, repo, owner, data.title, data.body, data.assignees, data.milestone)
+
+				try {
+					var assignees = data.assignees.replace(/\s/g, '').split(',')
+
+				} catch (error) {
+					var assignees = []
+				}
+				try {
+					var labels = data.labels.replace(/\s/g, '').split(',')
+
+				} catch (error) {
+					var labels = []
+				}
+
+				createIssue(userid, repo, owner, data.title, data.body, labels, assignees)
 			}).catch(err => console.log(err))
 	})
 
-	robot.on('github-webhook-event', function (data) {
 
-		switch (data.eventType) {
-			case 'push':
-				pushEvent(data.payload);
-				break;
-			case 'deployment':
-				developmentEvent(data.payload);
-				break;
-			case 'deployment_status':
-				developmentStatusEvent(data.payload);
-				break;
-			case 'issues':
-				issuesEvent(data.payload);
-				break;
-			case 'issue_comment':
-				issueCommentEvent(data.payload);
-				break;
-			case 'fork':
-				break;
-			case 'pull':
-				break;
-			case '':
-				break;
-
-			default:
-				let room = "random";
-				robot.messageRoom(room, `event: ${data.eventType}`);
-				break;
-		}
-	})
 
 	// get user's followers. Developed for testing purposes
 	robot.respond(/gh followers (.*)/, function (res_r) {
@@ -171,7 +172,7 @@ module.exports = function (robot) {
 			var installation_id = ghApp[i].id
 
 			var options = {
-				url: `${github_api_url}/user/installations/${installation_id}/repositories`,
+				url: `${GITHUB_API}/user/installations/${installation_id}/repositories`,
 				headers: getUserHeaders(token),
 				json: true,
 			};
@@ -196,23 +197,124 @@ module.exports = function (robot) {
 		}
 	}
 
-	function createIssue(userid, repo, owner, title, body, assignees, milestone) {
+	function listRepoIssues(userid, repo, state) {
+		var ghApp = cache.get('GithubApp')
+		var appToken = ghApp[0].token
+		var owner = ghApp[0].account
+
+		var options = {
+			url: `${GITHUB_API}/repos/${owner}/${repo}/issues?state=${state}`,
+			method: 'GET',
+			headers: getAppHeaders(appToken),
+			json: true
+		}
+
+		request(options)
+			.then(issues => {
+				var msg = {}
+				msg.unfurl_links = false
+				if (repoIssues.length > 0) {
+					msg.attachments = []
+					msg.text = `Issues of <https://www.github.com/${owner}/${repo}|${owner}/${repo}>:`
+				} else {
+					msg.text = `There aren't any issues on <https://www.github.com/${owner}/${repo}|${owner}/${repo}>`
+				}
+				Promise.each(repoIssues, function (issue) {
+					var attachement = slackMsgs.attachment()
+					var title = issue.title
+					var url = issue.html_url
+					var num = `#${issue.number}`
+					attachement.text = `${title} <${url}|${num}>`
+
+					if (issue.state.includes('open')) {
+						attachement.color = 'good'
+					} else {
+						attachement.color = 'danger'
+					}
+					msg.attachments.push(attachement)
+				}).done(() => {
+					robot.messageRoom(userid, msg)
+				})
+			})
+			.catch(err => { console.log(err) })
+	}
+
+	function listIssueComments(userid, issueNum, repo = null) {
+		var ghApp = cache.get('GithubApp')
+		var appToken = ghApp[0].token
+		var owner = ghApp[0].account
 
 		var cred = getCredentials(userid)
 		if (!cred) { return 0 }
 
-		var dataString = { title: 'test issue through bot' }
-		var ghApp = cache.get('GithubApp')[0]
-
+		// if (!repo) {
+		// 	try {
+		// 		repo = cache.get(userid).content.repo
+		// 	} catch (e) {
+		// 		// ask for repo
+		// 	}
+		// }
 
 		var options = {
-			url: `${github_api_url}/repos/${owner}/${repo}/issues`,
+			url: `${GITHUB_API}/repos/${owner}/${repo}/issues/${issueNum}/comments`,
+			method: 'GET',
+			headers: getUserHeaders(cred.token),
+			json: true
+		}
+
+		request(options)
+			.then(issueComments => {
+				var msg = {}
+				msg.unfurl_links = false
+				var repo_url = `${GITHUB_API}/repos/${owner}/${repo}`
+
+				if (issueComments.length > 0) {
+					msg.attachments = []
+					msg.text = `Comments of <${repo_url}/issues/${issueNum}|issue #${issueNum}> of <${repo_url}|${repo}> repo:`
+				} else {
+					msg.text = `<${repo_url}/issues/${issueNum}|Issue #${issueNum}> of repository ${repo} hasn't any comments yet.`
+				}
+				Promise.each(issueComments, function (comment) {
+					var attachement = slackMsgs.attachment()
+					var body = comment.body
+					var created_at = dateFormat(new Date(comment.created_at), 'mmm dS yyyy, HH:MM')
+					var url = comment.html_url
+					var user = comment.user.login
+					attachement.color = 'warning'
+					attachement.pretext = `*${user}* commented on <${url}|${created_at}>`
+					attachement.text = body
+
+					msg.attachments.push(attachement)
+				}).done(() => {
+					robot.messageRoom(userid, msg)
+				})
+
+			})
+			.catch(err => {
+				//TODO handle error codes: i.e. 404 not found -> dont post
+				console.log(err)
+			})
+	}
+
+	function createIssue(userid, repo, owner, title, body, label, assignees) {
+		var cred = getCredentials(userid)
+		if (!cred) { return 0 }
+
+		var dataString = {
+			title: title,
+			body: body,
+			labels: label,
+			assignees: assignees
+		}
+
+		var options = {
+			url: `${GITHUB_API}/repos/${owner}/${repo}/issues`,
 			method: 'POST',
 			body: dataString,
 			headers: getUserHeaders(cred.token),
 			json: true
-
 		}
+
 		request(options)
 			.then(res => {
 				console.log(res)
@@ -222,143 +324,6 @@ module.exports = function (robot) {
 				console.log(err)
 			})
 	}
-
-	function getUserHeaders(token) {
-		return {
-			'Authorization': `token ${token}`,
-			'Accept': 'application/vnd.github.machine-man-preview+json',
-			'User-Agent': 'Hubot For Github'
-		}
-	}
-
-	function getAppHeaders(token) {
-		return {
-			'Authorization': `Bearer ${token}`,
-			'Accept': 'application/vnd.github.machine-man-preview+json',
-			'User-Agent': 'Hubot For Github'
-		}
-	}
-
-	function pushEvent(payload) {
-		var room = "random";
-		var adapter = robot.adapterName;
-		let repo_name = payload.repository.full_name;
-		let branch = payload.repository.default_branch;
-		let repo_url = payload.repository.url + '/tree/' + branch;
-		let compare_url = payload.compare;
-		let commits = Object.keys(payload.commits).length;		 // get the total number of commits done
-
-		if (adapter == 'slack') {
-			let msg = slackMsgs.githubEvent();
-			let i;
-
-			for (i = 0; i < commits; i++) {
-				let user_login = payload.commits[i].author.username;
-				var user_url = `https://www.github.com/${user_login}`;
-				var user_name = payload.commits[i].author.name;
-				var commit_id = payload.commits[i].id.substr(0, 7);		 // get the first 7 chars of the commit id
-				var commit_msg = payload.commits[i].message.split('\n', 1); // get only the commit msg, not the description
-				var commit_url = payload.commits[i].url;
-				commit_id = "`" + commit_id + "`"; // add slack's msg format 
-				msg.attachments[0].text = msg.attachments[0].text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
-			}
-			msg.text = `<${repo_url}|[${repo_name}:${branch}]> ${commits} new <${compare_url}|commit(s)> by <${user_url}|${user_name}>:`;
-			msg.attachments[0].color = '#0000ff'; // set color = blue
-			robot.messageRoom(room, msg);
-
-		} else {
-			//TODO: send a msg in plain text for other chat platforms or add any other specific formats than slack's
-			robot.messageRoom(room, "push event");
-		}
-	}
-
-	function getCommits() {
-
-	}
-
-	function developmentStatusEvent(payload) {
-		var room = "random";
-		var adapter = robot.adapterName;
-		if (adapter == 'slack') {
-			let msg = slackMsgs.githubEvent();
-			let target_url = payload.deployment_status.target_url;
-			let repo_url = payload.repository.html_url;
-			let state = payload.deployment_status.state;
-			let creator = payload.deployment_status.creator.login;
-			let repo = payload.repository.full_name;
-			let environment = payload.deployment.environment;
-			msg.text = `<${repo_url}|[${repo}]> created by ${creator}`;
-			msg.attachments[0].title = `Deployment ${state}`;
-			msg.attachments[0].text = `<${target_url}|${environment}>`;
-			if (state == 'pending') {
-				msg.attachments[0].color = '#ff8533' // set color = orange
-			} else if (state == 'success') {
-				msg.attachments[0].color = '#00ff00' // set color = green 
-			} else if (state == 'fail') {
-				msg.attachments[0].color = '#0000ff' // set color = blue 
-			} else {
-				msg.attachments[0].color = '#ff0000' // set color = red 
-			}
-			robot.messageRoom(room, msg);
-		} else {
-			robot.messageRoom(room, "deployment_status event");
-		}
-	}
-
-	function developmentEvent(payload) {
-		//TODO 
-	};
-
-	function issuesEvent(payload) {
-		//under construction
-		var room = "random";
-		var adapter = robot.adapterName;
-		let repo = payload.repository.full_name;
-		let repo_url = payload.repository.html_url;
-		let action = payload.action;
-		let issue_url = payload.issue.url;
-		let issue_num = payload.issue.number;
-		let issue_title = payload.issue.title;
-		let issue_body = payload.issue.body;
-		let user = payload.issue.user.login;
-		let labels = Object.keys(payload.issue.labels).length;
-
-		if (adapter == 'slack') {
-			let msg = slackMsgs.githubEvent();
-			if (action == 'opened') {
-				msg.attachments[0].pretext = `[${repo}] Issue *created* by <www.github.com/${user}|${user}>`;
-				msg.attachments[0].fallback = `[${repo}] Issue created: ${issue_title}`;
-				msg.attachments[0].title = `<${issue_url}|#${issue_num} ${issue_title}>`;
-				msg.attachments[0].text = issue_body;
-				msg.attachments[0].color = '#00ff00'; // set color = green
-			} else {
-				msg = `[${repo}] Issue <${issue_url}|#${issue_num} ${issue_title}>: *${action}* by <www.github.com/${user}|${user}>`;
-			}
-
-			/* assign attachement color - CURRENTLY WE ARE NOT USING ATTACHEMENTS FOR ALL ISSUES
-			if (action.includes('open')){
-				msg.attachments[0].color = '#00ff00'; // set color = green
-			} else if (action.includes('close')){
-				msg.attachments[0].color = '#ff0000'; // set color = red
-			} else {
-				msg.attachments[0].color = '#ff8533'; // set color = orange
-			} 
-			*/
-			robot.messageRoom(room, msg);
-
-		} else {
-			let msg = `[${repo}] Issue ${action} by <www.github.com/${user}|${user}>`;
-			msg = msg + `\n <${issue_url}|#${issue_num} ${issue_title}>` + `\n${issue_body}`;
-			robot.messageRoom(room, msg);
-
-			//todo: plain text
-		}
-	};
-
-	function issueCommentEvent(payload) {
-		//TODO
-	};
-
 
 
 	/*************************************************************************/
@@ -384,6 +349,22 @@ module.exports = function (robot) {
 			token: token
 		}
 	}
+
+	function getUserHeaders(token) {
+		return {
+			'Authorization': `token ${token}`,
+			'Accept': 'application/vnd.github.machine-man-preview+json',
+			'User-Agent': 'Hubot For Github'
+		}
+	}
+
+	function getAppHeaders(token) {
+		return {
+			'Authorization': `Bearer ${token}`,
+			'Accept': 'application/vnd.github.machine-man-preview+json',
+			'User-Agent': 'Hubot For Github'
+		}
+	}
 	function oauthLogin(userid) {
 		// TODO change message text 
 		robot.messageRoom(userid, `<${bot_host_url}/auth/github?userid=${userid}|login>`);
@@ -403,19 +384,6 @@ module.exports = function (robot) {
 			})
 	}
 
-	function githubAuthUser(token) {
-		ghUser.authenticate({
-			"type": "token",
-			"token": token
-		})
-	}
-	function githubAuthApp(token) {
-		ghApp.authenticate({
-			"type": "integration",
-			"token": token
-		})
-	}
-
 	function errorHandler(userid, error) {
 		// TODO change the messages
 		if (error.statusCode == 401) {
@@ -426,5 +394,9 @@ module.exports = function (robot) {
 			robot.messageRoom(userid, c.errorMessage + 'Status Code: ' + error.statusCode)
 			robot.logger.error(error)
 		}
+	}
+
+	function updateConversationContent(userid, content) {
+		cache.set(userid, { content: content })
 	}
 }

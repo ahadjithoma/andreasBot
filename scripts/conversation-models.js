@@ -9,7 +9,7 @@ var createIssue = {
         {
             "question": [
                 "Specify `repo` name and `owner` in this format: `owner/repo`"
-                +"\nLeave owner blank for Default Team's Organisation "
+                + "\nLeave owner blank for Default Team's Organisation "
             ],
             "answer": {
                 "name": "repo",
@@ -37,11 +37,11 @@ var createIssue = {
             }
         },
         {
-            "question": "You can set a milestone if you want!",
+            "question": "Apply a label to this issue:",
             "answer": {
-                "name": "mileston",
-                "type": "number",
-                "required": false
+                "name": "labels",
+                "type": "string",
+                "required": false,
             }
         },
         {

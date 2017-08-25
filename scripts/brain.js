@@ -67,13 +67,14 @@ module.exports = (robot) => {
     // TO BE DELETED
     // FOR DEBUGGING
     robot.respond(/show cache/, function (res) {
-        console.log(cache.data)
+
         var ghApp = cache.get('GithubApp')
-        console.log('1\n', ghApp[1])
+        var userid = res.message.user.id
 
-        var installation_id = ghApp[0].id
+        console.log(cache.data)
+        console.log(cache.get(userid).content.repo)
 
-        console.log('\n', installation_id)
+
     })
     // ***********************************************
 
