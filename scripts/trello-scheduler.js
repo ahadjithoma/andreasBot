@@ -1,30 +1,53 @@
 var CronJob = require('cron').CronJob;
 var mongoskin = require('mongoskin')
+var Promise = require('bluebird')
 var cache = require('./cache.js').getCache()
 // config
 var mongodb_uri = process.env.MONGODB_URI
 
+module.exports = (robot) => {
 
-var job = new CronJob('00 00 10 * * 1-5',
-    function () {
-        trelloSumUpScheduler()
-        // 2. lookup in DB for the previous
-        // 3. find all user ids
-        // 4. emit a sumup event to trigger getNotificationsSumUp() function in integration.js file
-        //    and the query must include the since date. 
-        //    if no since date -> query: read_filter: unread
-    },
-    function () { return null; }, /* This function is executed when the job stops */
-    true, /* Start the job right now */
-    'Europe/Athens' /* Time zone of this job. */
-);
-
-
-function trelloSumUpScheduler() {
-
-    var userIDs = cache.get(userIDs)
+    // TO BE DELETED ↙↙↙
+    getTrelloSumUpData()
     
+    function getTrelloSumUpData() {
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
+        db.bind('trelloSumUps').findOneAsync()
+            .then(dbData => {
+                createCronJob(dbData)
+            })
+            .catch(dbError => {
+                //TODO
+            })
+    }
 
+    function createCronJob(sumup) {
+        var time = sumup.time.split(':')
+        var days = sumup.days
+
+        var job = new CronJob(`${time[2]} ${time[1]} ${time[0]} * * ${days}`,
+            function () {
+                trelloSumUpScheduler()
+            },
+            function () { return null; }, /* This function is executed when the job stops */
+            true, /* Start the job right now */
+            'Europe/Athens' /* Time zone of this job. */
+        )
+    }
+
+    function trelloSumUpScheduler() {
+        var userIDs = cache.get('userIDs')
+        Promise.each(userIDs, function (userid) {
+            var query
+            var lastNotificationID = cache.get(userid, 'trello_last_notification')
+            if (!lastNotificationID) {
+                query = { read_filer: 'unread' }
+            } else {
+                query = { since: lastNotificationID }
+            }
+            robot.emit('trelloSumUp', userid, query, true)
+        })
+    }
 }
 /**********************************************************/
 // OLD STUFF - TO BE DELETED

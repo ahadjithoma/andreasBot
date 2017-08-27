@@ -27,8 +27,8 @@ module.exports = robot => {
         generateJWToken()
     })
 
-    // generate a new token every 55 minutes. (Tokens expire after 60 minutes)
-    var job = new CronJob('0 */47 * * * *',
+    // generate a new token every 30 minutes. (Tokens expire after 60 minutes)
+    var job = new CronJob('0 */30 * * * *',
         function () {
             robot.logger.info('cronjob for generateJWToken')
             generateJWToken()
@@ -94,7 +94,7 @@ module.exports = robot => {
             .then(function (res) {
                 // store token in cache
                 var token = res.token;
-                cache.union(`GithubApp`, { id: installation_id, account: installation_account, token: token })
+                cache.set(`GithubApp`, [{ id: installation_id, account: installation_account, token: token }])
             })
             .catch(function (err) {
                 // print eror 

@@ -15,6 +15,7 @@ var trello_headers = {
 }
 // auth
 var mongodb_uri = process.env.MONGODB_URI
+var hubot_host_url = process.env.HUBOT_HOST_URL;
 var trelloKey = process.env.HUBOT_TRELLO_KEY;
 var secret = process.env.HUBOT_TRELLO_OAUTH;
 var token = process.env.HUBOT_TRELLO_TOKEN;
@@ -27,6 +28,12 @@ var trello = Promise.promisifyAll(trelloAuth);
 
 module.exports = function (robot) {
 
+
+    /*************************************************************************/
+    /*                             Listeners                                 */
+    /*************************************************************************/
+
+
     robot.respond(/trello (all |unread |read |)notifications/i, function (res) {
         var read_filter = res.match[1].trim()
         if (!read_filter) {
@@ -36,6 +43,13 @@ module.exports = function (robot) {
         getNotifications(res.message.user.id, query)
     })
 
+
+    robot.respond(/trello mentions/i, function (res) {
+        var query = { filter: 'mentionedOnCard' }
+        getNotifications(res.message.user.id, query)
+    })
+
+    // TODO add the since query
     robot.respond(/trello sum-?up( all| unread| read|)/i, function (res) {
         var read_filter = res.match[1].trim()
         if (!read_filter) {
@@ -45,40 +59,87 @@ module.exports = function (robot) {
         getNotificationsSumUp(res.message.user.id, query)
     })
 
-
-    // σηοθλ
-    robot.hear(/trello hooks/, function (res) {
-        let boardId = 'BE7seI7e';
-        let cb_url = 'https://andreasbot.herokuapp.com/hubot/trello-webhooks';
-        let args = { description: "my test webhook", callbackURL: cb_url, idModel: '59245663c76f54b975558854' };
-
-        trello.postAsync('/1/webhooks', args).then(function (data) {
-            res.send(data)
-        }).catch(function (err) {
-            res.send(err.Error);
-        })
+    robot.on('trelloSumUp', function (userid, query, saveLastNotif) {
+        getNotificationsSumUp(userid, query, saveLastNotif)
     })
 
+    robot.respond(/enable trello webhooks for channel (.*) for the board (.*)/i, function (res) {
+        var callback_url = `${hubot_host_url}/hubot/trello-webhooks`
+        var userid
+        var boardName = res.match[2].trim()
+        var channel = res.match[1].trim()
+        // TODO: could check the existance of that channel
 
-    robot.on('trello-webhook-event', function (data, res) {
+        getBoardID(res.message.user.id, boardName)
+            .then(id => {
+                console.log(id)
+                enableTrelloWebhooks(userid, modelId)
+                // enable webhooks here
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    })
 
-        var room = "random";
-        let payload = data.body;
-        let type = payload.action.type;
-        robot.logger.info(type);
-        switch (type) {
+    robot.on('postTrelloAction', function (token, actionId, room) {
+        console.log(token)
+        console.log(actionId)
+        console.log(room)
+        getTrelloAction(token, actionId, room)
+    })
 
-            case 'updateList':
-                robot.messageRoom(room, `updateList`);
-                break;
-            case 'voteOnCard':
-                break;
-            default:
-                robot.messageRoom(room, type.split(/(?=[A-Z])/).join(" ").toLowerCase());
-                break;
+    /*************************************************************************/
+    /*                             API Functions                             */
+    /*************************************************************************/
+
+    function getTrelloAction(token, actionId, room) {
+
+        var qs = { entities: true }
+
+        var options = {
+            url: `${TRELLO_API}/actions/${actionId}?token=${token}&key=${trelloKey}`,
+            method: 'GET',
+            qs: qs,
+            headers: trello_headers,
+            json: true
         }
-    })
 
+        request(options)
+            .then(action => {
+
+
+
+                //PROBLEM here
+                displayNotifications(room, action)
+
+
+
+
+            })
+            .catch(error => {
+                //TODO
+            })
+
+
+    }
+
+    function enableTrelloWebhooks(userid, modelId) {
+        var credentials = getCredentials(userid)
+        if (!credentials) { return 0 }
+
+        var qs = {}
+
+        var options = {
+            url: `${TRELLO_API}/members/me/notifications?${credentials}`,
+            method: 'GET',
+            qs: qs,
+            headers: trello_headers,
+            json: true
+        }
+
+        request(options)
+            .then()
+    }
 
     function getNotifications(userid, query) {
         var credentials = getCredentials(userid)
@@ -261,7 +322,6 @@ module.exports = function (robot) {
                     break
                 case 'mentionedOnCard':
                     attachment.color = 'warning'
-
                     attachment.text = `You've been ${bold('mentioned')} on ${typesCnt[types[j]]} ${bold('card' + s)}`
                     msg.attachments.push(attachment)
                     break
@@ -299,9 +359,6 @@ module.exports = function (robot) {
             }
         }
         robot.messageRoom(userid, msg)
-
-
-
     }
 
     function displayNotifications(userid, notifications) {
@@ -320,7 +377,7 @@ module.exports = function (robot) {
                         pretext += entity.text + ' '
                         break
                     case 'member':
-                        pretext += `<https://trello.com/${entity.username}|${entity.text}>` + ' '
+                        pretext += `<https://trello.com/${entity.username}|${entity.text}> (${entity.username})` + ' '
                         break
                     case 'card':
                         pretext += `<https://trello.com/c/${entity.shortLink}|${entity.text}>` + ' '
@@ -348,7 +405,35 @@ module.exports = function (robot) {
         robot.messageRoom(userid, msg)
     }
 
+    function getBoardID(userid, boardName) {
+        var credentials = getCredentials(userid)
+        if (!credentials) { return 0 }
 
+        var query = { fields: 'id,name' }
+
+        var options = {
+            url: `${TRELLO_API}/members/me/boards?${credentials}`,
+            method: 'GET',
+            qs: query,
+            headers: trello_headers,
+            json: true
+        }
+        return new Promise(function (resolve, reject) {
+            request(options)
+                .then(boards => {
+                    for (var i = 0; i < boards.length; i++) {
+                        if (boards[i].name == boardName) {
+                            resolve(boards[i].id)
+                        } else if (boards.length == i + 1) {
+                            reject(404)
+                        }
+                    }
+                })
+                .catch(error => {
+                    reject(error)
+                })
+        })
+    }
 
     /*************************************************************************/
     /*                          helpful functions                            */

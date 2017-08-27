@@ -61,7 +61,7 @@ module.exports = function (robot) {
             var time = standup.time.split(':')
             var standupId = standup._id
             // TODO days
-            cronJobs[standup.name] = new CronJob(`${time[2]} ${time[1]} ${time[0]} * * *`, /* ss mm hh daysOfMonth MM daysOFWeek */
+            cronJobs[standup.name] = new CronJob(`${time[2]} ${time[1]} ${time[0]} * * ${days}`, /* ss mm hh daysOfMonth MM daysOFWeek */
                 function () { getStandupData(standupId) },   /* This function is executed when the job starts */
                 function () { return null },               /* This function is executed when the job stops */
                 true,           /* Start the job right now */

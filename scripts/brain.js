@@ -86,7 +86,6 @@ module.exports = (robot) => {
         var adapter = robot.adapterName
         for (var i = 0; i < usersIDs.length; i++) {
             var user = usersObject[usersIDs[i]][adapter]
-            console.log(user)
             try {
                 if (!user.is_bot && !user.is_app_user) {
                     cache.union('userIDs',user.id)
