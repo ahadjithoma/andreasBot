@@ -19,7 +19,7 @@ module.exports = function (robot) {
 
     var switchBoard = new Conversation(robot)
 
-    // when updating existing standups CronJobs or adding new ones -> should fire this listener here
+    // when updating existing standups CronJobs or adding new ones -> should fire this listener here to  get the updated/new cronjobs
     robot.on(/updateStandupsCronJobs/, function (res) {
         // stop all the previous jobs and reset them 
         Promise.each(Object.keys(cronJobs),
@@ -35,7 +35,6 @@ module.exports = function (robot) {
             })
 
     })
-
 
 
     // db -> all standups data -> create cron jobs
@@ -61,6 +60,7 @@ module.exports = function (robot) {
             var days = standup.days
             var time = standup.time.split(':')
             var standupId = standup._id
+            // TODO days
             cronJobs[standup.name] = new CronJob(`${time[2]} ${time[1]} ${time[0]} * * *`, /* ss mm hh daysOfMonth MM daysOFWeek */
                 function () { getStandupData(standupId) },   /* This function is executed when the job starts */
                 function () { return null },               /* This function is executed when the job stops */

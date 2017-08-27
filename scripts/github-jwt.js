@@ -12,8 +12,8 @@ var cache = require('./cache.js').getCache()
 Promise.promisifyAll(mongoskin)
 
 // config
-var mongodb_uri = process.env.MONGODB_URI
 var appID = (process.env.GITHUB_APP_ID || c.GithubApp.AppId)
+var mongodb_uri = process.env.MONGODB_URI
 var db = mongoskin.MongoClient.connect(mongodb_uri)
 
 module.exports = robot => {
@@ -28,8 +28,11 @@ module.exports = robot => {
     })
 
     // generate a new token every 55 minutes. (Tokens expire after 60 minutes)
-    var job = new CronJob('0 */55 0 * * *',
-        function () { generateJWToken() },
+    var job = new CronJob('0 */47 * * * *',
+        function () {
+            robot.logger.info('cronjob for generateJWToken')
+            generateJWToken()
+        },
         function () { return null; }, /* This function is executed when the job stops */
         true, /* Start the job right now */
         'Europe/Athens' /* Time zone of this job. */
