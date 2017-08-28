@@ -1,7 +1,6 @@
 module.exports = function (robot) {
 
-    var convModel = require('./conversation-models.js')
-
-
-    
+    robot.respond(/aaa/, res => {
+        console.log(robot.brain.userForId(res.message.user.id).name)
+    })
 };

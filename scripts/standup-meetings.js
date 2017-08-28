@@ -100,8 +100,6 @@ module.exports = function (robot) {
         var attachmentColor = standup.questions[qstCnt].color
         var questionsNum = standup.questions.length
 
-
-        //to get the users -> robot.adapter.client.rtm.dataStore.users
         var msg = {
             message: {
                 user: { id: userid }

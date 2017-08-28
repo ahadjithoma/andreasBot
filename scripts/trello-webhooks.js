@@ -19,7 +19,7 @@ module.exports = function (robot) {
 
         // BIG TODO
         // this is a users token ↙
-        var token = ' '
+        var token = ''
         // must fetch it dynamically. when creating the webhook, must save this as well to be able to fetch it here later 
 
         var handled = robot.emit('postTrelloAction', token, actionId, room)
