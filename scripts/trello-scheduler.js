@@ -2,14 +2,38 @@ var CronJob = require('cron').CronJob;
 var mongoskin = require('mongoskin')
 var Promise = require('bluebird')
 var cache = require('./cache.js').getCache()
+var async = require('async')
+var c = require('./config.json')
 // config
 var mongodb_uri = process.env.MONGODB_URI
 
 module.exports = (robot) => {
 
-    // TO BE DELETED ↙↙↙
-    getTrelloSumUpData()
-    
+    async.series([
+        function (done) {
+            initDefaultSumUp()
+            done()
+        },
+        function (done) {
+            getTrelloSumUpData()
+        }
+    ])
+
+    function initDefaultSumUp() {
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
+        db.bind('trelloSumUps').insertAsync(c.defaultTrelloSumUp)
+            .then(data => {
+            })
+            .catch(error => {
+                if (error.code != 11000) {
+                    robot.logger.error(error)
+                    if (c.errorsChannel) {
+                        robot.messageRoom(c.errorsChannel, c.errorMessage + `Script: ${path.basename(__filename)}`)
+                    }
+                }
+            })
+    }
+
     function getTrelloSumUpData() {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
         db.bind('trelloSumUps').findOneAsync()
@@ -17,7 +41,11 @@ module.exports = (robot) => {
                 createCronJob(dbData)
             })
             .catch(dbError => {
-                //TODO
+                robot.logger.error(error)
+                if (c.errorsChannel) {
+                    robot.messageRoom(c.errorsChannel, c.errorMessage + `Script: ${path.basename(__filename)}`)
+
+                }
             })
     }
 
