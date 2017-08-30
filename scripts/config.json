@@ -21,7 +21,8 @@
         "name": "Daily Report",
         "days": "1-5",
         "channel": "general",
-        "time": "09:30:00",
+        "time": "18:41",
+        "active": true,
         "questions": [
             {
                 "text": "What did you accomplish yesterday?",

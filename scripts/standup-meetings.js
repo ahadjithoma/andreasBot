@@ -6,6 +6,7 @@ var cache = require('./cache.js').getCache()
 var c = require('./config.json')
 var CronJob = require('cron').CronJob
 var path = require("path")
+var async = require('async')
 var dateFormat = require('dateformat')
 var Promise = require('bluebird')
 var mongoskin = require('mongoskin')
@@ -17,60 +18,100 @@ var errorChannel = process.env.HUBOT_ERRORS_CHANNEL || null
 
 module.exports = function (robot) {
 
-    initDefaultStandup()
+    // init standups
+    async.series([
+        function (done) {
+            initDefaultStandup()
+            done()
+        },
+        function (done) {
+            getAllStandupsData()
+        }
+    ])
 
     /*************************************************************************/
     /*                            Listeners                                  */
     /*************************************************************************/
     var switchBoard = new Conversation(robot)
 
-    robot.respond(/(start|begin|trigger|report) standup/i, function (res) {
-
+    robot.respond(/(start|begin|trigger|report) (standup|report)/i, function (res) {
+        getStandupData('defaultStandup', res.message.user.id)
     })
-    robot.respond(/(edit|change|modify|update) standup time/i, function (res) {
 
+    // triggers a standup for everyone
+    robot.hear(/(start|begin|trigger|report) (standup|report)/i, function (res) {
+        getStandupData('defaultStandup')
     })
-    robot.respond(/ standup /i, function (res) {
 
-    })
-    robot.respond(/ standup /i, function (res) {
-
-    })
-    robot.respond(/show standups/i, function (res) {
+    robot.respond(/(show|view|get) standups?/i, function (res) {
         showStandups(res.message.user.id)
     })
 
-
-    // when updating existing standups CronJobs or adding new ones -> should fire this listener here to  get the updated/new cronjobs
-    robot.on(/updateStandupsCronJobs/, function (res) {
-        // stop all the previous jobs and reset them 
-        Promise.each(Object.keys(cronJobs),
-            function (standupName) {
-                cronJobs[standupName].stop()
-            })
-            .catch(err => {
-                console.log(err)
-            })
-            .done(() => {
-                console.log('done')
-                getAllStandupsData()
-            })
+    robot.respond(/(edit|change|modify|update) standup time ?t?o? (.*)/i, function (res) {
+        var time = res.match[2].trim()
+        var userid = res.message.user.id
+        if (!isTimeValid(time)) {
+            res.reply('Sorry but this is not a valid time. Try again using this `HH:MM` format.')
+        } else {
+            updateTime(userid, 'defaultStandup', time)
+            robot.messageRoom('Ok, I have updated it.')
+        }
 
     })
+
+    robot.respond(/(edit|change|modify|update) standup days ?t?o? (.*)/i, function (res) {
+        // trim and replace spaces
+        var days = res.match[2].trim().replace(/\s/g, '');
+        var userid = res.message.user.id
+        var cronDays = getCronDays(days)
+        if (!isCronDaysValid(cronDays)) {
+            res.reply('Sorry but this is not a valid input. Try again someting like `Monday, Wednesday - Friday`.')
+        } else {
+            updateDays(userid, 'defaultStandup', cronDays)
+        }
+    })
+
+    robot.respond(/(pause|deactivate|disable) standup/i, function (res) {
+        var userid = res.message.user.id
+        updateStandupStatus(userid, 'defaultStandup', false)
+    })
+
+    robot.respond(/(resume|activate|enable) standup/i, function (res) {
+        var userid = res.message.user.id
+        updateStandupStatus(userid, 'defaultStandup', true)
+    })
+
+
+
+    function enableStandup() { }
+
+    robot.respond(/time (.*)/i, function (res) {
+        console.log(isTimeValid(res.match[1]))
+    })
+
+
+    robot.on(/updateStandupsCronJobs/, function (res) {
+        updateStandupsCronJobs()
+    })
+
+
 
 
     /*************************************************************************/
     /*                                                                       */
     /*************************************************************************/
 
-    function getCronDay(day) {
-        if (!day) {
-            return -1;
+
+    function getCronDays(days) {
+        var daysArray = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        for (var i = 0; i < 7; i++) {
+            days = days.replace(daysArray[i], i)
+            days = days.replace(daysArray[i].substring(0, 3), i)
         }
-        return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'].indexOf(day.toLowerCase().substring(0, 3));
+        return days
     }
 
-    function getDayName(cronDay) {
+    function getDaysNames(cronDay) {
         var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
         for (var i = 0; i < 7; i++) {
             cronDay = cronDay.replace(i, days[i])
@@ -78,15 +119,22 @@ module.exports = function (robot) {
         return cronDay
     }
 
-    function isTtimeValid(time) {
-        var validateTimePattern;
-        validateTimePattern = /([01]?[0-9]|2[0-4]):[0-5]?[0-9]/;
+    function isTimeValid(time) {
+        var validateTimePattern = /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])(:[0-5][0-9])?$/
         return validateTimePattern.test(time);
     }
+
+
+    function isCronDaysValid(days) {
+        var validateDayPattern = /^[^a-zA-Z]+$/
+        return validateDayPattern.test(days);
+    }
+
 
     /*************************************************************************/
     /*                                                                       */
     /*************************************************************************/
+    var cronJobs = {}
 
     function initDefaultStandup() {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
@@ -103,14 +151,113 @@ module.exports = function (robot) {
             })
     }
 
-    function showStandups(userid) {
+    function updateStandupsCronJobs() {
+        // stop all the previous jobs and reset them with the new settings
+        Promise.each(Object.keys(cronJobs),
+            function (standupName) {
+                cronJobs[standupName].stop()
+            })
+            .then(() => {
+                getAllStandupsData()
+            })
+            .catch(err => {
+                robot.logger.error(error)
+                if (c.errorsChannel) {
+                    robot.messageRoom(c.errorsChannel, c.errorMessage + `Script: ${path.basename(__filename)}`)
+                }
+            })
+    }
+
+    // TODO: updateTime() and updateDays() could be possibly merged  
+    function updateTime(userid, standupid, time) {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('standups').find().toArrayAsync() // Although we have a single standup, we are using Array for future feature of having multiple standups
+        db.bind('standups').findAndModifyAsync(
+            { _id: standupid },
+            [["_id", 1]],
+            { $set: { time: time } })
+            .then(standup => {
+                updateStandupsCronJobs()
+                return { channel: standup.value.channel, name: standup.value.name }
+            }).then((standup) => {
+                var username = robot.brain.userForId(userid).name
+                var realname = robot.brain.userForId(userid).real_name
+                robot.messageRoom(userid, `Standup time succesfully changed.`)
+                robot.messageRoom('#' + standup.channel, `Standup *${standup.name}* time changed to *${time}* by ${realname} (${username})`)
+            })
+            .catch(error => {
+                robot.logger.error(error)
+                robot.messageRoom(userid, c.errorMessage + `Script: ${path.basename(__filename)}`)
+            })
+    }
+
+    function updateDays(userid, standupid, days) {
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
+        db.bind('standups').findAndModifyAsync(
+            { _id: standupid },
+            [["_id", 1]],
+            { $set: { days: days } })
+            .then(standup => {
+                updateStandupsCronJobs()
+                return { channel: standup.value.channel, name: standup.value.name }
+            }).then((standup) => {
+                var username = robot.brain.userForId(userid).name
+                var realname = robot.brain.userForId(userid).real_name
+                robot.messageRoom(userid, `Standup days succesfully changed.`)
+                robot.messageRoom('#' + standup.channel, `Standup *${standup.name}* days changed to *${getDaysNames(days)}* by ${realname} (${username})`)
+            })
+            .catch(error => {
+                robot.logger.error(error)
+                robot.messageRoom(userid, c.errorMessage + `Script: ${path.basename(__filename)}`)
+            })
+    }
+
+    function updateStandupStatus(userid, standupid, status) {
+        if (status) {
+            cronJobs[standupid].start()
+        } else {
+            cronJobs[standupid].stop()
+        }
+
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
+        db.bind('standups').findAndModifyAsync(
+            { _id: standupid },
+            [["_id", 1]],
+            { $set: { active: status } })
+            .then(standup => {
+                updateStandupsCronJobs()
+                return { channel: standup.value.channel, name: standup.value.name }
+            })
+            .then(standup => {
+                var username = robot.brain.userForId(userid).name
+                var realname = robot.brain.userForId(userid).real_name
+                var standup = standup
+                var newStatus, oldStatus
+                if (status) {
+                    newStatus = 'activated'
+                    oldStatus = 'deactivate'
+                } else {
+                    newStatus = 'deactivated'
+                    oldStatus = 'activate'
+                }
+                robot.messageRoom('#' + standup.channel, `${realname} (${username}) *${newStatus}* ${standup.name} standup.`)
+                showStandups(standup.channel, { _id: 'defaultStandup' })
+                robot.messageRoom(standup.channel, `You can ${oldStatus} again by saying ` + '`activate standup`')
+                robot.messageRoom(userid, `Standup ${standup.name} activated succesfully.`)
+            })
+            .catch(error => {
+                robot.logger.error(error)
+                robot.messageRoom(userid, c.errorMessage + `Script: ${path.basename(__filename)}`)
+            })
+    }
+
+    // set query = {} to get All the stored standups
+    function showStandups(userid, query = { _id: 'defaultStandup' }) {
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
+        db.bind('standups').find(query).toArrayAsync() // Although we have a single standup, we are using Array for future feature of having multiple standups
             .then(allStandups => {
                 var msg = { attachments: [] }
-                Promise.forEach(allStandups, function (standup) {
-                    var attachment, qAttachment
-                    attachment = qAttachment = slackMsg.attachment()
+                Promise.each(allStandups, function (standup) {
+                    var attachment = slackMsg.attachment()
 
                     attachment.pretext = `Standup *${standup.name}* for Channel *${standup.channel}*`
                     attachment.fields.push({
@@ -120,18 +267,37 @@ module.exports = function (robot) {
                     })
                     attachment.fields.push({
                         title: "Days",
-                        value: getDayName(standup.days),
+                        value: getDaysNames(standup.days),
                         short: true
                     })
+                    attachment.fields.push({
+                        title: "Active",
+                        value: (standup.active).toString(),
+                        short: true
+                    })
+                    attachment.fields.push({
+                        title: "Channel",
+                        value: standup.channel,
+                        short: true
+                    })
+                    if (standup.active) {
+                        attachment.color = 'good'
+                    } else {
+                        attachment.color = 'danger'
+                    }
                     msg.attachments.push(attachment)
 
                     for (var i = 0; i < standup.questions.length; i++) {
+                        var qAttachment = slackMsg.attachment()
 
+                        qAttachment.text = `${i + 1}. ${standup.questions[i].text}`
+                        qAttachment.color = standup.questions[i].color
+
+                        msg.attachments.push(qAttachment)
                     }
+                }).then(() => {
+                    robot.messageRoom(userid, msg)
                 })
-            })
-            .then(() => {
-
             })
             .catch(error => {
                 robot.logger.error(error)
@@ -139,8 +305,7 @@ module.exports = function (robot) {
             })
     }
 
-    // db -> all standups data -> create cron jobs
-    getAllStandupsData()
+    // mongoDb -> find standups data -> create cron jobs
     function getAllStandupsData() {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
         db.bind('standups').find().toArrayAsync()
@@ -154,19 +319,16 @@ module.exports = function (robot) {
 
 
     // standup Data -> cronJobs
-    // -> getStandup data() -> provide standup id
-    // fetchStandupsDbData() <-> robot.on in case of new standup 
-    var cronJobs = {}
     function createCronJobs(data) {
         data.forEach(function (standup) {
             var days = standup.days
             var time = standup.time.split(':')
             var standupId = standup._id
             // TODO days
-            cronJobs[standup.name] = new CronJob(`${time[2]} ${time[1]} ${time[0]} * * ${days}`, /* ss mm hh daysOfMonth MM daysOFWeek */
+            cronJobs[standup._id] = new CronJob(`00 ${time[1]} ${time[0]} * * ${days}`, /* ss mm hh daysOfMonth MM daysOFWeek */
                 function () { getStandupData(standupId) },   /* This function is executed when the job starts */
                 function () { return null },               /* This function is executed when the job stops */
-                true,           /* Start the job right now */
+                standup.active,           /* Start the job right now */
                 'Europe/Athens' /* Time zone of this job. */
             )
         })
@@ -203,6 +365,7 @@ module.exports = function (robot) {
     }
 
 
+    // TODO: could be replaced with dynamic-dialog.js in the future
     function startReport(userid, standup, qstCnt) {
 
         var question = standup.questions[qstCnt].text
@@ -234,6 +397,7 @@ module.exports = function (robot) {
             qstCnt++
             if (['cancel', 'stop', 'abort', 'exit', 'quit'].includes(answer)) {
                 robot.messageRoom(userid, 'You have cancelled the standup report. You can start whenever you want by saing `start standup`. ')
+                delete cache.data[userid][standup.name]
                 return 0
             }
             else if (qstCnt < standup.questions.length) {
