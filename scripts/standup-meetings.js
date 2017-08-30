@@ -27,7 +27,7 @@ module.exports = function (robot) {
     robot.respond(/(start|begin|trigger|report) standup/i, function (res) {
 
     })
-    robot.respond(/ standup /i, function (res) {
+    robot.respond(/(edit|change|modify|update) standup time/i, function (res) {
 
     })
     robot.respond(/ standup /i, function (res) {
@@ -36,8 +36,8 @@ module.exports = function (robot) {
     robot.respond(/ standup /i, function (res) {
 
     })
-    robot.respond(/ standup /i, function (res) {
-
+    robot.respond(/show standups/i, function (res) {
+        showStandups(res.message.user.id)
     })
 
 
@@ -62,6 +62,7 @@ module.exports = function (robot) {
     /*************************************************************************/
     /*                                                                       */
     /*************************************************************************/
+
     function getCronDay(day) {
         if (!day) {
             return -1;
@@ -99,11 +100,44 @@ module.exports = function (robot) {
                         robot.messageRoom(c.errorsChannel, c.errorMessage + `Script: ${path.basename(__filename)}`)
                     }
                 }
-
             })
     }
 
+    function showStandups(userid) {
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
+        db.bind('standups').find().toArrayAsync() // Although we have a single standup, we are using Array for future feature of having multiple standups
+            .then(allStandups => {
+                var msg = { attachments: [] }
+                Promise.forEach(allStandups, function (standup) {
+                    var attachment, qAttachment
+                    attachment = qAttachment = slackMsg.attachment()
 
+                    attachment.pretext = `Standup *${standup.name}* for Channel *${standup.channel}*`
+                    attachment.fields.push({
+                        title: "Time",
+                        value: standup.time,
+                        short: true
+                    })
+                    attachment.fields.push({
+                        title: "Days",
+                        value: getDayName(standup.days),
+                        short: true
+                    })
+                    msg.attachments.push(attachment)
+
+                    for (var i = 0; i < standup.questions.length; i++) {
+
+                    }
+                })
+            })
+            .then(() => {
+
+            })
+            .catch(error => {
+                robot.logger.error(error)
+                robot.messageRoom(userid, c.errorMessage + `Script: ${path.basename(__filename)}`)
+            })
+    }
 
     // db -> all standups data -> create cron jobs
     getAllStandupsData()
