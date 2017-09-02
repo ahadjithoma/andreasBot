@@ -125,6 +125,9 @@ var Dialog = function Dialog(originalMessage, timeoutValue, timeoutMessage) {
         }
     };
 
+    /**
+     * Unregister the dialog at the end of the last dialog choice 
+     */
     this.finish = function () {
         self.emit('timeout');
     }
