@@ -21,7 +21,7 @@
         "name": "Daily Report",
         "days": "1-5",
         "channel": "general",
-        "time": "05:04",
+        "time": "09:30",
         "active": true,
         "questions": [
             {
@@ -43,8 +43,10 @@
         ]
     },
     "defaultTrelloSumUp": {
-        "_id": "TrelloSumUps",
-        "days": "1-5",
-        "time": "10:00:00"
+        "_id": "defaultSumUp",
+        "days": "*",
+        "time": "17:24",
+        "active": true,
+        "channel": "general"
     }
 }

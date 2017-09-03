@@ -45,6 +45,16 @@ module.exports = function (robot) {
         getStandupData('defaultStandup')
     })
 
+    robot.respond(/(pause|deactivate|disable) standup/i, function (res) {
+        var userid = res.message.user.id
+        updateStandupStatus(userid, 'defaultStandup', false)
+    })
+
+    robot.respond(/(resume|activate|enable) standup/i, function (res) {
+        var userid = res.message.user.id
+        updateStandupStatus(userid, 'defaultStandup', true)
+    })
+
     robot.respond(/(show|view|get) standups?/i, function (res) {
         showStandups(res.message.user.id)
     })
@@ -53,12 +63,10 @@ module.exports = function (robot) {
         var time = res.match[2].trim()
         var userid = res.message.user.id
         if (!isTimeValid(time)) {
-            res.reply('Sorry but this is not a valid time. Try again using this `HH:MM` format.')
+            res.reply('Sorry but this is not a valid time. Try again using this `HH:MM` 24h-format.')
         } else {
             updateTime(userid, 'defaultStandup', time)
-            robot.messageRoom('Ok, I have updated it.')
         }
-
     })
 
     robot.respond(/(edit|change|modify|update) standup days ?t?o? (.*)/i, function (res) {
@@ -71,16 +79,6 @@ module.exports = function (robot) {
         } else {
             updateDays(userid, 'defaultStandup', cronDays)
         }
-    })
-
-    robot.respond(/(pause|deactivate|disable) standup/i, function (res) {
-        var userid = res.message.user.id
-        updateStandupStatus(userid, 'defaultStandup', false)
-    })
-
-    robot.respond(/(resume|activate|enable) standup/i, function (res) {
-        var userid = res.message.user.id
-        updateStandupStatus(userid, 'defaultStandup', true)
     })
 
     robot.respond(/add standup question "(.*)" to ([0-9]*)( with (.*))?/i, function (res) {
@@ -131,28 +129,10 @@ module.exports = function (robot) {
     })
 
 
-
-
-    /*****************************************************************************************************/
-    // WORKING PLACE
-
-    function resetStandup(userid, standupid) {
-        var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('standups').removeAsync({ _id: standupid })
-            .then(() => { initDefaultStandup() })
-            .then(() => { updateStandupsCronJobs() })
-    }
-    /*****************************************************************************************************/
-    // cron jobs does not work 
-
-
-
-
-
-
     /*************************************************************************/
     /*                          standups Handling                            */
     /*************************************************************************/
+
 
     function initDefaultStandup() {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
@@ -169,6 +149,16 @@ module.exports = function (robot) {
             })
     }
 
+    function resetStandup(userid, standupid) {
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
+        db.bind('standups').removeAsync({ _id: standupid })
+            .then(() => {
+                initDefaultStandup()
+            })
+            .then(() => {
+                updateStandupsCronJobs()
+            })
+    }
 
     // getAllStandupsData(): fetch all standups' data  ==>  createCronJob(): create cron jobs for every single standup
     // This function is being called every time the bot initializes (i.e. the very first time or after code changes and deployment)
@@ -342,6 +332,8 @@ module.exports = function (robot) {
                     }
                 }).then(() => {
                     robot.messageRoom(userid, msg)
+                }).catch(error => {
+
                 })
             })
             .catch(error => {
@@ -352,7 +344,7 @@ module.exports = function (robot) {
 
 
     /*************************************************************************/
-    /*                          standups updating                            */
+    /*                      standups updating functions                      */
     /*************************************************************************/
 
 
@@ -430,7 +422,7 @@ module.exports = function (robot) {
                 robot.messageRoom('#' + standup.channel, `${realname} (${username}) *${newStatus}* ${standup.name} standup.`)
                 showStandups(standup.channel, { _id: 'defaultStandup' })
                 robot.messageRoom(standup.channel, `You can ${oldStatus} again by saying ` + '`activate standup`')
-                robot.messageRoom(userid, `Standup ${standup.name} activated succesfully.`)
+                robot.messageRoom(userid, `Standup ${standup.name} ${newStatus} succesfully.`)
             })
             .catch(error => {
                 robot.logger.error(error)
@@ -546,11 +538,31 @@ module.exports = function (robot) {
 
     var cronJobs = {}
 
+    // standup Data -> cronJobs
+    function createCronJobs(data) {
+        data.forEach(function (standup) {
+            var days = standup.days
+            var time = standup.time.split(':')
+            var standupId = standup._id
+            // TODO days
+            cronJobs[standup._id] = new CronJob(`00 ${time[1]} ${time[0]} * * ${days}`, /* ss mm hh daysOfMonth MM daysOFWeek */
+                function () { /* This function is executed when the job starts */
+                    getStandupData(standupId)
+                },
+                function () {
+                    return null
+                },               /* This function is executed when the job stops */
+                standup.active,           /* Start the job right now */
+                'Europe/Athens' /* Time zone of this job. */
+            )
+        })
+    }
+
+    // stop all the previous jobs and reset them with the new settings
     function updateStandupsCronJobs() {
-        // stop all the previous jobs and reset them with the new settings
         Promise.each(Object.keys(cronJobs),
-            function (standupName) {
-                cronJobs[standupName].stop()
+            function (standupId) {
+                cronJobs[standupId].stop()
             })
             .then(() => {
                 getAllStandupsData()
@@ -563,43 +575,39 @@ module.exports = function (robot) {
             })
     }
 
-    // standup Data -> cronJobs
-    function createCronJobs(data) {
-        data.forEach(function (standup) {
-            var days = standup.days
-            var time = standup.time.split(':')
-            var standupId = standup._id
-            // TODO days
-            cronJobs[standup._id] = new CronJob(`00 ${time[1]} ${time[0]} * * ${days}`, /* ss mm hh daysOfMonth MM daysOFWeek */
-                function () { getStandupData(standupId) },   /* This function is executed when the job starts */
-                function () { return null },               /* This function is executed when the job stops */
-                standup.active,           /* Start the job right now */
-                'Europe/Athens' /* Time zone of this job. */
-            )
-        })
-    }
-
-
     /*************************************************************************/
     /*                           helpful functions                           */
     /*************************************************************************/
 
 
     function getCronDays(days) {
-        var daysArray = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-        for (var i = 0; i < 7; i++) {
-            days = days.replace(daysArray[i], i)
-            days = days.replace(daysArray[i].substring(0, 3), i)
+        if (['everyday', 'all', 'every day'].includes(days)) {
+            return '*'
         }
-        return days
+        else if (days == 'weekdays') {
+            return '1-5'
+        }
+        else {
+            var daysArray = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+            for (var i = 0; i < 7; i++) {
+                days = days.replace(daysArray[i], i)
+                days = days.replace(daysArray[i].substring(0, 3), i)
+            }
+            return days
+        }
     }
 
     function getDaysNames(cronDay) {
-        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-        for (var i = 0; i < 7; i++) {
-            cronDay = cronDay.replace(i, days[i])
+        if (cronDay == '*') {
+            return 'Every Day'
         }
-        return cronDay
+        else {
+            var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+            for (var i = 0; i < 7; i++) {
+                cronDay = cronDay.replace(i, days[i])
+            }
+            return cronDay
+        }
     }
 
     function isTimeValid(time) {
@@ -612,10 +620,5 @@ module.exports = function (robot) {
         var validateDayPattern = /^[^a-zA-Z]+$/
         return validateDayPattern.test(days);
     }
-
-
-
-
-
 
 }
