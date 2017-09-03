@@ -59,6 +59,12 @@ module.exports = function (robot) {
         showStandups(res.message.user.id)
     })
 
+    robot.respond(/(edit|change|modify|update) standup channel ?t?o? (.*)/i, function (res) {
+        var channel = res.match[2].trim()
+        var userid = res.message.user.id
+        updateChannel(userid, channel, 'defaultStandup')
+    })
+
     robot.respond(/(edit|change|modify|update) standup time ?t?o? (.*)/i, function (res) {
         var time = res.match[2].trim()
         var userid = res.message.user.id
@@ -347,6 +353,26 @@ module.exports = function (robot) {
     /*                      standups updating functions                      */
     /*************************************************************************/
 
+    function updateChannel(userid, channel, standupid) {
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
+        db.bind('standups').findAndModifyAsync(
+            { _id: standupid },
+            [["_id", 1]],
+            { $set: { channel: channel } })
+            .then(standup => {
+                updateStandupsCronJobs()
+                return { channel: standup.value.channel, name: standup.value.name }
+            }).then((standup) => {
+                var username = robot.brain.userForId(userid).name
+                var realname = robot.brain.userForId(userid).real_name
+                robot.messageRoom(userid, `Standup time succesfully changed.`)
+                robot.messageRoom('#' + standup.channel, `Standup *${standup.name}* channel changed to *${channel}* by ${realname} (${username})`)
+            })
+            .catch(error => {
+                robot.logger.error(error)
+                robot.messageRoom(userid, c.errorMessage + `Script: ${path.basename(__filename)}`)
+            })
+    }
 
     // TODO: updateTime() and updateDays() could be possibly merged  
     function updateTime(userid, standupid, time) {

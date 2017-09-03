@@ -226,11 +226,11 @@ module.exports = (robot) => {
             .then(sumup => {
                 updateSumupsCronJobs()
                 return sumup.value.channel
-            }).then((channel) => {
+            }).then((oldChannel) => {
                 var username = robot.brain.userForId(userid).name
                 var realname = robot.brain.userForId(userid).real_name
                 robot.messageRoom(userid, `Trello-Sumup channel succesfully changed.`)
-                robot.messageRoom('#' + channel, `Trello-Sumup channel changed to *${time}* by ${realname} (${username})`)
+                robot.messageRoom('#' + oldChannel, `Trello-Sumup channel changed to *${channel}* by ${realname} (${username})`)
             })
             .catch(error => {
                 robot.logger.error(error)
