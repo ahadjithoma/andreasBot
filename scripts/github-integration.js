@@ -48,13 +48,65 @@ module.exports = function (robot) {
 	})
 
 	robot.respond(/github comments of issue ([0-9]) of repo (.*)/i, function (res) {
-		console.log(res.match)
 		var repo = res.match[2].trim()
 		var issueNum = res.match[1].trim()
 		listIssueComments(res.message.user.id, issueNum, repo)
 	})
 
+	robot.respond(/github (list)? pull requests of repo (.*)/i, function (res) {
+		var userid = res.message.user.id
+		var repo = res.match[2].trim()
+		listRepoPullRequests(userid, repo)
+	})
 
+	function listRepoPullRequests(userid, repo, state) {
+		var ghApp = cache.get('GithubApp')
+		var appToken = ghApp[0].token
+		var owner = ghApp[0].account
+
+		var cred = getCredentials(userid)
+		if (!cred) { return 0 }
+
+		var options = {
+			url: `${GITHUB_API}/repos/${owner}/${repo}/pulls?state=${state}`,
+			method: 'GET',
+			headers: getUserHeaders(cred.token),
+			json: true
+		}
+
+		request(options)
+			.then(pullRequests => {
+				var msg = {}
+				msg.unfurl_links = false
+				if (pullRequests.length > 0) {
+					msg.attachments = []
+					msg.text = `Pull Requests of <https://www.github.com/${owner}/${repo}|${owner}/${repo}>:`
+				} else {
+					msg.text = `There aren't any Pull Requests on <https://www.github.com/${owner}/${repo}|${owner}/${repo}>`
+				}
+				Promise.each(pullRequests, function (pr) {
+					var attachement = slackMsgs.attachment()
+					var title = pr.title
+					var url = pr.html_url
+					var num = pr.number
+					attachement.text = `<${url}|#${num} ${title}>`
+
+					if (pr.state.includes('open')) {
+						attachement.color = 'good'
+					} else {
+						attachement.color = 'danger'
+					}
+					msg.attachments.push(attachement)
+				}).done(() => {
+					robot.messageRoom(userid, msg)
+				})
+			})
+			.catch(error => {
+				robot.messageRoom(userid, c.errorMessage)
+			})
+	}
+
+	// TODO: may be replaced with api.ai
 	robot.respond(/github (create|open)(| a new) issue\b/, function (res) {
 
 		var userid = res.message.user.id
@@ -89,62 +141,6 @@ module.exports = function (robot) {
 	})
 
 
-
-	// get user's followers. Developed for testing purposes
-	robot.respond(/gh followers (.*)/, function (res_r) {
-		var username = res_r.match[1];
-		github.users.getFollowersForUser({
-			"username": username
-		}).then(function (res) {
-			var jsonsize = Object.keys(res.data).length;
-			let menu = slackMsgs.menu();
-			let login;
-			for (var i = 0; i < jsonsize; i++) {
-				login = res.data[i].login;
-				menu.attachments[0].actions[0]['options'].push({ "text": login, "value": login });
-			}
-			menu.attachments[0].text = "Followers of " + "*" + username + "*";
-			menu.attachments[0].fallback = 'Github followers of ' + username;
-			menu.attachments[0].callback_id = 'followers_cb_id';
-			menu.attachments[0].actions[0].name = ' ';
-			menu.attachments[0].actions[0].text = ' ';
-			res_r.reply(menu);
-		}).catch(function (err) {
-			res_r.send('Error: ' + JSON.parse(err).message);
-		})
-	})
-
-	/* set Github Accounts for Users and App (bot) */
-	var github = new GitHubApi({
-		/* optional */
-		// debug: true,
-		protocol: "https",
-		host: "api.github.com", // should be api.github.com for GitHub
-		thPrefix: "/api/v3", // for some GHEs; none for GitHub
-		headers: {
-			"Accept": "application/vnd.github.machine-man-preview+json",
-			"user-agent": "Hubot-GitHub" // GitHub is happy with a unique user agent
-		},
-		Promise: require('bluebird'),
-		followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
-		timeout: 5000
-	});
-
-	var ghUser, ghApp
-	var ghUser = ghApp = new GitHubApi({
-		/* optional */
-		// debug: true,
-		protocol: "https",
-		host: "api.github.com", // should be api.github.com for GitHub
-		thPrefix: "/api/v3", // for some GHEs; none for GitHub
-		headers: {
-			"Accept": "application/vnd.github.machine-man-preview+json",
-			"user-agent": "Hubot-GitHub" // GitHub is happy with a unique user agent
-		},
-		Promise: require('bluebird'),
-		followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
-		timeout: 5000
-	})
 
 
 
@@ -210,7 +206,7 @@ module.exports = function (robot) {
 		}
 
 		request(options)
-			.then(issues => {
+			.then(repoIssues => {
 				var msg = {}
 				msg.unfurl_links = false
 				if (repoIssues.length > 0) {
@@ -246,14 +242,6 @@ module.exports = function (robot) {
 
 		var cred = getCredentials(userid)
 		if (!cred) { return 0 }
-
-		// if (!repo) {
-		// 	try {
-		// 		repo = cache.get(userid).content.repo
-		// 	} catch (e) {
-		// 		// ask for repo
-		// 	}
-		// }
 
 		var options = {
 			url: `${GITHUB_API}/repos/${owner}/${repo}/issues/${issueNum}/comments`,

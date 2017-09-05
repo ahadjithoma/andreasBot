@@ -36,13 +36,20 @@ module.exports = function (robot) {
 
     var switchBoard = new Conversation(robot)
 
-    robot.respond(/(start|begin|trigger|report) (standup|report)/i, function (res) {
+
+    /** triggers a standup **/
+    robot.on('triggerStandupReport', function ({ }, res) {
         getStandupData('defaultStandup', res.message.user.id)
     })
 
-    // triggers a standup for everyone
     robot.hear(/(start|begin|trigger|report) (standup|report)/i, function (res) {
-        getStandupData('defaultStandup')
+        var roomid = res.message.user.room
+        if (roomid[0] != 'D') { // if msg is not a direct msg (DM) with a user but in channel. (tested in slack only)
+            getStandupData('defaultStandup', roomid)
+        } else {
+            getStandupData('defaultStandup', res.message.user.id)
+        }
+
     })
 
     robot.respond(/(pause|deactivate|disable) standup/i, function (res) {
@@ -182,15 +189,41 @@ module.exports = function (robot) {
     // cronJob started ==> getStandupData(): fetch data of a single standup ==> startReport(): QnA to users
     // This function is being called every time a cronJob runs to fetch standup's data (questions & channel) and start the report. 
     /* Notes: 
-     * Whenever providing a userid parameter, the standup excecutes for that specific user only. 
+     * Whenever providing a userid parameter, the standup excecutes for that specific user only or channel's user if the id is for channel. 
      * Otherwise is excecuted for all the users that belong to the specified channel of the given standupid */
     function getStandupData(standupId, userid = null) {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
 
         db.bind('standups').findOneAsync({ _id: standupId })
             .then(standupData => {
-                if (!userid) {
-                    var channelMembers = (robot.adapter.client.rtm.dataStore.getChannelByName(standupData.channel)).members
+
+                if (!userid) { // this is actually for scheduled standups
+                    try {
+                        // this is for public channels
+                        var channelMembers = (robot.adapter.client.rtm.dataStore.getChannelByName(standupData.channel)).members
+                    } catch (error) {
+                        // this is for private channels in case we don't have a public one
+                        var channelMembers = (robot.adapter.client.rtm.dataStore.getGroupByName(standupData.channel)).members
+                    }
+
+                    channelMembers.forEach(function (id) {
+                        var user = robot.brain.userForId(id)
+                        if (!user[robot.adapterName].is_bot && !user[robot.adapterName].is_app_user) {
+                            startReport(id, standupData, 0)
+                        }
+                    })
+                }
+                else if (userid[0] != 'D' && userid[0] != 'U') { // if it's not a Direct Message (tested on slack only).
+                    // 'C' stands for public (C)hannel where 'G' is for private (G)roup
+                    if (userid[0] == 'C') {
+                        var channelMembers = (robot.adapter.client.rtm.dataStore.getChannelById(userid)).members
+                    }
+                    else if (userid[0] == 'G') {
+                        var channelMembers = (robot.adapter.client.rtm.dataStore.getGroupById(userid)).members
+                    }
+                    else {
+                        return -1
+                    }
 
                     channelMembers.forEach(function (id) {
                         var user = robot.brain.userForId(id)
@@ -232,7 +265,7 @@ module.exports = function (robot) {
             message: {
                 user: { id: userid }
             },
-            reply(text) {
+            reply: function (text) {
                 robot.messageRoom(userid, text)
             }
         }

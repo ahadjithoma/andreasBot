@@ -89,7 +89,7 @@ module.exports = function (robot) {
             //TODO error
 
         })
-        res_r.redirect('/a');
+        res_r.redirect('/token%20received');
     });
 
 }

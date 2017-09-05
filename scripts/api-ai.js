@@ -22,14 +22,11 @@ module.exports = robot => {
         if (res.message.text.match(regex)) { // captures only direct messages and not messages in channels 
             var msg = res.message.text.match(regex)[1]
             console.log(msg)
-            // apiaiAsk(msg, res);
+            apiaiAsk(msg, res);
         }
 
     });
 
-    // robot.respond(/(.*)/, function(res){
-    //     console.log('robot respond (.*)')
-    // })
 
     // sending a msg to api.ai from other scripts
     robot.on('ask-api.ai', function (msg, res) {
@@ -52,20 +49,20 @@ module.exports = robot => {
         var request = app.textRequest(msg, options)
 
         request.on('response', function (response) {
-            var r = response.result;
-
+            var result = response.result;
+            console.log(result)
             // if the action is completed, emit the data 
-            var isComplete = !r.actionIncomplete;
+            var isComplete = !result.actionIncomplete;
             if (isComplete) {
-                var handled = robot.emit(r.action, r, res);
+                var handled = robot.emit(result.action, result, res);
                 if (!handled) {
-                    robot.logger.info('No scripts handled the api.ai action: ' + r.action);
+                    robot.logger.info('No scripts handled the api.ai action: ' + result.action);
                 }
             }
 
             // reply back to user
-            if (r.fulfillment.speech) {
-                res.send(r.fulfillment.speech);
+            if (result.fulfillment.speech) {
+                res.send(result.fulfillment.speech);
             }
         });
 

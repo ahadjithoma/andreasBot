@@ -1,8 +1,10 @@
 module.exports = function (robot) {
 
     robot.router.head('/hubot/trello-webhooks', function (req, res) {
-        robot.logger.info(`trello-webhook HEAD. Status Code: ${res.statusCode}`);
+        robot.logger.info(`Trello webhook creation. Callback: /hubot/trello-webhooks. Status Code: ${res.statusCode}`);
         res.send(200);
+
+        // save trello id and user
     });
 
     robot.router.post('/hubot/trello-webhooks', function (req, res) {
@@ -15,17 +17,25 @@ module.exports = function (robot) {
         var type = payload.action.type;
         var actionId = payload.action.id
         var room = req.query.room
+        var modelId = payload.model.id
 
+        /* Notes: 
+         * Every webhook is a unique compination of callback_url, model_id and user_token.
+         * The callback_url contains the webhook's room for chat client (i.e. slack channel) to post the updates
+         * where callback body is the same for all webhooks (callback body is actually the bot host url). 
+         * So getting the room name && model_id we can regocnize the user who created the webhook 
+         * and use his token for the GET trello action request.  
+         */
 
-        // BIG TODO
+        
+         // BIG TODO
         // this is a users token ↙
-        var token = '32005607708d42b1a23e3029e9c14c86897fb3899f6d735b8f97705b67138a8d'
         // must fetch it dynamically. when creating the webhook, must save this as well to be able to fetch it here later 
 
-        var handled = robot.emit('postTrelloAction', token, actionId, room)
+        var handled = robot.emit('postTrelloAction', modelId, room, actionId)
         if (!handled) {
             robot.logger.warning('No scripts handled the Trello Webhook Action.');
-        }       
-        
+        }
+
     });
 }

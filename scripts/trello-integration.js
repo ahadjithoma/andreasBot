@@ -102,7 +102,8 @@ module.exports = function (robot) {
         updateWebhook(res.message.user.id, webhookId, { active: true })
     })
 
-    // the follow command is useful when changing hubot host (i.e. when testing with ngrok)
+    // The follow command is useful when changing hubot host (i.e. when testing with ngrok).
+    // Due to that, it's not uvailable through api.ai NLU/P 
     robot.respond(/update trello webhooks (callback ?url|callback|url)/i, function (res) {
         var webhookId = res.match[1].trim()
         // need the room for the callback url
@@ -137,14 +138,29 @@ module.exports = function (robot) {
         deleteWebhook(res.message.user.id, webhookId)
     })
 
+    // get the existing trello webhooks and display them
     robot.respond(/show trello webhooks/i, function (res) {
+        var userid = res.message.user.id
+        getWebhooks(res.message.user.id)
+    })
+    robot.on('showTrelloWebhooks', function (response, res) {
+        var userid = res.message.user.id
         getWebhooks(res.message.user.id)
     })
 
-    robot.on('postTrelloAction', function (token, actionId, room) {
-        // console.log('trello token', token)
-        // console.log('actionId', actionId)
-        getTrelloAction(token, actionId, room)
+
+    robot.on('postTrelloAction', function (modelid, room, actionId) {
+        // first i need to get the token of the user who created that webhook.
+        Promise.each(cache.get('trelloWebhooks'), function (webhook) {
+            if (webhook.room == room && webhook.model_id == modelid) {
+                var userid = webhook.userid // this is the id of the user who created the webhook    
+                var token = cache.get(userid).trello_token
+
+                getTrelloAction(token, actionId, room)
+            }
+        }).catch(error => {
+            //TODO
+        })
     })
 
     /*************************************************************************/
@@ -190,6 +206,10 @@ module.exports = function (robot) {
                     })
             })
             .then(() => {
+                var handled = robot.emit('resetCacheForTrelloWebhooks')
+                if (!handled) {
+                    robot.logger.warning('No script handled the resetCacheForTrelloWebhooks event.')
+                }
                 if (query.active) {
                     robot.messageRoom(userid, 'Webhook activated. You can deactivate it again: `deactivate trello webhook <Webhook ID>`')
                 } else if (query.active == false) {
@@ -203,7 +223,7 @@ module.exports = function (robot) {
                     robot.messageRoom(userid, 'You provided a wrong webhook ID. Say `show trello webhooks` to see webhooks details.')
                 }
                 else if (error.statusCode == 401) {
-                    robot.messageRoom(userid, 'Only the user who created the webhook is eligible to disable it. Say `show trello webhooks` to see webhooks details.')
+                    robot.messageRoom(userid, 'Only the user who created the webhook is eligible to make any changes. Say `show trello webhooks` to see webhooks details.')
                 } else {
                     robot.messageRoom(userid, error.message)
                 }
@@ -225,10 +245,15 @@ module.exports = function (robot) {
         request(options)
             .then(webhook => {
                 console.log(webhook)
-                //save to db and cache 
+                // update db 
                 db.bind('trelloWebhooks').removeAsync({ _id: webhookId })
             })
             .then(() => {
+                // then update cache (cache 'looks' at db so update it later than db)
+                var handled = robot.emit('resetCacheForTrelloWebhooks')
+                if (!handled) {
+                    robot.logger.warning('No script handled the resetCacheForTrelloWebhooks event.')
+                }
                 robot.messageRoom(userid, 'Webhook deleted permanently.')
             })
             .catch(error => {
@@ -345,21 +370,23 @@ module.exports = function (robot) {
 
         request(options)
             .then(webhook => {
-                //save to db and cache 
+                //save to db and cache
+                var webhookObj = {
+                    userid: userid,
+                    username: username,
+                    idModel: webhook.idModel,
+                    modelType: model.type,
+                    room: room,
+                    active: webhook.active,
+                    description: webhook.description
+                }
+
                 var db = mongoskin.MongoClient.connect(mongodb_uri);
                 db.bind('trelloWebhooks').findAndModifyAsync(
                     { _id: webhook.id },
                     [["_id", 1]],
                     {
-                        $set: {
-                            userid: userid,
-                            username: username,
-                            description: webhook.description,
-                            idModel: webhook.idModel,
-                            modelType: model.type,
-                            room: room,
-                            active: webhook.active,
-                        }
+                        $set: webhookObj
                     },
                     { upsert: true })
                     .catch(error => {
@@ -371,6 +398,11 @@ module.exports = function (robot) {
                     })
             })
             .then(() => {
+                // then update cache (cache 'looks' at db so update it later than db)
+                var handled = robot.emit('resetCacheForTrelloWebhooks')
+                if (!handled) {
+                    robot.logger.warning('No script handled the resetCacheForTrelloWebhooks event.')
+                }
                 robot.messageRoom(userid, 'Webbhook created! To check your team`s webhooks: `show trello webhooks`')
             })
             .catch(error => {

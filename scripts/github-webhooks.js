@@ -1,70 +1,70 @@
 var url = require('url');
 var querystring = require('querystring');
+var slackMsgs = require('./slackMsgs.js')
 
-// for debugging purposes  
-debug = false;
+
 
 module.exports = function (robot) {
-    robot.router.post('/hubot/github-hooks', function (req, res) {
-        var error, eventBody, data;
-        try {
-            if (debug) {
-                robot.logger.info("Github post received: ", req);
-            }
-            eventBody = {
-                eventType: req.headers["x-github-event"],
-                signature: req.headers["X-Hub-Signature"],
-                deliveryId: req.headers["X-Github-Delivery"],
-                payload: req.body,
-                query: querystring.parse(url.parse(req.url).query)
-            };
-            res.send('json received');
-            webhooksEventsBranching(eventBody);
-        } catch (e) {
-            // res.send('You supplied invalid JSON to this endpoint.');
-            error = e;
-            // robot.logger.error('Could not receive github response on github-hooks.js');	
-            robot.logger.error("github-hooks.js error: " + error.stack + "**" + "\n");
-        }
-        return res.end("");
-    });
+	robot.router.post('/hubot/github-hooks', function (req, res) {
+		var error, eventBody, data;
+		try {
+			if (false) {
+				robot.logger.info("Github post received: ", req);
+			}
+			eventBody = {
+				eventType: req.headers["x-github-event"],
+				signature: req.headers["X-Hub-Signature"],
+				deliveryId: req.headers["X-Github-Delivery"],
+				payload: req.body,
+				query: querystring.parse(url.parse(req.url).query)
+			};
+			res.send('OK');
+			webhooksEventsBranching(eventBody);
+		} catch (e) {
+			// res.send('You supplied invalid JSON to this endpoint.');
+			error = e;
+			// robot.logger.error('Could not receive github response on github-hooks.js');	
+			robot.logger.error("github-hooks.js error: " + error.stack + "\n");
+		}
+		return res.end("");
+	});
 
 
-    function webhooksEventsBranching(data) {
+	function webhooksEventsBranching(eventBody) {
+		switch (eventBody.eventType) {
+			case 'push':
+				pushEvent(eventBody);
+				break;
+			case 'deployment':
+				developmentEvent(eventBody);
+				break;
+			case 'deployment_status':
+				developmentStatusEvent(eventBody);
+				break;
+			case 'issues':
+				issuesEvent(eventBody);
+				break;
+			case 'issue_comment':
+				issueCommentEvent(eventBody);
+				break;
+			case 'fork':
+				break;
+			case 'pull':
+				break;
+			case '':
+				break;
 
-        switch (data.eventType) {
-            case 'push':
-                pushEvent(data.payload);
-                break;
-            case 'deployment':
-                developmentEvent(data.payload);
-                break;
-            case 'deployment_status':
-                developmentStatusEvent(data.payload);
-                break;
-            case 'issues':
-                issuesEvent(data.payload);
-                break;
-            case 'issue_comment':
-                issueCommentEvent(data.payload);
-                break;
-            case 'fork':
-                break;
-            case 'pull':
-                break;
-            case '':
-                break;
-
-            default:
-                let room = "random";
-                robot.messageRoom(room, `event: ${data.eventType}`);
-                break;
-        }
-    }
+			default:
+				var room = eventBody.query.room
+				robot.messageRoom(room, `event: ${eventBody.eventType}`);
+				break;
+		}
+	}
 
 
-	function pushEvent(payload) {
-		var room = "random";
+	function pushEvent(eventBody) {
+		var room = eventBody.query.room
+		var payload = eventBody.payload
 		var adapter = robot.adapterName;
 		let repo_name = payload.repository.full_name;
 		let branch = payload.repository.default_branch;
@@ -96,12 +96,9 @@ module.exports = function (robot) {
 		}
 	}
 
-	function getCommits() {
-
-	}
-
-	function developmentStatusEvent(payload) {
-		var room = "random";
+	function developmentStatusEvent(eventBody) {
+		var room = eventBody.query.room
+		var payload = eventBody.payload
 		var adapter = robot.adapterName;
 		if (adapter == 'slack') {
 			let msg = slackMsgs.githubEvent();
@@ -129,13 +126,14 @@ module.exports = function (robot) {
 		}
 	}
 
-	function developmentEvent(payload) {
+	function developmentEvent(eventBody) {
 		//TODO 
 	};
 
-	function issuesEvent(payload) {
-		//under construction
-		var room = "random";
+	function issuesEvent(eventBody) {
+		//TODO: under construction
+		var room = eventBody.query.room
+		var payload = eventBody.payload
 		var adapter = robot.adapterName;
 		let repo = payload.repository.full_name;
 		let repo_url = payload.repository.html_url;
@@ -179,7 +177,7 @@ module.exports = function (robot) {
 		}
 	};
 
-	function issueCommentEvent(payload) {
+	function issueCommentEvent(eventBody) {
 		//TODO
 	};
 

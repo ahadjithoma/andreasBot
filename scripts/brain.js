@@ -14,6 +14,8 @@ module.exports = (robot) => {
 
     adapterUsersIDsToCache()
     usersDataToCache()
+    trelloWebhooksInfoToCache()
+    robot.brain.constructor(robot)
 
     robot.on('refreshBrain', function () {
         // not sure yet if it's needed
@@ -22,10 +24,12 @@ module.exports = (robot) => {
         usersDataToCache()
     })
 
+    robot.on('resetCacheForTrelloWebhooks', function () {
+        cache.del('trelloWebhooks')
+        trelloWebhooksInfoToCache()
+    })
+
     function usersDataToCache() {
-
-        robot.brain.constructor(robot)
-
         var db = mongoskin.MongoClient.connect(mongodb_uri)
         db.collection('users').find().toArrayAsync()
             .then(data => {
@@ -80,6 +84,31 @@ module.exports = (robot) => {
             })
     }
 
+    function trelloWebhooksInfoToCache() {
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
+
+        db.collection('trelloWebhooks').find().toArrayAsync()
+            .then(data => {
+                data.forEach(function (webhook) {
+
+                    webhookObj = {
+                        webhook_id: webhook._id,
+                        userid: webhook.userid,
+                        model_id: webhook.idModel,
+                        room: webhook.room
+                    }
+                    cache.union('trelloWebhooks', webhookObj)
+                })
+            }).catch(dbError => {
+                robot.logger.error(dbError)
+                if (c.errorsChannel)
+                    robot.messageRoom(c.errorsChannel, c.errorMessage
+                        + `Script: ${path.basename(__filename)}`)
+            }).done(() => {
+                db.close()
+            })
+    }
+
     function adapterUsersIDsToCache() {
         var usersObject = robot.brain.users()
         var usersIDs = Object.keys(usersObject)
@@ -88,13 +117,16 @@ module.exports = (robot) => {
             var user = usersObject[usersIDs[i]][adapter]
             try {
                 if (!user.is_bot && !user.is_app_user) {
-                    cache.union('userIDs',user.id)
+                    cache.union('userIDs', user.id)
                 }
             } catch (error) {
                 // do nothing
             }
         }
     }
+
+
+
 
     // ***********************************************
     // TO BE DELETED
