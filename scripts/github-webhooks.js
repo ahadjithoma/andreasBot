@@ -1,8 +1,9 @@
 var url = require('url');
 var querystring = require('querystring');
 var slackMsgs = require('./slackMsgs.js')
+var color = require('./colors.js')
 
-
+var githubURL = 'https://www.github.com/'
 
 module.exports = function (robot) {
 	robot.router.post('/hubot/github-hooks', function (req, res) {
@@ -41,12 +42,19 @@ module.exports = function (robot) {
 			case 'deployment_status':
 				developmentStatusEvent(eventBody);
 				break;
+			case 'create':
+			case 'delete':
+				createAndDeleteEvent(eventBody)
+				break
 			case 'issues':
 				issuesEvent(eventBody);
 				break;
 			case 'issue_comment':
 				issueCommentEvent(eventBody);
 				break;
+			case 'pull_request':
+				pullRequestEvent(eventBody)
+				break
 			case 'fork':
 				break;
 			case 'pull':
@@ -61,6 +69,43 @@ module.exports = function (robot) {
 		}
 	}
 
+	function createAndDeleteEvent(eventBody) {
+		var room = eventBody.query.room
+		var payload = eventBody.payload
+
+		var repoFullName = payload.repository.full_name
+		var repoURL = githubURL + repoFullName
+		var refType = payload.ref_type //repo, branch or tag 
+		var refName = payload.ref
+		var refURL = repoURL + '/tree/' + refName
+		var senderUsername = payload.sender.login
+		var senderURL = payload.sender.html_url
+
+		var msg = { attachments: [] };
+		var attachment = slackMsgs.attachment()
+
+		if (eventBody.eventType == 'delete') {
+			attachment.pretext = `<${repoURL}|[${repoFullName}]> The follow ${refType} was deleted by <${senderURL}|${senderUsername}>`
+		}
+		else if (eventBody.eventType == 'create') {
+			attachment.pretext = `<${repoURL}|[${repoFullName}]> New ${refType} was pushed by <${senderURL}|${senderUsername}>`
+		}
+		attachment.text = `<${refURL}|${refName}>`
+		attachment.color = color.getHex('blue')
+		attachment.fallback = attachment.pretext
+
+		msg.attachments.push(attachment)
+
+		robot.messageRoom(room, msg)
+	}
+
+
+	function pullRequestEvent(eventBody) {
+		var room = eventBody.query.room
+		var payload = eventBody.payload
+
+		robot.messageRoom(room, 'TODO: pull request event')
+	}
 
 	function pushEvent(eventBody) {
 		var room = eventBody.query.room

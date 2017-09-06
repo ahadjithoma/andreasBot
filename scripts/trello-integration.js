@@ -2,7 +2,7 @@
 //   Trello API Integration
 //
 // Commands:
-//   `Trello Integration ToDo`
+
 //
 // Configuration
 //

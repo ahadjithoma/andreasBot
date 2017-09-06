@@ -1,3 +1,11 @@
+// Commands:
+//	 `github login`
+//	 `github repos`
+//	 `github open|closed|all issues of repo <repo name>`
+//	 `github comments of issue <issue num> of repo <repo name>`
+//	 `github pull requests of repo <repo name>`
+//	 `github create issue`
+
 'use strict';
 
 // init
@@ -53,9 +61,9 @@ module.exports = function (robot) {
 		listIssueComments(res.message.user.id, issueNum, repo)
 	})
 
-	robot.respond(/github (list)? pull requests of repo (.*)/i, function (res) {
+	robot.respond(/github pull requests of repo (.*)/i, function (res) {
 		var userid = res.message.user.id
-		var repo = res.match[2].trim()
+		var repo = res.match[1].trim()
 		listRepoPullRequests(userid, repo)
 	})
 
@@ -85,11 +93,17 @@ module.exports = function (robot) {
 					msg.text = `There aren't any Pull Requests on <https://www.github.com/${owner}/${repo}|${owner}/${repo}>`
 				}
 				Promise.each(pullRequests, function (pr) {
+					console.log(pr)
 					var attachement = slackMsgs.attachment()
 					var title = pr.title
 					var url = pr.html_url
 					var num = pr.number
 					attachement.text = `<${url}|#${num} ${title}>`
+
+
+					attachement.author_name = pr.user.login
+					attachement.author_link = pr.user.html_url
+					attachement.author_icon = pr.user.avatar_url
 
 					if (pr.state.includes('open')) {
 						attachement.color = 'good'
@@ -386,5 +400,27 @@ module.exports = function (robot) {
 
 	function updateConversationContent(userid, content) {
 		cache.set(userid, { content: content })
+	}
+
+
+	function getSlackUser(username) {
+
+		var userids = cache.get('userIDs')
+
+		for (var i = 0; i < userids.length; i++) {
+			var id = userids[i]
+
+			var user = cache.get(id)
+			var githubUsername
+			try {
+				var githubUsername = user.github_username
+				if (githubUsername == username) {
+					return robot.brain.userForId(id)
+				}
+			} catch (e) {
+
+			}
+			return 'false'
+		}
 	}
 }

@@ -1,3 +1,21 @@
+// Description:
+//   Standups
+//
+// Commands:
+//   `standup report` - triggers a new standup 
+//   `standup disable|deactivate|pause` - disable the default standup
+//   `standup enable|activate|resume`
+//   `standup show`
+//   `standup edit|change channel to <channel name>`
+//   `standup edit|change days to <dayName1, dayName2, ...>`
+//   `standup edit time to <HH:MM>`
+//   `standup add question "<question>" to <order number> with <color name>`
+//   `standup remove|delete question <Question Number>`
+//   `standup edit|change standup question <Question Number> color to <color name>`
+//   `standup edit|change standup question <Question Number> text to <color name>`
+//   `standup move question <number> to <number>`
+//   `standup reset`
+
 'use strict'
 
 const Conversation = require('./hubot-conversation/index.js')

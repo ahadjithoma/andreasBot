@@ -1,3 +1,16 @@
+// Configuration:
+// Commands:
+//   `JENKINS`
+//   `jenkins login`
+//   `jenkins builds of job <job name>`
+//   `jenkins last successful build of job <job name>`
+//   `jenkins last completed build of job <job name>`
+//   `jenkins last build of job <job name>`
+//   `jenkins build info <build number> of job <job name>`
+//   `jenkins build console <build number> of job <job name>`
+//   `jenkins build #<build number>`
+
+
 var jenkinsapi = require('jenkins-api');
 var Promise = require('bluebird')
 var request = require('request-promise')
