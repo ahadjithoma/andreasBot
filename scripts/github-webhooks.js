@@ -117,28 +117,32 @@ module.exports = function (robot) {
 		let compare_url = payload.compare;
 		let commits = Object.keys(payload.commits).length;		 // get the total number of commits done
 
-		if (adapter == 'slack') {
-			let msg = slackMsgs.githubEvent();
-			let i;
+		let msg = slackMsgs.githubEvent();
+		let i;
 
-			for (i = 0; i < commits; i++) {
-				let user_login = payload.commits[i].author.username;
-				var user_url = `https://www.github.com/${user_login}`;
-				var user_name = payload.commits[i].author.name;
-				var commit_id = payload.commits[i].id.substr(0, 7);		 // get the first 7 chars of the commit id
-				var commit_msg = payload.commits[i].message.split('\n', 1); // get only the commit msg, not the description
-				var commit_url = payload.commits[i].url;
-				commit_id = "`" + commit_id + "`"; // add slack's msg format 
-				msg.attachments[0].text = msg.attachments[0].text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
-			}
-			msg.text = `<${repo_url}|[${repo_name}:${branch}]> ${commits} new <${compare_url}|commit(s)> by <${user_url}|${user_name}>:`;
-			msg.attachments[0].color = '#0000ff'; // set color = blue
-			robot.messageRoom(room, msg);
-
-		} else {
-			//TODO: send a msg in plain text for other chat platforms or add any other specific formats than slack's
-			robot.messageRoom(room, "push event");
+		for (i = 0; i < commits; i++) {
+			let user_login = payload.commits[i].author.username;
+			var user_url = `https://www.github.com/${user_login}`;
+			var user_name = payload.commits[i].author.name;
+			var commit_id = payload.commits[i].id.substr(0, 7);		 // get the first 7 chars of the commit id
+			var commit_msg = payload.commits[i].message.split('\n', 1); // get only the commit msg, not the description
+			var commit_url = payload.commits[i].url;
+			commit_id = "`" + commit_id + "`"; // add slack's msg format 
+			msg.attachments[0].text = msg.attachments[0].text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
 		}
+		if (payload.created) {
+			msg.text = `<${repo_url}|[${repo_name}:${branch}]> ${commits} new <${compare_url}|commit(s)> by <${user_url}|${user_name}>:`;
+		}
+		else if (payload.forced) {
+			//TODO
+		}
+		else if (payload.deleted) {
+			// TODO
+		}
+		msg.attachments[0].color = '#0000ff'; // set color = blue
+		robot.messageRoom(room, msg);
+
+
 	}
 
 	function developmentStatusEvent(eventBody) {
