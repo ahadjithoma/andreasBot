@@ -1,3 +1,6 @@
+// Commanfs: 
+// `trello login`
+
 var slackMsgs = require('./slackMsgs.js');
 var url = require('url');
 var Trello = require('node-trello');
@@ -25,7 +28,7 @@ module.exports = function (robot) {
     var TrelloOAuth = require('./trello-oauth.js')
     var tOAuth = new TrelloOAuth(app_key, oauth_secret, loginCallback, 'Hubot', scope, expr);
 
-    robot.respond(/trello auth/, function (res) {
+    robot.respond(/trello login/, function (res) {
         trelloOAuthLogin(res.message.user.id)
     })
 

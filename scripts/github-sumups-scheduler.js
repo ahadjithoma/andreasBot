@@ -17,7 +17,7 @@ module.exports = (robot) => {
             done()
         },
         function (done) {
-            getTrelloSumUpData()
+            getGithubSumUpData()
         }
     ])
 
@@ -27,18 +27,18 @@ module.exports = (robot) => {
     /*                             Listeners                                 */
     /*************************************************************************/
 
-    robot.respond(/trello (show|get|give me)? sum-?up'?s? info/i, function (res) {
+    robot.respond(/github sum-?ups? (show|get|give me)? info/i, function (res) {
         var userid = res.message.user.id
         showSumupInfo(userid)
     })
 
-    robot.respond(/trello (change|edit|update|modify) sum-?ups? channel t?o? (.*)/i, function (res) {
+    robot.respond(/github sum-?ups? (change|edit|update|modify) channel t?o? (.*)/i, function (res) {
         var channel = res.match[2].trim()
         var userid = res.message.user.id
         updateChannel(userid, channel)
     })
 
-    robot.respond(/trello (change|edit|update|modify) sum-?ups? time t?o? (.*)/i, function (res) {
+    robot.respond(/github sum-?ups? (change|edit|update|modify) time t?o? (.*)/i, function (res) {
         var time = res.match[2].trim()
         var userid = res.message.user.id
         if (!isTimeValid(time)) {
@@ -49,8 +49,8 @@ module.exports = (robot) => {
     })
 
 
-    /** Change the days of the trello sumup scheduler **/
-    robot.respond(/trello (edit|change|modify|update) sum-?ups? days ?t?o? (.*)/i, function (res) {
+    /** Change the days of the github sumup scheduler **/
+    robot.respond(/github sum-?ups? (edit|change|modify|update) days ?t?o? (.*)/i, function (res) {
         var days = res.match[2].trim().replace(/(and)/gi, ',').replace(/\s/g, '')  // remove spaces
         var userid = res.message.user.id
         var cronDays = getCronDays(days)
@@ -61,12 +61,12 @@ module.exports = (robot) => {
         }
     })
 
-    robot.on('changeTrelloSumupDays', function (result, res) {
+    robot.on('changeGithubSumupDays', function (result, res) {
         var days = result.parameters.days.toString()
-        changeTrelloSumupDaysListeners(days, res)
+        changeGithubSumupDaysListeners(days, res)
     })
 
-    function changeTrelloSumupDaysListeners(days, res) {
+    function changeGithubSumupDaysListeners(days, res) {
         var userid = res.message.user.id
         var cronDays = getCronDays(days)
         if (!isCronDaysValid(cronDays)) {
@@ -76,18 +76,18 @@ module.exports = (robot) => {
         }
     }
 
-    /** Deactivate/Activate trello sumups auto-post scheduler **/
-    robot.respond(/trello (pause|deactivate|disable) sum-?ups?/i, function (res) {
+    /** Deactivate/Activate github sumups auto-post scheduler **/
+    robot.respond(/github sum-?ups? (pause|deactivate|disable)/i, function (res) {
         var userid = res.message.user.id
         updateSumupStatus(userid, false)
     })
 
-    robot.respond(/trello (resume|activate|enable) sum-?ups?/i, function (res) {
+    robot.respond(/github sum-?ups? (resume|activate|enable)/i, function (res) {
         var userid = res.message.user.id
         updateSumupStatus(userid, true)
     })
 
-    robot.on('changeTrelloSumupsStatus', function (result, res) {
+    robot.on('changeGithubSumupsStatus', function (result, res) {
         var userid = res.message.user.id
         var newStatus = result.parameters.bool
         updateSumupStatus(userid, newStatus)
@@ -102,11 +102,11 @@ module.exports = (robot) => {
     function showSumupInfo(userid, sumupId = 'defaultSumUp') {
         var msg = { attachments: [] }
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('trelloSumUps').findOneAsync({ _id: sumupId }) // Although we have a single sumup, we are using Array for future feature of having multiple sumups
+        db.bind('githubSumUps').findOneAsync({ _id: sumupId }) // Although we have a single sumup, we are using Array for future feature of having multiple sumups
             .then(sumup => {
                 var attachment = slackMsg.attachment()
 
-                attachment.pretext = `Trello SumUps auto-post Scheduler Info`
+                attachment.pretext = `Github SumUps auto-post Scheduler Info`
                 attachment.fields.push({
                     title: "Time",
                     value: sumup.time,
@@ -144,9 +144,9 @@ module.exports = (robot) => {
 
     function initDefaultSumUp() {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('trelloSumUps').insertAsync(c.defaultTrelloSumUp)
+        db.bind('githubSumUps').insertAsync(c.defaultGithubSumUp)
             .then(() => {
-                robot.logger.info('Default Trello SumUps Initialized')
+                robot.logger.info('Default Github SumUps Initialized')
             })
             .catch(error => {
                 if (error.code != 11000) {
@@ -158,9 +158,9 @@ module.exports = (robot) => {
             })
     }
 
-    function getTrelloSumUpData() {
+    function getGithubSumUpData() {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('trelloSumUps').findOneAsync()
+        db.bind('githubSumUps').findOneAsync()
             .then(dbData => {
                 createCronJob(dbData)
             })
@@ -174,17 +174,17 @@ module.exports = (robot) => {
     }
 
     // Gets all the users' IDs and emits an event for SumUp posting to each user
-    function trelloSumUpScheduler() {
+    function githubSumUpScheduler() {
         var userIDs = cache.get('userIDs')
         Promise.each(userIDs, function (userid) {
             var query
-            var lastTrelloNotificationID = cache.get(userid, 'trello_last_notification')
-            if (!lastTrelloNotificationID) {
+            var lastGithubSumupDate = cache.get(userid, 'github_last_notification')
+            if (!lastGithubSumupDate) {
                 query = { read_filer: 'unread' }
             } else {
-                query = { since: lastTrelloNotificationID }
+                query = { since: lastGithubSumupDate }
             }
-            robot.emit('trelloSumUp', userid, query, true) // robot.on in trello-integration.js file
+            robot.emit('githubSumUp', userid, query, true)
         })
     }
 
@@ -200,7 +200,7 @@ module.exports = (robot) => {
         }
 
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('trelloSumUps').findAndModifyAsync(
+        db.bind('githubSumUps').findAndModifyAsync(
             { _id: sumupId },
             [["_id", 1]],
             { $set: { active: status } })
@@ -219,10 +219,10 @@ module.exports = (robot) => {
                     newStatus = 'deactivated'
                     oldStatus = 'activate'
                 }
-                robot.messageRoom('#' + channel, `${realname} (${username}) *${newStatus}* Trello Sumups.`)
+                robot.messageRoom('#' + channel, `${realname} (${username}) *${newStatus}* Github Sumups.`)
                 showSumupInfo(channel, sumupId)
-                robot.messageRoom(channel, `You can ${oldStatus} again by saying ` + '`' + oldStatus + ' trello sumup`')
-                robot.messageRoom(userid, `Trello-SumUp ${newStatus} succesfully.`)
+                robot.messageRoom(channel, `You can ${oldStatus} again by saying ` + '`' + oldStatus + ' github sumup`')
+                robot.messageRoom(userid, `Github-SumUp ${newStatus} succesfully.`)
             })
             .catch(error => {
                 robot.logger.error(error)
@@ -232,7 +232,7 @@ module.exports = (robot) => {
 
     function updateChannel(userid, channel, sumupId = 'defaultSumUp') {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('trelloSumUps').findAndModifyAsync(
+        db.bind('githubSumUps').findAndModifyAsync(
             { _id: sumupId },
             [["_id", 1]],
             { $set: { channel: channel } })
@@ -242,8 +242,8 @@ module.exports = (robot) => {
             }).then((oldChannel) => {
                 var username = robot.brain.userForId(userid).name
                 var realname = robot.brain.userForId(userid).real_name
-                robot.messageRoom(userid, `Trello-Sumup channel succesfully changed.`)
-                robot.messageRoom('#' + oldChannel, `Trello-Sumup channel changed to *${channel}* by ${realname} (${username})`)
+                robot.messageRoom(userid, `Github-Sumup channel succesfully changed.`)
+                robot.messageRoom('#' + oldChannel, `Github-Sumup channel changed to *${channel}* by ${realname} (${username})`)
             })
             .catch(error => {
                 robot.logger.error(error)
@@ -253,7 +253,7 @@ module.exports = (robot) => {
 
     function updateTime(userid, time, sumupId = 'defaultSumUp') {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('trelloSumUps').findAndModifyAsync(
+        db.bind('githubSumUps').findAndModifyAsync(
             { _id: sumupId },
             [["_id", 1]],
             { $set: { time: time } })
@@ -263,8 +263,8 @@ module.exports = (robot) => {
             }).then((channel) => {
                 var username = robot.brain.userForId(userid).name
                 var realname = robot.brain.userForId(userid).real_name
-                robot.messageRoom(userid, `Trello-Sumup time succesfully changed.`)
-                robot.messageRoom('#' + channel, `Trello-Sumup time changed to *${time}* by ${realname} (${username})`)
+                robot.messageRoom(userid, `Github-Sumup time succesfully changed.`)
+                robot.messageRoom('#' + channel, `Github-Sumup time changed to *${time}* by ${realname} (${username})`)
             })
             .catch(error => {
                 robot.logger.error(error)
@@ -274,7 +274,7 @@ module.exports = (robot) => {
 
     function updateDays(userid, days, sumupId = 'defaultSumUp') {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('trelloSumUps').findAndModifyAsync(
+        db.bind('githubSumUps').findAndModifyAsync(
             { _id: sumupId },
             [["_id", 1]],
             { $set: { days: days } })
@@ -284,8 +284,8 @@ module.exports = (robot) => {
             }).then((channel) => {
                 var username = robot.brain.userForId(userid).name
                 var realname = robot.brain.userForId(userid).real_name
-                robot.messageRoom(userid, `Trello-Sumup time succesfully changed.`)
-                robot.messageRoom('#' + channel, `Trello-Sumup days changed to *${getDaysNames(days)}* by ${realname} (${username})`)
+                robot.messageRoom(userid, `Github-Sumup time succesfully changed.`)
+                robot.messageRoom('#' + channel, `Github-Sumup days changed to *${getDaysNames(days)}* by ${realname} (${username})`)
             })
             .catch(error => {
                 robot.logger.error(error)
@@ -305,7 +305,7 @@ module.exports = (robot) => {
 
         cronJobs[sumup._id] = new CronJob(`00 ${time[1]} ${time[0]} * * ${days}`,
             function () {
-                trelloSumUpScheduler()
+                githubSumUpScheduler()
             },
             function () {
                 return null
@@ -322,9 +322,9 @@ module.exports = (robot) => {
                 cronJobs[sumuId].stop()
             })
             .then(() => {
-                getTrelloSumUpData()
+                getGithubSumUpData()
             })
-            .catch(error => {
+            .catch(err => {
                 robot.logger.error(error)
                 if (c.errorsChannel) {
                     robot.messageRoom(c.errorsChannel, c.errorMessage + `Script: ${path.basename(__filename)}`)
@@ -380,178 +380,3 @@ module.exports = (robot) => {
 
 
 }
-/**********************************************************/
-// OLD STUFF - TO BE DELETED
-// left for some possible useful code snippets
-
-// var key = process.env.HUBOT_TRELLO_KEY;
-// var Promise = require('bluebird');
-// var Trello = require('node-trello');
-// var message = require('./slackMsgs.js');
-// var c = require('./colors.js');
-
-// module.exports = function (robot) {
-//     var db = require('./mlab-login.js').db();
-//     var encryption = require('./encryption.js');
-//     var CronJob = require('cron').CronJob;
-//     var job = new CronJob('00 05 20 * * *',
-//         function () {
-//             robot.logger.info('cron job running on trello-notifications.js');
-//             trelloNotifications();
-//         },
-//         function () { }, /* This function is executed when the job stops */
-//         true, /* Start the job right now */
-//         'Europe/Athens' /* Time zone of this job. */
-//     );
-
-//     // check if trello notifications feature is enabled
-//     // db.bind('settings');
-//     // db.settings.find().toArrayAsync().then(dbData => {
-//     //     if (dbData.trelloNotifications) {
-//     //         job.start();
-//     //     } else {
-//     //         // job.stop();
-//     //     }
-//     // }).catch(dbError => {
-//     //     robot.logger.info(dbError)
-//     // });
-
-//     // trelloNotifications(); //for debugging -> MUST DELETE THIS AT THE END OF DEVELOPMENT
-//     function trelloNotifications() {
-//         db.bind('trelloTokens');
-//         db.trelloTokens.find().toArrayAsync().then(dbData => {
-//             var usersNum = dbData.length;
-//             for (let i = 0; i < usersNum; i++) { // i: the number of authorized trello users
-//                 var encryptedToken = dbData[i].token;
-//                 encryption.decrypt(encryptedToken).then(token => {
-//                     var trello = Promise.promisifyAll(new Trello(key, token));
-//                     var args = { read_filter: 'unread' }; // get only the unread notifications
-
-//                     trello.getAsync('/1/member/me/notifications', args).then(notif => {
-//                         if (notif.length > 0) {
-//                             let msg = getMsg(notif);
-//                             let userId = dbData[i].id;      // get user's id (on chat platform)
-//                             robot.messageRoom(userId, msg); // send message to that user
-//                         }
-//                     }).catch(trError => {
-//                         robot.messageRoom('general', 'trError on scheduler.js. Please check server log');
-//                         robot.logger.error(trError);
-//                     })
-//                 })
-//             }
-//         }).catch(dbError => {
-//             robot.messageRoom('general', 'dbError on scheduler.js. Please check server log');
-//             robot.logger.error(dbError)
-//         })
-//     }
-
-//     function getMsg(notif) {
-//         var msg = { attachments: [] };
-//         var notifNum = notif.length;
-
-//         for (let j = 0; j < notifNum; j++) { // j: the number of notifications per user
-//             let attachment = message.attachment();
-//             let type, creator, text, pretext, cardUrl, cardName, listName, color;
-//             if (notif[j].memberCreator)
-//                 creator = notif[j].memberCreator.username;
-//             cardUrl = `https://trello.com/c/${notif[j].data.card.shortLink}`;
-//             cardName = notif[j].data.card.name;
-
-//             switch (notif[j].type) {
-//                 // case 'addAdminToBoard':
-//                 // case 'addAdminToOrganization':
-//                 // case 'addedAttachmentToCard':
-//                 // case 'addedMemberToCard':
-//                 // case 'addedToBoard':
-//                 // case 'addedToCard':
-//                 // case 'addedToOrganization':
-//                 //     break;
-//                 case 'cardDueSoon':
-//                 case 'changeCard':
-//                     // listName = (notif[j].data.listBefore || notif[j].data.list)['name'];
-//                     // type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
-//                     // creator = notif[j].memberCreator.username;
-//                     // pretext = `Card <${cardUrl}|${cardName}> on list _${listName}_ updated by ${creator}`;
-//                     // color = c.getColor('cyan');
-//                     // if (notif[j].data.card.due != null) {
-//                     //     let fullDate = getDate(notif[j].data.card.due);
-//                     //     text = `*Due Date:* ${fullDate}`;
-//                     // } else if (notif[j].data.listBefore) {
-//                     //     text = `*Moved* to list: ${notif[j].data.listAfter.name}`;
-//                     // }
-//                     break;
-//                 case 'closeBoard':
-//                     break;
-//                 case 'commentCard':
-//                     pretext = `New comment on card <${cardUrl}|${cardName}> by ${creator}`
-//                     text = notif[j].data.text
-//                     break;
-//                 // case 'createdCard':
-//                 // case 'declinedInvitationToBoard':
-//                 // case 'declinedInvitationToOrganization':
-//                 // case 'invitedToBoard':
-//                 // case 'invitedToOrganization':
-//                 // case 'makeAdminOfBoard':
-//                 // case 'makeAdminOfOrganization':
-//                 // case 'memberJoinedTrello':
-//                 // case 'mentionedOnCard':
-//                 // case 'removedFromBoard':
-//                 // case 'removedFromCard':
-//                 // case 'removedFromOrganization':
-//                 // case 'removedMemberFromCard':
-//                 // case 'unconfirmedInvitedToBoard':
-//                 // case 'unconfirmedInvitedToOrganization':
-//                 // case 'updateCheckItemStateOnCard':
-//                 // break;
-
-//                 default:
-//                     type = notif[j].type.split(/(?=[A-Z])/).join(" ").toLowerCase(); // split capitals, join and convert to lowercase 
-//                     text = 'default';
-//                     pretext = `${type} by ${creator}`;
-//                     color = c.getColor('cyan');
-
-//                     break;
-//             }
-//             attachment.text = text;
-//             attachment.pretext = pretext;
-//             attachment.color = color;
-//             msg.attachments.push(attachment);
-//         }
-//         return msg;
-//     }
-
-
-//     function getDate(timestamp) {
-//         var d = new Date(timestamp);
-//         var options = {
-//             year: "numeric", month: "long",
-//             day: "numeric", hour: "2-digit", minute: "2-digit"
-//         };
-//         var str = d.toLocaleString("en-uk", options).split(',') // MMMM DD, YYYY, HH:MM PP 
-//         var date = str[0];
-//         var year = str[1];
-//         var time = str[2];
-//         var day = d.getDate()
-
-//         // don't display year if due date year matches the current year
-//         if (parseInt(year) === (new Date()).getFullYear()) {
-//             year = '';
-//         } else {
-//             year = ',' + year;
-//         }
-
-//         var suffix = "th";
-//         if (day % 10 == 1 && day != 11) {
-//             suffix = 'st'
-//         } else if (day % 10 == 2 && day != 12) {
-//             suffix = 'nd'
-//         } else if (day % 10 == 3 && day != 13) {
-//             suffix = 'rd'
-//         }
-//         else {
-//             suffix = 'th'
-//         }
-
-//         return (date + suffix + year + ' at' + time);
-//     }
-// }

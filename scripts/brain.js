@@ -40,6 +40,7 @@ module.exports = (robot) => {
                     var jenkins_crumb = document.jenkins_crumb
                     var trello_token = document.trello_token
                     var trello_last_notification = document.trello_last_notification
+                    var github_last_sumup_date = document.github_last_sumup_date
                     var id = document._id // represents the userid in chat adapter
 
                     if (github_token) {
@@ -72,6 +73,10 @@ module.exports = (robot) => {
 
                     if (trello_last_notification) {
                         cache.set(id, { trello_last_notification: trello_last_notification })
+                    }
+
+                    if (github_last_sumup_date){
+                        cache.set(id, { github_last_sumup_date: github_last_sumup_date })
                     }
                 })
             }).catch(dbError => {

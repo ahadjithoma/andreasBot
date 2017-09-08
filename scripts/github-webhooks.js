@@ -63,8 +63,10 @@ module.exports = function (robot) {
 				pullRequestReviewCommentEvent(eventBody)
 				break
 			case 'fork':
+				// is it usefull?
 				break;
 			case 'pull':
+				// is it usefull?
 				break;
 			default:
 				var room = eventBody.query.room
@@ -344,28 +346,42 @@ module.exports = function (robot) {
 	function pushEvent(eventBody) {
 		var room = eventBody.query.room
 		var payload = eventBody.payload
-		var adapter = robot.adapterName;
-		let repo_name = payload.repository.full_name;
+
+		var senderUsername = payload.sender.login
+		var senderURL = payload.sender.html_url
+
+		let repoFullName = payload.repository.full_name;
 		let branch = payload.repository.default_branch;
-		let repo_url = payload.repository.url + '/tree/' + branch;
-		let compare_url = payload.compare;
+		let repoURL = payload.repository.url + '/tree/' + branch;
+		let compareURL = payload.compare;
 		let commits = Object.keys(payload.commits).length;		 // get the total number of commits done
 
-		let msg = slackMsgs.githubEvent();
-		let i;
-
-		for (i = 0; i < commits; i++) {
-			let user_login = payload.commits[i].author.username;
-			var user_url = `https://www.github.com/${user_login}`;
-			var user_name = payload.commits[i].author.name;
-			var commit_id = payload.commits[i].id.substr(0, 7);		 // get the first 7 chars of the commit id
-			var commit_msg = payload.commits[i].message.split('\n', 1); // get only the commit msg, not the description
-			var commit_url = payload.commits[i].url;
-			commit_id = "`" + commit_id + "`"; // add slack's msg format 
-			msg.attachments[0].text = msg.attachments[0].text + `\n<${commit_url}|${commit_id}> ${commit_msg}`;
+		let msg = {
+			unfurl_links: false,
+			attachments: []
 		}
+		var attachement = slackMsgs.attachment()
+
+		for (var i = 0; i < commits; i++) {
+			var authorUsername = payload.commits[i].author.username;
+			var authorURL = githubURL + authorUsername;
+			var authorName = payload.commits[i].author.name;
+			var commitID = payload.commits[i].id.substr(0, 7);		 	// get the first 7 chars of the commit id
+			var commitMsg = payload.commits[i].message.split('\n', 1); 	// get only the commit msg, not the description
+			var commitURL = payload.commits[i].url;
+			commitID = "`" + commitID + "`"
+			attachement.text += `\n<${commitURL}|${commitID}> ${commitMsg} - ${authorUsername}`;
+		}
+
+		// manage plural
+		var s = ''
+		if (commits > 1) {
+			s = 's'
+		}
+
 		if (payload.created) {
-			msg.text = `<${repo_url}|[${repo_name}:${branch}]> ${commits} new <${compare_url}|commit(s)> by <${user_url}|${user_name}>:`;
+			msg.text = `<${repoURL}|[${repoFullName}:${branch}]> ${commits} new <${compareURL}|commit${s}> `
+				+ `by <${senderURL}|${senderUsername}>:`
 		}
 		else if (payload.forced) {
 			//TODO
@@ -374,43 +390,48 @@ module.exports = function (robot) {
 			// TODO
 		}
 		else {
-			msg.text = `<${repo_url}|[${repo_name}:${branch}]> ${commits} new <${compare_url}|commit(s)> by <${user_url}|${user_name}>:`;
+			msg.text = `<${repoURL}|[${repoFullName}:${branch}]> ${commits} new <${compareURL}|commit${s}> `
+				+ `by <${senderURL}|${senderUsername}>:`
 		}
 
-		msg.attachments[0].color = '#0000ff'; // set color = blue
+		attachement.color = color.getHex('blue')
+		attachement.fallback = msg.text
+		msg.attachments.push(attachement)
+
 		robot.messageRoom(room, msg);
-
-
 	}
 
 	function developmentStatusEvent(eventBody) {
 		var room = eventBody.query.room
 		var payload = eventBody.payload
-		var adapter = robot.adapterName;
-		if (adapter == 'slack') {
-			let msg = slackMsgs.githubEvent();
-			let target_url = payload.deployment_status.target_url;
-			let repo_url = payload.repository.html_url;
-			let state = payload.deployment_status.state;
-			let creator = payload.deployment_status.creator.login;
-			let repo = payload.repository.full_name;
-			let environment = payload.deployment.environment;
-			msg.text = `<${repo_url}|[${repo}]> created by ${creator}`;
-			msg.attachments[0].title = `Deployment ${state}`;
-			msg.attachments[0].text = `<${target_url}|${environment}>`;
-			if (state == 'pending') {
-				msg.attachments[0].color = '#ff8533' // set color = orange
-			} else if (state == 'success') {
-				msg.attachments[0].color = '#00ff00' // set color = green 
-			} else if (state == 'fail') {
-				msg.attachments[0].color = '#0000ff' // set color = blue 
-			} else {
-				msg.attachments[0].color = '#ff0000' // set color = red 
-			}
-			robot.messageRoom(room, msg);
-		} else {
-			robot.messageRoom(room, "deployment_status event");
+
+		var msg = {
+			unfurl_links: false,
+			attachments: []
 		}
+		var attachment = slackMsgs.attachment()
+
+		var targetURL = payload.deployment_status.target_url;
+		var repoURL = payload.repository.html_url;
+		var state = payload.deployment_status.state;
+		var senderUsername = payload.sender.login;
+		var senderURL = payload.sender.html_url
+		var repo = payload.repository.full_name;
+		var environment = payload.deployment.environment;
+		msg.text = `<${repoURL}|[${repo}]> created by <${senderURL}|${senderUsername}>`;
+		attachment.title = `Deployment ${state}`;
+		attachment.text = `<${targetURL}|${environment}>`;
+		if (state == 'pending') {
+			attachment.color = color.getHex('orange')
+		} else if (state == 'success') {
+			attachment.color = 'good'
+		} else if (state == 'fail') {
+			attachment.color = color.getHex('blue')
+		} else {
+			attachment.color = 'danger'
+		}
+		msg.attachments.push(attachment)
+		robot.messageRoom(room, msg);
 	}
 
 	function developmentEvent(eventBody) {
@@ -418,50 +439,48 @@ module.exports = function (robot) {
 	};
 
 	function issuesEvent(eventBody) {
-		//TODO: under construction
 		var room = eventBody.query.room
 		var payload = eventBody.payload
-		var adapter = robot.adapterName;
-		let repo = payload.repository.full_name;
-		let repo_url = payload.repository.html_url;
-		let action = payload.action;
-		let issue_url = payload.issue.url;
-		let issue_num = payload.issue.number;
-		let issue_title = payload.issue.title;
-		let issue_body = payload.issue.body;
-		let user = payload.issue.user.login;
-		let labels = Object.keys(payload.issue.labels).length;
 
-		if (adapter == 'slack') {
-			let msg = slackMsgs.githubEvent();
-			if (action == 'opened') {
-				msg.attachments[0].pretext = `[${repo}] Issue *created* by <www.github.com/${user}|${user}>`;
-				msg.attachments[0].fallback = `[${repo}] Issue created: ${issue_title}`;
-				msg.attachments[0].title = `<${issue_url}|#${issue_num} ${issue_title}>`;
-				msg.attachments[0].text = issue_body;
-				msg.attachments[0].color = '#00ff00'; // set color = green
-			} else {
-				msg = `[${repo}] Issue <${issue_url}|#${issue_num} ${issue_title}>: *${action}* by <www.github.com/${user}|${user}>`;
-			}
+		var msg = { attachments: [] }
+		var attachment = slackMsgs.attachment()
 
-			/* assign attachement color - CURRENTLY WE ARE NOT USING ATTACHEMENTS FOR ALL ISSUES
-			if (action.includes('open')){
-				msg.attachments[0].color = '#00ff00'; // set color = green
-			} else if (action.includes('close')){
-				msg.attachments[0].color = '#ff0000'; // set color = red
-			} else {
-				msg.attachments[0].color = '#ff8533'; // set color = orange
-			} 
-			*/
-			robot.messageRoom(room, msg);
+		var repoFullName = payload.repository.full_name
+		var repoURL = githubURL + repoFullName
+		var senderUsername = payload.sender.login
+		var senderURL = payload.sender.html_url
+		var issueURL = payload.issue.html_url
+		var issueNum = payload.issue.number
+		var issueTitle = payload.issue.title
+		var issueBody = payload.issue.body
 
-		} else {
-			let msg = `[${repo}] Issue ${action} by <www.github.com/${user}|${user}>`;
-			msg = msg + `\n <${issue_url}|#${issue_num} ${issue_title}>` + `\n${issue_body}`;
-			robot.messageRoom(room, msg);
-
-			//todo: plain text
+		var action = payload.action
+		if (action == 'opened') {
+			attachment.pretext = `<${repoURL}|[${repoFullName}]> ${bold('Issue')} created by <${senderURL}|${senderUsername}>`;
+			attachment.title = `<${issueURL}|#${issueNum}: ${issueTitle}>`;
+			attachment.text = issueBody;
+			attachment.color = 'warning'
 		}
+		else {
+			attachment.pretext = `<${repoURL}|[${repoFullName}]> ${bold('Issue')} <${issueURL}|#${issueNum}: ` +
+				`${issueTitle}> ${bold(action)} by <${senderURL}|${senderUsername}>`
+		}
+		attachment.fallback = attachment.pretext
+
+		// assign attachement color 
+		// CURRENTLY WE ARE NOT USING ATTACHEMENTS FOR ALL ISSUES SO IT'S USELESS
+		// 	if (action.includes('open')){
+		// 		attachment.color = '#00ff00'; // set color = green
+		// 	} else if (action.includes('close')){
+		// 		attachment.color = '#ff0000'; // set color = red
+		// 	} else {
+		// 		attachment.color = '#ff8533'; // set color = orange
+		// 	} 
+
+		msg.attachments.push(attachment)
+
+		robot.messageRoom(room, msg)
+
 	};
 
 

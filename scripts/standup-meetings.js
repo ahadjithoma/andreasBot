@@ -60,7 +60,7 @@ module.exports = function (robot) {
         getStandupData('defaultStandup', res.message.user.id)
     })
 
-    robot.hear(/(start|begin|trigger|report) (standup|report)/i, function (res) {
+    robot.hear(/standup (start|begin|trigger|report)/i, function (res) {
         var roomid = res.message.user.room
         if (roomid[0] != 'D') { // if msg is not a direct msg (DM) with a user but in channel. (tested in slack only)
             getStandupData('defaultStandup', roomid)
@@ -70,27 +70,27 @@ module.exports = function (robot) {
 
     })
 
-    robot.respond(/(pause|deactivate|disable) standup/i, function (res) {
+    robot.respond(/standup (pause|deactivate|disable)/i, function (res) {
         var userid = res.message.user.id
         updateStandupStatus(userid, 'defaultStandup', false)
     })
 
-    robot.respond(/(resume|activate|enable) standup/i, function (res) {
+    robot.respond(/standup (resume|activate|enable)/i, function (res) {
         var userid = res.message.user.id
         updateStandupStatus(userid, 'defaultStandup', true)
     })
 
-    robot.respond(/(show|view|get) standups?/i, function (res) {
+    robot.respond(/standups? (show|view|get)/i, function (res) {
         showStandups(res.message.user.id)
     })
 
-    robot.respond(/(edit|change|modify|update) standup channel ?t?o? (.*)/i, function (res) {
+    robot.respond(/standup (edit|change|modify|update) channel ?t?o? (.*)/i, function (res) {
         var channel = res.match[2].trim()
         var userid = res.message.user.id
         updateChannel(userid, channel, 'defaultStandup')
     })
 
-    robot.respond(/(edit|change|modify|update) standup time ?t?o? (.*)/i, function (res) {
+    robot.respond(/standup (edit|change|modify|update) time ?t?o? (.*)/i, function (res) {
         var time = res.match[2].trim()
         var userid = res.message.user.id
         if (!isTimeValid(time)) {
@@ -100,7 +100,7 @@ module.exports = function (robot) {
         }
     })
 
-    robot.respond(/(edit|change|modify|update) standup days ?t?o? (.*)/i, function (res) {
+    robot.respond(/standup (edit|change|modify|update) days ?t?o? (.*)/i, function (res) {
         // trim and replace spaces
         var days = res.match[2].trim().replace(/\s/g, '');
         var userid = res.message.user.id
@@ -112,7 +112,7 @@ module.exports = function (robot) {
         }
     })
 
-    robot.respond(/add standup question "(.*)" to ([0-9]*)( with (.*))?/i, function (res) {
+    robot.respond(/standup add question "(.*)" to ([0-9]*)( with (.*))?/i, function (res) {
         var text = res.match[1].trim()
         var questionIndex = parseInt(res.match[2]) - 1
         var colorName = res.match[4].trim()
@@ -120,13 +120,13 @@ module.exports = function (robot) {
         pushQuestion('defaultStandup', questionObj, questionIndex)
     })
 
-    robot.respond(/(remove|delete) standup question ([0-9]*)/i, function (res) {
+    robot.respond(/standup (remove|delete) question ([0-9]*)/i, function (res) {
         var questionIndex = parseInt(res.match[2]) - 1
         var userid = res.message.user.id
         pullQuestion(userid, 'defaultStandup', questionIndex)
     })
 
-    robot.respond(/(change|update|modify|edit) standup question'?s? (\d+) colou?r to (.*)/, function (res) {
+    robot.respond(/standup (change|update|modify|edit) question'?s? (\d+) colou?r to (.*)/, function (res) {
         var questionIndex = parseInt(res.match[2]) - 1
         var colorHex = color.getHex(res.match[3].trim())
         var userid = res.message.user.id
@@ -134,7 +134,7 @@ module.exports = function (robot) {
         updateQuestion(userid, 'defaultStandup', questionIndex, updateObj)
     })
 
-    robot.respond(/(change|update|modify|edit) standup question'?s? ([0-9]*) text to "?(.*)"?/, function (res) {
+    robot.respond(/standup (change|update|modify|edit) question'?s? ([0-9]*) text to "?(.*)"?/, function (res) {
         var questionIndex = parseInt(res.match[2]) - 1
         var questionText = res.match[3]
         var userid = res.message.user.id
@@ -143,14 +143,14 @@ module.exports = function (robot) {
     })
 
 
-    robot.respond(/(move) standup question'?s? ([0-9]*) to ([0-9]*)/, function (res) {
+    robot.respond(/standup (move) question'?s? ([0-9]*) to ([0-9]*)/, function (res) {
         var questionIndex = parseInt(res.match[2]) - 1
         var newIndex = parseInt(res.match[3]) - 1
         var userid = res.message.user.id
         updateQuestionIndex(userid, 'defaultStandup', questionIndex, newIndex)
     })
 
-    robot.respond(/reset standup/i, function (res) {
+    robot.respond(/standup reset/i, function (res) {
         var userid = res.message.user.id
         resetStandup(userid, 'defaultStandup')
     })

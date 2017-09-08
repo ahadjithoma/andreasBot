@@ -48,5 +48,12 @@
         "time": "17:24",
         "active": true,
         "channel": "general"
+    },
+    "defaultGithubSumUp": {
+        "_id": "defaultSumUp",
+        "days": "*",
+        "time": "17:24",
+        "active": true,
+        "channel": "general"
     }
 }

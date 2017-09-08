@@ -2,7 +2,16 @@
 //   Trello API Integration
 //
 // Commands:
-
+//   `trello (all|unread|read) notifications`
+//	 `trello mentions`
+//	 `trello sumup (all|unread|read)`
+// 	 `trello link <board|card url> to <channel>`
+//	 `trello disable|deactivate webhook <webhook-ID>`
+//	 `trello enable|activate webhook <webhook-ID>`
+//   `trello update webhooks callback url`
+//	 `trello update|change webhook <webhook-ID> channel to <channel>`
+//	 `trello delete webhook <webhook-ID>`
+//	 `trello show webhooks`
 //
 // Configuration
 //
@@ -63,20 +72,31 @@ module.exports = function (robot) {
     })
 
     // TODO add the since query
-    robot.respond(/trello sum-?up( all| unread| read|)/i, function (res) {
+    robot.respond(/trello( all| unread| read| since|) sum-?ups?/i, function (res) {
+        var userid = res.message.user.id
         var read_filter = res.match[1].trim()
         if (!read_filter) {
             read_filter = 'unread'
         }
-        var query = { read_filter: read_filter }
-        getNotificationsSumUp(res.message.user.id, query)
+        else if (read_filter == 'since') {
+            var lastTrelloNotificationID = cache.get(userid, 'trello_last_notification')
+            if (!lastTrelloNotificationID) {
+                query = { read_filer: 'unread' }
+            } else {
+                query = { since: lastTrelloNotificationID }
+            }
+        }
+        else {
+            var query = { read_filter: read_filter }
+        }
+        getNotificationsSumUp(userid, query)
     })
 
     robot.on('trelloSumUp', function (userid, query, saveLastNotif) {
         getNotificationsSumUp(userid, query, saveLastNotif)
     })
 
-    robot.respond(new RegExp("link (.*)trello.com/(.*) to (.*)", "i"), function (res) {
+    robot.respond(new RegExp("trello link (.*)trello.com/(.*) to (.*)", "i"), function (res) {
         var userid = res.message.user.id
         var modelUrl = res.match[2].trim()
         var room = res.match[3].trim()
@@ -92,19 +112,19 @@ module.exports = function (robot) {
             })
     })
 
-    robot.respond(/(disable|pause|stop|deactivate) trello webhook (.*)/i, function (res) {
+    robot.respond(/trello (disable|pause|stop|deactivate) webhook (.*)/i, function (res) {
         var webhookId = res.match[2].trim()
         updateWebhook(res.message.user.id, webhookId, { active: false })
     })
 
-    robot.respond(/(enable|resume|start|activate) trello webhook (.*)/i, function (res) {
+    robot.respond(/trello (enable|resume|start|activate) webhook (.*)/i, function (res) {
         var webhookId = res.match[2].trim()
         updateWebhook(res.message.user.id, webhookId, { active: true })
     })
 
     // The follow command is useful when changing hubot host (i.e. when testing with ngrok).
     // Due to that, it's not uvailable through api.ai NLU/P 
-    robot.respond(/update trello webhooks (callback ?url|callback|url)/i, function (res) {
+    robot.respond(/trello update webhooks callback url/i, function (res) {
         var webhookId = res.match[1].trim()
         // need the room for the callback url
         var db = mongoskin.MongoClient.connect(mongodb_uri);
@@ -127,19 +147,19 @@ module.exports = function (robot) {
             })
     })
 
-    robot.respond(/(change|edit|replace|update) trello webhook (.*) channel to (.*)/i, function (res) {
+    robot.respond(/trello (change|edit|replace|update) webhook (.*) channel to (.*)/i, function (res) {
         var webhookId = res.match[2].trim()
         var channel = res.match[3].trim()
         updateWebhook(res.message.user.id, webhookId, { callbackURL: `${hubot_host_url}/hubot/trello-webhooks?room=${channel}` })
     })
 
-    robot.respond(/delete trello webhook (.*)/i, function (res) {
+    robot.respond(/trello delete webhook (.*)/i, function (res) {
         var webhookId = res.match[1].trim()
         deleteWebhook(res.message.user.id, webhookId)
     })
 
     // get the existing trello webhooks and display them
-    robot.respond(/show trello webhooks/i, function (res) {
+    robot.respond(/trello show webhooks/i, function (res) {
         var userid = res.message.user.id
         getWebhooks(res.message.user.id)
     })
@@ -164,7 +184,7 @@ module.exports = function (robot) {
     })
 
     /*************************************************************************/
-    /*                             API Functions                             */
+    /*                             API Calls                                 */
     /*************************************************************************/
 
     function updateWebhook(userid, webhookId, query) {
@@ -480,7 +500,7 @@ module.exports = function (robot) {
             })
     }
 
-    function getNotificationsSumUp(userid, query, saveLastNotificationID = 1) {
+    function getNotificationsSumUp(userid, query, saveLastNotificationID = false) {
         var credentials = getCredentials(userid)
         if (!credentials) { return 0 }
 
@@ -501,15 +521,15 @@ module.exports = function (robot) {
 
                     if (saveLastNotificationID) {
                         //TODO save last notification id
-                        var lastNotificationID = notifications[0].id
+                        var lastTrelloNotificationID = notifications[0].id
 
-                        cache.set(userid, { trello_last_notification: lastNotificationID })
+                        cache.set(userid, { trello_last_notification: lastTrelloNotificationID })
 
                         var db = mongoskin.MongoClient.connect(mongodb_uri);
                         db.bind('users').findAndModifyAsync(
                             { _id: userid },
                             [["_id", 1]],
-                            { $set: { trello_last_notification: lastNotificationID } },
+                            { $set: { trello_last_notification: lastTrelloNotificationID } },
                             { upsert: true })
                             .catch(err => {
                                 robot.logger.error(err)

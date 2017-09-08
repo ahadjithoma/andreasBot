@@ -18,6 +18,7 @@ const Conversation = require('./hubot-conversation/index.js');
 var dialog = require('./dynamic-dialog.js')
 var convModel = require('./conversation-models.js')
 var path = require('path')
+var async = require('async')
 var dateFormat = require('dateformat')
 var request = require('request-promise')
 var Promise = require('bluebird')
@@ -31,6 +32,10 @@ var GITHUB_API = 'https://api.github.com'
 
 module.exports = function (robot) {
 
+	/*************************************************************************/
+	/*                             Listeners                                 */
+	/*************************************************************************/
+
 	var switchBoard = new Conversation(robot);
 
 	robot.respond(/github login/, function (res) {
@@ -41,10 +46,10 @@ module.exports = function (robot) {
 	})
 
 	robot.respond(/github repos/, (res) => {
-		getRepos(res.message.user.id)
+		listRepos(res.message.user.id)
 	})
-	robot.on('getRepos', (data, res) => {
-		getRepos(res.message.user.id)
+	robot.on('listRepos', (data, res) => {
+		listRepos(res.message.user.id)
 	})
 
 	robot.respond(/github (open |closed |all |)issues( of)?( repo)? (.*)/i, function (res) {
@@ -64,10 +69,210 @@ module.exports = function (robot) {
 	robot.respond(/github pull requests of repo (.*)/i, function (res) {
 		var userid = res.message.user.id
 		var repo = res.match[1].trim()
-		listRepoPullRequests(userid, repo)
+		listPullRequests(userid, repo)
 	})
 
-	function listRepoPullRequests(userid, repo, state) {
+	// TODO: maybe replace it with api.ai
+	robot.respond(/github (create|open)(| a new) issue\b/, function (res) {
+
+		var userid = res.message.user.id
+
+		dialog.startDialog(switchBoard, res, convModel.createIssue)
+			.then(data => {
+				var owner
+				var repo = data.repo.split('/')
+				if (repo[1]) {
+					repo = repo[1]
+					owner = repo[0]
+				} else {
+					repo = repo[0]
+					owner = cache.get('GithubApp')[0].account
+				}
+
+				try {
+					var assignees = data.assignees.replace(/\s/g, '').split(',')
+
+				} catch (error) {
+					var assignees = []
+				}
+				try {
+					var labels = data.labels.replace(/\s/g, '').split(',')
+
+				} catch (error) {
+					var labels = []
+				}
+
+				createIssue(userid, repo, owner, data.title, data.body, labels, assignees)
+			}).catch(err => console.log(err))
+	})
+
+
+	robot.on('githubSumUp', function (userid, query, saveLastSumupDate) {
+		listCommitsSumUp(userid, query, saveLastSumupDate)
+	})
+
+	robot.respond(/gh repo/i, function (res) {
+		listCommitsSumUp(res.message.user.id, 'query', true)
+	})
+
+	/*************************************************************************/
+	/*                             API Calls                                 */
+	/*************************************************************************/
+
+
+	function listCommitsSumUp(userid, query, saveLastSumupDate = false) {
+		var credentials = getCredentials(userid)
+		if (!credentials) { return 0 }
+
+		if (saveLastSumupDate) {
+			var date = new Date().toISOString();
+			cache.set(userid, { github_last_sumup_date: date })
+
+			var db = mongoskin.MongoClient.connect(mongodb_uri);
+			db.bind('users').findAndModifyAsync(
+				{ _id: userid },
+				[["_id", 1]],
+				{ $set: { github_last_sumup_date: date } },
+				{ upsert: true })
+				.catch(error => {
+					robot.logger.error(error)
+					if (c.errorsChannel) {
+						robot.messageRoom(c.errorsChannel, c.errorMessage
+							+ `Script: ${path.basename(__filename)}`)
+					}
+				})
+		}
+		getAccesibleReposFullName(userid)
+			.then(repos => {
+				var msg = {attachments: []}
+				var attachment = slackMsgs.attachment()
+				
+				for (var i = 0; i < repos.length; i++) {
+					var repoName = repos[i]
+					Promise.mapSeries([
+						displayPullRequestsSumup(userid, repoName),
+						displayIssuesSumup(userid, repoName),
+						displayCommitsSumup(userid, repoName)
+					], function (msg) {
+						return msg
+					}).then(function (data) {
+						data.forEach(function (msg) {
+
+							robot.messageRoom(userid, msg)
+						})
+					})
+				}
+			})
+			.catch(error => {
+				robot.logger.error(error)
+				robot.messageRoom(userid, c.errorMessage + `Script: ${path.basename(__filename)}`)
+			})
+	}
+
+	function displayRepoSumup(userid, repo, state = '') {
+
+	}
+
+	// TODO: 
+	//   check the state when is not provided.
+	//	 better msg + title
+	//	 same for the functions bellow
+	function displayPullRequestsSumup(userid, repo, state = '') {
+		var ghApp = cache.get('GithubApp')
+		var appToken = ghApp[0].token
+		var owner = ghApp[0].account
+
+		var cred = getCredentials(userid)
+		if (!cred) { return 0 }
+
+		var options = {
+			url: `${GITHUB_API}/repos/${owner}/${repo}/pulls?state=${state}`,
+			method: 'GET',
+			headers: getUserHeaders(cred.token),
+			json: true
+		}
+		return new Promise((resolve, reject) => {
+			request(options)
+				.then(pullRequests => {
+					var msg = `[${owner}/${repo}] has ${pullRequests.length} ${state} pull requests`
+					return msg
+				})
+				.then((msg) => {
+					resolve(msg)
+					// robot.messageRoom(userid, msg)
+				})
+				.catch(error => {
+					reject(error)
+					// robot.logger.error(error)
+					// robot.messageRoom(userid, c.errorMessage)
+				})
+		})
+	}
+
+	// TODOs: as mentioned in displayPullRequestsSumup
+	function displayIssuesSumup(userid, repo, state = '') {
+		var ghApp = cache.get('GithubApp')
+		var appToken = ghApp[0].token
+		var owner = ghApp[0].account
+
+		var options = {
+			url: `${GITHUB_API}/repos/${owner}/${repo}/issues?state=${state}`,
+			method: 'GET',
+			headers: getAppHeaders(appToken),
+			json: true
+		}
+
+		return new Promise((resolve, reject) => {
+			request(options)
+				.then(pullRequests => {
+					var msg = `[${owner}/${repo}] has ${pullRequests.length} ${state} issues`
+					return msg
+				})
+				.then((msg) => {
+					resolve(msg)
+					// robot.messageRoom(userid, msg)
+				})
+				.catch(error => {
+					reject(error)
+					// robot.logger.error(error)
+					// robot.messageRoom(userid, c.errorMessage)
+				})
+		})
+
+	}
+
+	// TODOs: as mentioned in displayPullRequestsSumup
+	function displayCommitsSumup(userid, repo, since = '2017-01-01T04:36:52+03:00') {
+		var ghApp = cache.get('GithubApp')
+		var appToken = ghApp[0].token
+		var owner = ghApp[0].account
+
+		var options = {
+			url: `${GITHUB_API}/repos/${owner}/${repo}/commits?since=${since}`,
+			method: 'GET',
+			headers: getAppHeaders(appToken),
+			json: true
+		}
+
+		return new Promise((resolve, reject) => {
+			request(options)
+				.then(commits => {
+					var msg = `[${owner}/${repo}] has ${commits.length} commits`
+					return msg
+				})
+				.then((msg) => {
+					resolve(msg)
+					// robot.messageRoom(userid, msg)
+				})
+				.catch(error => {
+					reject(error)
+					// robot.logger.error(error)
+					// robot.messageRoom(userid, c.errorMessage)
+				})
+		})
+	}
+
+	function listPullRequests(userid, repo, state) {
 		var ghApp = cache.get('GithubApp')
 		var appToken = ghApp[0].token
 		var owner = ghApp[0].account
@@ -120,45 +325,7 @@ module.exports = function (robot) {
 			})
 	}
 
-	// TODO: may be replaced with api.ai
-	robot.respond(/github (create|open)(| a new) issue\b/, function (res) {
-
-		var userid = res.message.user.id
-
-		dialog.startDialog(switchBoard, res, convModel.createIssue)
-			.then(data => {
-				var owner
-				var repo = data.repo.split('/')
-				if (repo[1]) {
-					repo = repo[1]
-					owner = repo[0]
-				} else {
-					repo = repo[0]
-					owner = cache.get('GithubApp')[0].account
-				}
-
-				try {
-					var assignees = data.assignees.replace(/\s/g, '').split(',')
-
-				} catch (error) {
-					var assignees = []
-				}
-				try {
-					var labels = data.labels.replace(/\s/g, '').split(',')
-
-				} catch (error) {
-					var labels = []
-				}
-
-				createIssue(userid, repo, owner, data.title, data.body, labels, assignees)
-			}).catch(err => console.log(err))
-	})
-
-
-
-
-
-	function getRepos(userid) {
+	function listRepos(userid) {
 
 		var cred = getCredentials(userid)
 		if (!cred) { return 0 }
@@ -206,6 +373,36 @@ module.exports = function (robot) {
 				})
 		}
 	}
+
+	function getAccesibleReposFullName(userid) {
+
+		var cred = getCredentials(userid)
+		if (!cred) { return 0 }
+
+		var ghApp = cache.get('GithubApp')
+		var installation_id = ghApp[0].id
+
+		var options = {
+			url: `${GITHUB_API}/user/installations/${installation_id}/repositories`,
+			headers: getUserHeaders(cred.token),
+			json: true,
+		};
+		return new Promise(function (resolve, reject) {
+			request(options)
+				.then(res => {
+					var reposArray = []
+					Promise.each(res.repositories, function (repo) {
+						reposArray.push(repo.name)
+					}).then(() => {
+						resolve(reposArray)
+					})
+				})
+				.catch(error => {
+					reject(error)
+				})
+		})
+	}
+
 
 	function listRepoIssues(userid, repo, state) {
 		var ghApp = cache.get('GithubApp')
