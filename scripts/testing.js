@@ -1,4 +1,4 @@
-var cache = require('./cache.js').getCache()
+// var cache = require('./cache.js').getCache()
 
 module.exports = function (robot) {
 
@@ -16,7 +16,6 @@ module.exports = function (robot) {
         if (res.message.text.match(regex)) { // captures only direct messages and not messages in channels 
             var msg = res.message.text.match(regex)[1]
             console.log(msg)
-            apiaiAsk(msg, res)
         }
     })
 };
