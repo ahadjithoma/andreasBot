@@ -2,7 +2,11 @@ var cache = require('./cache.js').getCache()
 
 module.exports = function (robot) {
 
-    robot.respond(/aaa/, res => {
-        robot.emit('resetCacheForWebhooks')
+    robot.hear(/room/, res => {
+
+        var room = res.message.room
+
+        console.log( robot.adapter.client.rtm.dataStore.getChannelGroupOrDMById(room).name)
+
     })
 };

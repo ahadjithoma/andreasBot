@@ -1,11 +1,12 @@
 // Commands:
 //	 `github login`
 //	 `github repos`
-//	 `github open|closed|all issues of repo <repo name>`
-//	 `github comments of issue <issue num> of repo <repo name>`
-//	 `github pull requests of repo <repo name>`
+//	 `github open|closed|all issues of repo <repo_name>`
+//	 `github commits of repo <repo_name>`
+//	 `github comments of issue <issue num> of repo <repo_name>`
+//	 `github open|closed|all pull requests of repo <repo_name>`
 //	 `github create issue`
-
+//	 `github open|closed|all pull requests of all repos`
 'use strict';
 
 // init
@@ -29,6 +30,7 @@ Promise.promisifyAll(mongoskin)
 var mongodb_uri = process.env.MONGODB_URI
 var bot_host_url = process.env.HUBOT_HOST_URL;
 var GITHUB_API = 'https://api.github.com'
+var githubURL = 'https://www.github.com/'
 
 module.exports = function (robot) {
 
@@ -66,10 +68,30 @@ module.exports = function (robot) {
 		listIssueComments(res.message.user.id, issueNum, repo)
 	})
 
-	robot.respond(/github pull requests of repo (.*)/i, function (res) {
+	robot.respond(/github (open |closed |all |)pull requests of repo (.*)/i, function (res) {
 		var userid = res.message.user.id
-		var repo = res.match[1].trim()
-		listPullRequests(userid, repo)
+		var state = res.match[1].trim()
+		var repo = res.match[2].trim()
+		listPullRequests(userid, repo, state)
+	})
+
+	robot.respond(/github (open |closed |all |)pull requests of all repos/i, function (res) {
+		var userid = res.message.user.id
+		var state = res.match[1].trim()
+		listPullRequestsForAllRepos(userid, state)
+	})
+
+	robot.respond(/github commits( of)?( repo)? (.*)/i, function (res) {
+		var repo = res.match.pop().trim()
+		var userid = res.message.user.id
+		updateConversationContent(userid, { repo: repo })
+		listRepoCommits(userid, repo)
+	})
+	robot.on('listRepoCommits', function (result, res) {
+		var userid = res.message.user.id
+		var since = result.parameters['date-time']
+		var repoName = result.parameters['repo']
+		listRepoCommits(userid, repoName, since)
 	})
 
 	// TODO: maybe replace it with api.ai
@@ -106,26 +128,46 @@ module.exports = function (robot) {
 			}).catch(err => console.log(err))
 	})
 
+	// robot.on(/github /i, function(res){
+
+	// })
+
+	// robot.on(/github /i, function(res){
+
+	// })
 
 	robot.on('githubSumUp', function (userid, query, saveLastSumupDate) {
-		listCommitsSumUp(userid, query, saveLastSumupDate)
+		listGithubSumUp(userid, query, saveLastSumupDate)
 	})
 
-	robot.respond(/gh repo/i, function (res) {
-		listCommitsSumUp(res.message.user.id, 'query', true)
+	robot.respond(/github sumup/i, function (res) {
+		listGithubSumUp(res.message.user.id, { state: 'open' }, false)
 	})
 
 	/*************************************************************************/
 	/*                             API Calls                                 */
 	/*************************************************************************/
 
+	function listPullRequestsForAllRepos(userid, state) {
+		getAccesibleReposFullName(userid)
+			.then(repos => {
+				for (var i = 0; i < repos.length; i++) {
+					listPullRequests(userid, repos[i], state)
+				}
+			})
+			.catch(error => {
+				robot.messageRoom(user, c.errorMessage)
+				robot.logger.error(error)
+			})
+	}
 
-	function listCommitsSumUp(userid, query, saveLastSumupDate = false) {
+	function listGithubSumUp(userid, query, saveLastSumupDate = false) {
+
 		var credentials = getCredentials(userid)
 		if (!credentials) { return 0 }
 
 		if (saveLastSumupDate) {
-			var date = new Date().toISOString();
+			var date = new Date().toISOString()
 			cache.set(userid, { github_last_sumup_date: date })
 
 			var db = mongoskin.MongoClient.connect(mongodb_uri);
@@ -142,22 +184,27 @@ module.exports = function (robot) {
 					}
 				})
 		}
+
 		getAccesibleReposFullName(userid)
 			.then(repos => {
-				var msg = {attachments: []}
-				var attachment = slackMsgs.attachment()
-				
+				// var msg = {attachments: []}
+				// var attachment = slackMsgs.attachment()
+
 				for (var i = 0; i < repos.length; i++) {
 					var repoName = repos[i]
-					Promise.mapSeries([
-						displayPullRequestsSumup(userid, repoName),
-						displayIssuesSumup(userid, repoName),
-						displayCommitsSumup(userid, repoName)
-					], function (msg) {
+					var sumUpsArray = [
+						getPullRequestsSumup(userid, repoName, query.state),
+						getIssuesSumup(userid, repoName, query.state, query.since),
+						getCommitsSumup(userid, repoName, query.since)
+					]
+
+					Promise.mapSeries(sumUpsArray, function (msg) {
 						return msg
 					}).then(function (data) {
-						data.forEach(function (msg) {
-
+						var msg = { attachments: [] }
+						Promise.each(data, function (attachment) {
+							msg.attachments.push(attachment)
+						}).then(() => {
 							robot.messageRoom(userid, msg)
 						})
 					})
@@ -177,7 +224,7 @@ module.exports = function (robot) {
 	//   check the state when is not provided.
 	//	 better msg + title
 	//	 same for the functions bellow
-	function displayPullRequestsSumup(userid, repo, state = '') {
+	function getPullRequestsSumup(userid, repo, state = '') {
 		var ghApp = cache.get('GithubApp')
 		var appToken = ghApp[0].token
 		var owner = ghApp[0].account
@@ -194,43 +241,41 @@ module.exports = function (robot) {
 		return new Promise((resolve, reject) => {
 			request(options)
 				.then(pullRequests => {
-					var msg = `[${owner}/${repo}] has ${pullRequests.length} ${state} pull requests`
-					return msg
-				})
-				.then((msg) => {
-					resolve(msg)
-					// robot.messageRoom(userid, msg)
+					var attachment = slackMsgs.attachment()
+					attachment.text = `[${owner}/${repo}] has ${pullRequests.length} ${state} pull requests`
+					resolve(attachment)
 				})
 				.catch(error => {
 					reject(error)
-					// robot.logger.error(error)
-					// robot.messageRoom(userid, c.errorMessage)
 				})
 		})
 	}
 
 	// TODOs: as mentioned in displayPullRequestsSumup
-	function displayIssuesSumup(userid, repo, state = '') {
+	function getIssuesSumup(userid, repo, state = '', since = '') {
 		var ghApp = cache.get('GithubApp')
 		var appToken = ghApp[0].token
 		var owner = ghApp[0].account
 
+		if (since) {
+			since = `&since=${since}`
+		} else {
+			since = ''
+		}
 		var options = {
-			url: `${GITHUB_API}/repos/${owner}/${repo}/issues?state=${state}`,
+			url: `${GITHUB_API}/repos/${owner}/${repo}/issues?state=${state}${since}`,
 			method: 'GET',
 			headers: getAppHeaders(appToken),
 			json: true
 		}
-
+		console.log('issues\n', options.url)
 		return new Promise((resolve, reject) => {
 			request(options)
-				.then(pullRequests => {
-					var msg = `[${owner}/${repo}] has ${pullRequests.length} ${state} issues`
-					return msg
-				})
-				.then((msg) => {
-					resolve(msg)
-					// robot.messageRoom(userid, msg)
+				.then(issues => {
+					var attachment = slackMsgs.attachment()
+					attachment.text = `[${owner}/${repo}] has ${issues.length} issues`
+					attachment.color = 'danger'
+					resolve(attachment)
 				})
 				.catch(error => {
 					reject(error)
@@ -242,13 +287,18 @@ module.exports = function (robot) {
 	}
 
 	// TODOs: as mentioned in displayPullRequestsSumup
-	function displayCommitsSumup(userid, repo, since = '2017-01-01T04:36:52+03:00') {
+	function getCommitsSumup(userid, repo, since = '') {
 		var ghApp = cache.get('GithubApp')
 		var appToken = ghApp[0].token
 		var owner = ghApp[0].account
 
+		if (since) {
+			since = `?since=${since}`
+		} else {
+			since = ''
+		}
 		var options = {
-			url: `${GITHUB_API}/repos/${owner}/${repo}/commits?since=${since}`,
+			url: `${GITHUB_API}/repos/${owner}/${repo}/commits`,
 			method: 'GET',
 			headers: getAppHeaders(appToken),
 			json: true
@@ -257,12 +307,10 @@ module.exports = function (robot) {
 		return new Promise((resolve, reject) => {
 			request(options)
 				.then(commits => {
-					var msg = `[${owner}/${repo}] has ${commits.length} commits`
-					return msg
-				})
-				.then((msg) => {
-					resolve(msg)
-					// robot.messageRoom(userid, msg)
+					var attachment = slackMsgs.attachment()
+					attachment.text = `[${owner}/${repo}] has ${commits.length} commits`
+					attachment.color = 'good'
+					resolve(attachment)
 				})
 				.catch(error => {
 					reject(error)
@@ -298,7 +346,6 @@ module.exports = function (robot) {
 					msg.text = `There aren't any Pull Requests on <https://www.github.com/${owner}/${repo}|${owner}/${repo}>`
 				}
 				Promise.each(pullRequests, function (pr) {
-					console.log(pr)
 					var attachement = slackMsgs.attachment()
 					var title = pr.title
 					var url = pr.html_url
@@ -403,6 +450,52 @@ module.exports = function (robot) {
 		})
 	}
 
+	function listRepoCommits(userid, repo, since) {
+		var ghApp = cache.get('GithubApp')
+		var appToken = ghApp[0].token
+		var owner = ghApp[0].account
+
+		var parameters = ''
+		if (since) {
+			parameters = `?since=${since}`
+		}
+
+		var options = {
+			url: `${GITHUB_API}/repos/${owner}/${repo}/commits${parameters}`,
+			method: 'GET',
+			headers: getAppHeaders(appToken),
+			json: true
+		}
+
+		request(options)
+			.then(repoCommits => {
+				var msg = { attachments: [] }
+				var attachement = slackMsgs.attachment()
+				msg.unfurl_links = false
+
+				if (repoCommits.length > 0) {
+					msg.attachments = []
+					msg.text = `Commits of <${githubURL}${owner}/${repo}|${owner}/${repo}>:`
+				} else {
+					msg.text = `<${githubURL}${owner}/${repo}|{${owner}/${repo}]>: No Commits found`
+				}
+
+				Promise.each(repoCommits, function (commit) {
+					var authorUsername = commit.author.login;
+					var authorURL = githubURL + authorUsername;
+					var commitID = commit.sha.substr(0, 7);		 	// get the first 7 chars of the commit id
+					var commitMsg = commit.commit.message.split('\n', 1); 	// get only the commit msg, not the description
+					var commitURL = commit.html_url;
+					commitID = "`" + commitID + "`"
+					attachement.text += `\n<${commitURL}|${commitID}> ${commitMsg} - ${authorUsername}`;
+				}).then(() => {
+					msg.attachments.push(attachement)
+				}).done(() => {
+					robot.messageRoom(userid, msg)
+				})
+			})
+			.catch(err => { console.log(err) })
+	}
 
 	function listRepoIssues(userid, repo, state) {
 		var ghApp = cache.get('GithubApp')

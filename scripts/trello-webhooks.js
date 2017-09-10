@@ -11,6 +11,7 @@ module.exports = function (robot) {
         var headers = req.headers
         res.send(200);
 
+        console.log('received')
         // TODO: validate the webhook source
 
         var payload = req.body;
@@ -18,6 +19,7 @@ module.exports = function (robot) {
         var actionId = payload.action.id
         var room = req.query.room
         var modelId = payload.model.id
+
 
         /* Notes: 
          * Every webhook is a unique compination of callback_url, model_id and user_token.
@@ -27,15 +29,21 @@ module.exports = function (robot) {
          * and use his token for the GET trello action request.  
          */
 
-        
-         // BIG TODO
-        // this is a users token ↙
-        // must fetch it dynamically. when creating the webhook, must save this as well to be able to fetch it here later 
+        // console.log(payload)
+
+         if (type == 'updateBoard' && payload.action.data.board.name) {
+            // change the name in db
+            var newName = payload.action.data.board.name 
+            robot.emit('trelloBoardRename', modelId, newName)
+            /* TODO-Note:
+             * The "bad-part" of this is that when a team has multiple webhooks,
+             * it's gonna call the db as many times as the number of the webhooks 
+             */
+        }
 
         var handled = robot.emit('postTrelloAction', modelId, room, actionId)
         if (!handled) {
             robot.logger.warning('No scripts handled the Trello Webhook Action.');
         }
-
     });
 }

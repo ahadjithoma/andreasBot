@@ -178,11 +178,19 @@ module.exports = (robot) => {
         var userIDs = cache.get('userIDs')
         Promise.each(userIDs, function (userid) {
             var query
-            var lastGithubSumupDate = cache.get(userid, 'github_last_notification')
+            var lastGithubSumupDate = cache.get(userid, 'github_last_sumup_date')
             if (!lastGithubSumupDate) {
-                query = { read_filer: 'unread' }
+                var date = new Date()
+                var yesterday = new Date(date.setDate(date.getDate() - 1)).toISOString()
+                query = {
+                    state: 'open',
+                    since: yesterday
+                }
             } else {
-                query = { since: lastGithubSumupDate }
+                query = {
+                    state: 'open',
+                    since: lastGithubSumupDate
+                }
             }
             robot.emit('githubSumUp', userid, query, true)
         })

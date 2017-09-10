@@ -28,6 +28,7 @@ var c = require('./config.json')
 var mongoskin = require('mongoskin');
 var dateFormat = require('dateformat')
 var Conversation = require('hubot-conversation');
+var path = require('path')
 
 // config
 var TRELLO_API = 'https://api.trello.com/1'
@@ -96,11 +97,13 @@ module.exports = function (robot) {
         getNotificationsSumUp(userid, query, saveLastNotif)
     })
 
-    robot.respond(new RegExp("trello link (.*)trello.com/(.*) to (.*)", "i"), function (res) {
+    robot.hear(/trello link (.*)trello.com\/(.*)/i, function (res) {
+        var room = slackmsg.getChannelName(robot, res)
         var userid = res.message.user.id
         var modelUrl = res.match[2].trim()
-        var room = res.match[3].trim()
-
+        if (room == 'DM') {
+            room = '@' + res.message.user.name
+        }
         getModelInfo(userid, modelUrl)
             .then(model => {
                 createWebhook(userid, model, room)
@@ -111,6 +114,69 @@ module.exports = function (robot) {
                     + `Script: ${path.basename(__filename)}`)
             })
     })
+
+    // DEPRECATED
+    // use: trello link (.*)
+
+    // // TODO: regexp may not needed. insted use \/ for slash 
+    // robot.respond(new RegExp("trello link (.*)trello.com/(.*) to (.*)", "i"), function (res) {
+    //     var userid = res.message.user.id
+    //     var modelUrl = res.match[2].trim()
+    //     var room = res.match[3].trim()
+
+    //     getModelInfo(userid, modelUrl)
+    //         .then(model => {
+    //             createWebhook(userid, model, room)
+    //         })
+    //         .catch(error => {
+    //             robot.logger.error(error)
+    //             robot.messageRoom(c.errorsChannel, c.errorMessage
+    //                 + `Script: ${path.basename(__filename)}`)
+    //         })
+    // })
+
+    robot.hear(/trello unlink (.*)trello.com\/(.*)/i, function (res) {
+        var room = slackmsg.getChannelName(robot, res)
+        var userid = res.message.user.id
+        var modelShortLink = res.match[2].trim().split('/')[1]
+        if (room == 'DM') {
+            room = '@' + res.message.user.name
+        }
+        var queryObj = {
+            userid: userid,
+            modelShortLink: modelShortLink,
+            room: room
+        }
+        getWebhookId(queryObj)
+            .then(webhooksIds => {
+                Promise.each(webhooksIds, function (webhookId) {
+                    deleteWebhook(res.message.user.id, webhookId)
+                })
+            })
+            .catch(error => {
+                robot.logger.error(error)
+                robot.messageRoom(c.errorsChannel, c.errorMessage
+                    + `Script: ${path.basename(__filename)}`)
+            })
+    })
+
+    function getWebhookId(queryObj) {
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
+        return new Promise(function (resolve, reject) {
+            db.bind('trelloWebhooks').find(queryObj).toArrayAsync()
+                .then(webhooks => {
+                    var idsArray = []
+                    Promise.each(webhooks, function (webhook) {
+                        idsArray.push(webhook._id)
+                    }).then(() => {
+                        resolve(idsArray)
+                    })
+                })
+                .catch(error => {
+                    reject(error)
+                })
+        })
+    }
 
     robot.respond(/trello (disable|pause|stop|deactivate) webhook (.*)/i, function (res) {
         var webhookId = res.match[2].trim()
@@ -125,8 +191,13 @@ module.exports = function (robot) {
     // The follow command is useful when changing hubot host (i.e. when testing with ngrok).
     // Due to that, it's not uvailable through api.ai NLU/P 
     robot.respond(/trello update webhooks callback url/i, function (res) {
-        var webhookId = res.match[1].trim()
-        // need the room for the callback url
+        // var webhookId = res.match[1].trim()
+        var userid = res.message.user.id
+        robot.messageRoom(userid, 'Note that webhooks not created by you can\'t be updated.')
+        updateWebhooksCallbackURL(userid)
+
+    })
+    function updateWebhooksCallbackURL(userid) {
         var db = mongoskin.MongoClient.connect(mongodb_uri);
         db.bind('trelloWebhooks').find().toArrayAsync()
             .then(webhooks => {
@@ -135,18 +206,14 @@ module.exports = function (robot) {
                     updateWebhook(webhook.userid, webhook._id, { callbackURL: callbackURL })
                 })
             })
-            .then(() => {
-                robot.messageRoom(res.message.user.id, 'Updated!')
-            })
             .catch(error => {
-                robot.logger.error(err)
+                robot.logger.error(error)
                 robot.messageRoom(res.message.user.id, c.errorMessage)
             })
             .done(() => {
                 db.close()
             })
-    })
-
+    }
     robot.respond(/trello (change|edit|replace|update) webhook (.*) channel to (.*)/i, function (res) {
         var webhookId = res.match[2].trim()
         var channel = res.match[3].trim()
@@ -181,6 +248,25 @@ module.exports = function (robot) {
         }).catch(error => {
             //TODO
         })
+    })
+
+    robot.on('trelloBoardRename', function (modelId, modelName) {
+        var db = mongoskin.MongoClient.connect(mongodb_uri);
+        db.bind('trelloWebhooks').updateAsync(
+            { idModel: modelId },
+            {
+                $set: { modelName: modelName }
+            },
+            { multi: true },
+            { upsert: true })
+            .catch(error => {
+                robot.logger.error(error)
+                if (c.errorsChannel) {
+                    robot.messageRoom(c.errorsChannel, c.errorMessage
+                        + `Script: ${path.basename(__filename)}`)
+                }
+            })
+
     })
 
     /*************************************************************************/
@@ -235,14 +321,20 @@ module.exports = function (robot) {
                 } else if (query.active == false) {
                     robot.messageRoom(userid, 'Webhook deactivated. You can activate it again: `activate trello webhook <Webhook ID>`')
                 } else if (query.callbackURL) {
-                    robot.messageRoom(userid, 'Webhook successfully updated')
+                    robot.messageRoom(userid, 'Webhook ' + webhookId + ' successfully updated')
                 }
             })
             .catch(error => {
+                // TODO 
+                // would be better to prin the error.message or error.error
                 if (error.statusCode == 400) {
+                    robot.logger.info(error)
+                    robot.messageRoom(userid, error.message)
                     robot.messageRoom(userid, 'You provided a wrong webhook ID. Say `show trello webhooks` to see webhooks details.')
                 }
                 else if (error.statusCode == 401) {
+                    robot.logger.error(error.message)
+                    robot.messageRoom(userid, error.message)
                     robot.messageRoom(userid, 'Only the user who created the webhook is eligible to make any changes. Say `show trello webhooks` to see webhooks details.')
                 } else {
                     robot.messageRoom(userid, error.message)
@@ -264,7 +356,6 @@ module.exports = function (robot) {
         var db = mongoskin.MongoClient.connect(mongodb_uri);
         request(options)
             .then(webhook => {
-                console.log(webhook)
                 // update db 
                 db.bind('trelloWebhooks').removeAsync({ _id: webhookId })
             })
@@ -395,7 +486,10 @@ module.exports = function (robot) {
                     userid: userid,
                     username: username,
                     idModel: webhook.idModel,
+                    modelName: model.name,
                     modelType: model.type,
+                    modelShortUrl: model.shortUrl,
+                    modelShortLink: model.shortLink,
                     room: room,
                     active: webhook.active,
                     description: webhook.description
@@ -423,6 +517,7 @@ module.exports = function (robot) {
                 if (!handled) {
                     robot.logger.warning('No script handled the resetCacheForTrelloWebhooks event.')
                 }
+                robot.messageRoom(room, ' To check your team`s webhooks: `show trello webhooks`')
                 robot.messageRoom(userid, 'Webbhook created! To check your team`s webhooks: `show trello webhooks`')
             })
             .catch(error => {
@@ -446,7 +541,7 @@ module.exports = function (robot) {
             modelType = 'cards'
         }
 
-        var query = { fields: 'id,name' }
+        var query = { fields: 'id,name,shortLink,shortUrl' }
         var options = {
             url: `${TRELLO_API}/${modelType}/${id}?${credentials}`,
             method: 'GET',
@@ -460,6 +555,8 @@ module.exports = function (robot) {
                     resolve({
                         id: model.id,
                         name: model.name,
+                        shortLink: model.shortLink,
+                        shortUrl: model.shortUrl,
                         type: modelType.slice(0, -1)
                     })
                 })
@@ -496,7 +593,7 @@ module.exports = function (robot) {
             .catch(error => {
                 //TODO handle error codes: i.e. 404 not found -> dont post
                 errorHandler(userid, error)
-                console.log(error)
+                robot.logger.error(error)
             })
     }
 
@@ -544,7 +641,6 @@ module.exports = function (robot) {
             .catch(error => {
                 //TODO handle error codes: i.e. 404 not found -> dont post
                 errorHandler(userid, error)
-                console.log(error)
             })
     }
 
@@ -559,7 +655,6 @@ module.exports = function (robot) {
                 typesCnt[notifType] += 1
             }
         }
-        console.log(typesCnt)
 
         var msg = {
             text: 'Here is your Trello Notifications Sum-Up:',
@@ -693,7 +788,6 @@ module.exports = function (robot) {
         var msg = { attachments: [] }
 
         for (var i = 0; i < notifications.length; i++) {
-            console.log(i + 1, notifications[i].type)
             var entities = notifications[i].entities
             var pretext = ''
             var text = ''
@@ -749,8 +843,11 @@ module.exports = function (robot) {
                         break
                 }
             }
-
-            msg.attachments.push({ pretext: pretext, text: text })
+            msg.attachments.push({
+                fallback: pretext,
+                pretext: pretext,
+                text: text
+            })
         }
         if (entities.length != 1) {         // This is because of a trello bug (?) 
             robot.messageRoom(userid, msg)  // when notification.type = 'deleteComment' the json includes just one member entity only
@@ -796,6 +893,9 @@ module.exports = function (robot) {
     function bold(text) {
         if (robot.adapterName == 'slack') {
             return `*${text}*`
+        }
+        else if (robot.adapterName == 'mattermost') {
+            return `**${text}**`
         }
         // Add any other adapters here  
         else {

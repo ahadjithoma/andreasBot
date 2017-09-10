@@ -55,5 +55,6 @@
         "time": "17:24",
         "active": true,
         "channel": "general"
-    }
+    },
+    "timezone":"Europe/Athens"
 }
