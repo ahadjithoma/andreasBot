@@ -399,10 +399,46 @@ module.exports = function (robot) {
         request(options)
             .then(action => {
                 displayNotifications(room, [action])
+
+                // Add here any logic fot user mentions.
+                /* Problem is that:
+                 * action.type == 'mentionedOnCard' does not exist. nor webhook.type
+                 * but only notification.type
+                 * 
+                 * Possible walkthrough 1: 
+                 *   each time action.type == 'commentCard'
+                 *   request from every user the notifications 
+                 *   and check for mentionOnCard notification. 
+                 *
+                 * Possible walkthrough 2: 
+                 * (currently working with this one - seems more logic)
+                 *   each time action.type == 'commentCard'
+                 *   check for any regex word match that starts with '@'
+                 *   check if the user exists and get the slack user id.
+                 *   After that, inform the user for its mention on card.
+                 */
+
+                // if (action.type == 'commentCard') {
+                //     var commentText = action.data.text
+                //     var regex = /(?:^|\W)@(\w+)(?!\w)/g, match, matches = [];
+                //     while (match = regex.exec(commentText)) {
+                //         var user = getSlackUser(match[1])
+                //         if (user) {
+                //             robot.messageRoom(user.id, 'You are mentioned on trello.')
+                //             displayNotifications(user.id, [action])
+                //             userMentionedOnCard(user.id)
+                //         }
+                //     }
+                // }
             })
             .catch(error => {
                 //TODO
             })
+    }
+
+    function userMentionedOnCard(userid) {
+        console.log(userid)
+        robot.messageRoom(userid, 'Reply back?')
     }
 
     function getWebhooks(userid) {
@@ -903,6 +939,26 @@ module.exports = function (robot) {
         }
     }
 
+    function getSlackUser(trelloUsername) {
+
+        var userids = cache.get('userIDs')
+
+        for (var i = 0; i < userids.length; i++) {
+            var id = userids[i]
+
+            var user = cache.get(id)
+            var cachedTrelloUsername
+            try {
+                var cachedTrelloUsername = user.trello_username
+                if (cachedTrelloUsername == trelloUsername) {
+                    return robot.brain.userForId(id)
+                }
+            } catch (e) {
+
+            }
+            return false
+        }
+    }
     /*******************************************************************/
     /*          Slack Buttons Implementation - TEMPLATE                */
     /*               (not in use - for future use)                     */

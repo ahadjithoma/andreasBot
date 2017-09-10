@@ -710,7 +710,7 @@ module.exports = function (robot) {
 			} catch (e) {
 
 			}
-			return 'false'
+			return false
 		}
 	}
 }

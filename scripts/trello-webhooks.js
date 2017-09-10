@@ -11,7 +11,6 @@ module.exports = function (robot) {
         var headers = req.headers
         res.send(200);
 
-        console.log('received')
         // TODO: validate the webhook source
 
         var payload = req.body;
@@ -29,15 +28,14 @@ module.exports = function (robot) {
          * and use his token for the GET trello action request.  
          */
 
-        // console.log(payload)
-
          if (type == 'updateBoard' && payload.action.data.board.name) {
             // change the name in db
             var newName = payload.action.data.board.name 
             robot.emit('trelloBoardRename', modelId, newName)
             /* TODO-Note:
-             * The "bad-part" of this is that when a team has multiple webhooks,
-             * it's gonna call the db as many times as the number of the webhooks 
+             * The "bad-part" of this is that when a team has multiple webhooks for the same model(id),
+             * it's gonna call the db as many times as the number of the webhooks but it only needs
+             * one call to change all the db.documents
              */
         }
 

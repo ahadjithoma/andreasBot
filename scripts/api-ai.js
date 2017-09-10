@@ -18,6 +18,7 @@ module.exports = robot => {
     })
 
     robot.catchAll(function (res) {
+        console.log('catchAll')
         // var regexp = new RegExp("^(?:" + robot.alias + "|" + robot.name + ") (.*)", "i") 
         var regex = new RegExp(robot.name + " (.*)", "i")
         if (res.message.text.match(regex)) { // captures only direct messages and not messages in channels 
