@@ -14,7 +14,7 @@
         "somthing": ""
     },
     "standups": {
-        "timeout": 600000
+        "timeout": 900000
     },
     "defaultStandup": {
         "_id": "defaultStandup",

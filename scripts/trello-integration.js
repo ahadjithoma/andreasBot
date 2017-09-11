@@ -4,7 +4,7 @@
 // Commands:
 //   `trello (all|unread|read) notifications`
 //	 `trello mentions`
-//	 `trello sumup (all|unread|read)`
+//	 `trello my sumup (all|unread|read|since)`
 // 	 `trello link <board|card url> to <channel>`
 //	 `trello disable|deactivate webhook <webhook-ID>`
 //	 `trello enable|activate webhook <webhook-ID>`
@@ -12,7 +12,7 @@
 //	 `trello update|change webhook <webhook-ID> channel to <channel>`
 //	 `trello delete webhook <webhook-ID>`
 //	 `trello show webhooks`
-//
+//   `trello reply <comment_text>`
 // Configuration
 //
 // Author
@@ -73,7 +73,7 @@ module.exports = function (robot) {
     })
 
     // TODO add the since query
-    robot.respond(/trello( all| unread| read| since|) sum-?ups?/i, function (res) {
+    robot.respond(/trello my sum-?ups?( all| unread| read| since|)/i, function (res) {
         var userid = res.message.user.id
         var read_filter = res.match[1].trim()
         if (!read_filter) {
@@ -101,7 +101,7 @@ module.exports = function (robot) {
         var room = slackmsg.getChannelName(robot, res)
         var userid = res.message.user.id
         var modelUrl = res.match[2].trim()
-        if (room == 'DM') {
+        if (room == 'DM') { // DM = Direct Message
             room = '@' + res.message.user.name
         }
         getModelInfo(userid, modelUrl)
@@ -160,24 +160,6 @@ module.exports = function (robot) {
             })
     })
 
-    function getWebhookId(queryObj) {
-        var db = mongoskin.MongoClient.connect(mongodb_uri)
-        return new Promise(function (resolve, reject) {
-            db.bind('trelloWebhooks').find(queryObj).toArrayAsync()
-                .then(webhooks => {
-                    var idsArray = []
-                    Promise.each(webhooks, function (webhook) {
-                        idsArray.push(webhook._id)
-                    }).then(() => {
-                        resolve(idsArray)
-                    })
-                })
-                .catch(error => {
-                    reject(error)
-                })
-        })
-    }
-
     robot.respond(/trello (disable|pause|stop|deactivate) webhook (.*)/i, function (res) {
         var webhookId = res.match[2].trim()
         updateWebhook(res.message.user.id, webhookId, { active: false })
@@ -197,23 +179,7 @@ module.exports = function (robot) {
         updateWebhooksCallbackURL(userid)
 
     })
-    function updateWebhooksCallbackURL(userid) {
-        var db = mongoskin.MongoClient.connect(mongodb_uri);
-        db.bind('trelloWebhooks').find().toArrayAsync()
-            .then(webhooks => {
-                Promise.each(webhooks, function (webhook) {
-                    var callbackURL = `${hubot_host_url}/hubot/trello-webhooks?room=${webhook.room}`
-                    updateWebhook(webhook.userid, webhook._id, { callbackURL: callbackURL })
-                })
-            })
-            .catch(error => {
-                robot.logger.error(error)
-                robot.messageRoom(res.message.user.id, c.errorMessage)
-            })
-            .done(() => {
-                db.close()
-            })
-    }
+
     robot.respond(/trello (change|edit|replace|update) webhook (.*) channel to (.*)/i, function (res) {
         var webhookId = res.match[2].trim()
         var channel = res.match[3].trim()
@@ -269,9 +235,52 @@ module.exports = function (robot) {
 
     })
 
+    // reply instantly to the last trello card comment mention
+    robot.respond(/trello reply (.*)/i, function (res) {
+        var userid = res.message.user.id
+        var commentText = res.match[1]
+        try {
+            var cardId = cache.get(userid).trello_last_mentioned_card_id
+            if (cardId) {
+                addCardComment(userid, cardId, commentText)
+            } else {
+                throw null
+            }
+        } catch (error) {
+            robot.messageRoom(userid, 'Sorry but no card found.')
+        }
+    })
+
     /*************************************************************************/
     /*                             API Calls                                 */
     /*************************************************************************/
+
+
+    function addCardComment(userid, cardId, commentText) {
+        var credentials = getCredentials(userid)
+        if (!credentials) { return 0 }
+
+        var query = { text: commentText }
+
+        var options = {
+            url: `${TRELLO_API}/cards/${cardId}/actions/comments?${credentials}`,
+            method: 'POST',
+            qs: query,
+            headers: trello_headers,
+            json: true
+        }
+
+        request(options)
+            .then(res => {
+                var cardName = res.data.card.name
+                var cardUrl = `https://trello.com/c/${res.data.card.shortLink}`
+                robot.messageRoom(userid, `Comment on card <${cardUrl}|${cardName}> added.`)
+            })
+            .catch(error => {
+                robot.logger.error(error)
+                robot.messageRoom(userid, error.message)
+            })
+    }
 
     function updateWebhook(userid, webhookId, query) {
         var credentials = getCredentials(userid)
@@ -342,6 +351,24 @@ module.exports = function (robot) {
             })
     }
 
+    function getWebhookId(queryObj) {
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
+        return new Promise(function (resolve, reject) {
+            db.bind('trelloWebhooks').find(queryObj).toArrayAsync()
+                .then(webhooks => {
+                    var idsArray = []
+                    Promise.each(webhooks, function (webhook) {
+                        idsArray.push(webhook._id)
+                    }).then(() => {
+                        resolve(idsArray)
+                    })
+                })
+                .catch(error => {
+                    reject(error)
+                })
+        })
+    }
+
     function deleteWebhook(userid, webhookId) {
         var credentials = getCredentials(userid)
         if (!credentials) { return 0 }
@@ -384,6 +411,24 @@ module.exports = function (robot) {
 
     }
 
+    function updateWebhooksCallbackURL(userid) {
+        var db = mongoskin.MongoClient.connect(mongodb_uri);
+        db.bind('trelloWebhooks').find().toArrayAsync()
+            .then(webhooks => {
+                Promise.each(webhooks, function (webhook) {
+                    var callbackURL = `${hubot_host_url}/hubot/trello-webhooks?room=${webhook.room}`
+                    updateWebhook(webhook.userid, webhook._id, { callbackURL: callbackURL })
+                })
+            })
+            .catch(error => {
+                robot.logger.error(error)
+                robot.messageRoom(res.message.user.id, c.errorMessage)
+            })
+            .done(() => {
+                db.close()
+            })
+    }
+
     function getTrelloAction(token, actionId, room) {
 
         var qs = { entities: true }
@@ -418,18 +463,20 @@ module.exports = function (robot) {
                  *   After that, inform the user for its mention on card.
                  */
 
-                // if (action.type == 'commentCard') {
-                //     var commentText = action.data.text
-                //     var regex = /(?:^|\W)@(\w+)(?!\w)/g, match, matches = [];
-                //     while (match = regex.exec(commentText)) {
-                //         var user = getSlackUser(match[1])
-                //         if (user) {
-                //             robot.messageRoom(user.id, 'You are mentioned on trello.')
-                //             displayNotifications(user.id, [action])
-                //             userMentionedOnCard(user.id)
-                //         }
-                //     }
-                // }
+                if (action.type == 'commentCard') {
+                    var commentText = action.data.text
+                    var cardId = action.data.card.id
+                    var regex = /(?:^|\W)@(\w+)(?!\w)/g, match, matches = [];
+                    while (match = regex.exec(commentText)) {
+                        var user = getSlackUser(match[1])
+                        if (user) {
+                            cache.set(user.id, { trello_last_mentioned_card_id: cardId })
+                            robot.messageRoom(user.id, 'You are mentioned on trello.')
+                            displayNotifications(user.id, [action])
+                            robot.messageRoom(user.id, '`trello reply <text>` to reply to your last card mentioned')
+                        }
+                    }
+                }
             })
             .catch(error => {
                 //TODO

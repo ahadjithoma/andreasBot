@@ -7,6 +7,8 @@
 //	 `github open|closed|all pull requests of repo <repo_name>`
 //	 `github create issue`
 //	 `github open|closed|all pull requests of all repos`
+// 	 `github my sumup open|closed|all`
+
 'use strict';
 
 // init
@@ -140,8 +142,16 @@ module.exports = function (robot) {
 		listGithubSumUp(userid, query, saveLastSumupDate)
 	})
 
-	robot.respond(/github sumup/i, function (res) {
-		listGithubSumUp(res.message.user.id, { state: 'open' }, false)
+	robot.respond(/github my sumup( all| closed| open|)/i, function (res) {
+		var queryObj, state
+		state = res.match[1].trim()
+		if (state!=null) {
+			queryObj = { state: state }
+		}
+		else {
+			queryObj = { state: 'open' }
+		}
+		listGithubSumUp(res.message.user.id, queryObj, false)
 	})
 
 	/*************************************************************************/
@@ -298,7 +308,7 @@ module.exports = function (robot) {
 			since = ''
 		}
 		var options = {
-			url: `${GITHUB_API}/repos/${owner}/${repo}/commits`,
+			url: `${GITHUB_API}/repos/${owner}/${repo}/commits${since}`,
 			method: 'GET',
 			headers: getAppHeaders(appToken),
 			json: true

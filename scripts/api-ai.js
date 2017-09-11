@@ -34,7 +34,7 @@ module.exports = robot => {
 
     // trigger an event to api.ai from other scripts
     robot.on('event-api.ai', function (eventName, userId) {
-        console.log(eventName, userId)
+        // console.log(eventName, userId)
         apiaiEvent(eventName)
     })
 
@@ -106,7 +106,7 @@ module.exports = robot => {
         var result = response.result
         var userId = res.message.user.id
 
-        console.log(response)
+        // console.log(response)
         if (result.score < SCORE_THRESHOLD) {
             apiaiEvent('uknownInput', userId)
             return 0

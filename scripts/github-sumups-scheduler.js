@@ -1,3 +1,11 @@
+// Commands:
+//   `github sumups info`
+//   `github sumups change|edit|update channel (to) <channel_name>`
+//   `github sumups change|edit|update time (to) <HH:MM>`
+//   `github sumups change|edit|update days (to) <days>`
+//   `github sumups pause|deactivate|disable`
+//   `github sumups resume|activate|enable`
+
 var CronJob = require('cron').CronJob;
 var mongoskin = require('mongoskin')
 var Promise = require('bluebird')

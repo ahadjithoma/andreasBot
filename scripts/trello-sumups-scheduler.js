@@ -1,3 +1,11 @@
+// Commands:
+//   `trello sumups info`
+//   `trello sumups change|edit|update channel (to) <channel_name>`
+//   `trello sumups change|edit|update time (to) <HH:MM>`
+//   `trello sumups change|edit|update days (to) <days>`
+//   `trello sumups pause|deactivate|disable`
+//   `trello sumups resume|activate|enable`
+
 var CronJob = require('cron').CronJob;
 var mongoskin = require('mongoskin')
 var Promise = require('bluebird')
@@ -27,18 +35,18 @@ module.exports = (robot) => {
     /*                             Listeners                                 */
     /*************************************************************************/
 
-    robot.respond(/trello (show|get|give me)? sum-?up'?s? info/i, function (res) {
+    robot.respond(/trello sum-?up'?s? (show|get|give me|)info/i, function (res) {
         var userid = res.message.user.id
         showSumupInfo(userid)
     })
 
-    robot.respond(/trello (change|edit|update|modify) sum-?ups? channel t?o? (.*)/i, function (res) {
+    robot.respond(/trello sum-?ups? (change|edit|update|modify) channel t?o? (.*)/i, function (res) {
         var channel = res.match[2].trim()
         var userid = res.message.user.id
         updateChannel(userid, channel)
     })
 
-    robot.respond(/trello (change|edit|update|modify) sum-?ups? time t?o? (.*)/i, function (res) {
+    robot.respond(/trello sum-?ups? (change|edit|update|modify) time t?o? (.*)/i, function (res) {
         var time = res.match[2].trim()
         var userid = res.message.user.id
         if (!isTimeValid(time)) {
@@ -50,7 +58,7 @@ module.exports = (robot) => {
 
 
     /** Change the days of the trello sumup scheduler **/
-    robot.respond(/trello (edit|change|modify|update) sum-?ups? days ?t?o? (.*)/i, function (res) {
+    robot.respond(/trello sum-?ups? (edit|change|modify|update) days ?t?o? (.*)/i, function (res) {
         var days = res.match[2].trim().replace(/(and)/gi, ',').replace(/\s/g, '')  // remove spaces
         var userid = res.message.user.id
         var cronDays = getCronDays(days)
@@ -66,23 +74,13 @@ module.exports = (robot) => {
         changeTrelloSumupDaysListeners(days, res)
     })
 
-    function changeTrelloSumupDaysListeners(days, res) {
-        var userid = res.message.user.id
-        var cronDays = getCronDays(days)
-        if (!isCronDaysValid(cronDays)) {
-            res.reply('Sorry but this is not a valid input. Try again someting like `Monday, Wednesday - Friday`.')
-        } else {
-            updateDays(userid, cronDays)
-        }
-    }
-
     /** Deactivate/Activate trello sumups auto-post scheduler **/
-    robot.respond(/trello (pause|deactivate|disable) sum-?ups?/i, function (res) {
+    robot.respond(/trello sum-?ups? (pause|deactivate|disable) sum-?ups?/i, function (res) {
         var userid = res.message.user.id
         updateSumupStatus(userid, false)
     })
 
-    robot.respond(/trello (resume|activate|enable) sum-?ups?/i, function (res) {
+    robot.respond(/trello sum-?ups? (resume|activate|enable) sum-?ups?/i, function (res) {
         var userid = res.message.user.id
         updateSumupStatus(userid, true)
     })
@@ -191,6 +189,16 @@ module.exports = (robot) => {
     /*************************************************************************/
     /*                        sumups updating functions                      */
     /*************************************************************************/
+    
+    function changeTrelloSumupDaysListeners(days, res) {
+        var userid = res.message.user.id
+        var cronDays = getCronDays(days)
+        if (!isCronDaysValid(cronDays)) {
+            res.reply('Sorry but this is not a valid input. Try again someting like `Monday, Wednesday - Friday`.')
+        } else {
+            updateDays(userid, cronDays)
+        }
+    }
 
     function updateSumupStatus(userid, status, sumupId = 'defaultSumUp') {
         if (status) {

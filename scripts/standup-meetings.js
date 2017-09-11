@@ -183,11 +183,22 @@ module.exports = function (robot) {
     function resetStandup(userid, standupid) {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
         db.bind('standups').removeAsync({ _id: standupid })
-            .then(() => {
+            .then((r) => {
                 initDefaultStandup()
             })
             .then(() => {
                 updateStandupsCronJobs()
+            })
+            .then(() => {
+                var username = robot.brain.userForId(userid).name
+                var channel = `#${c.defaultStandup.channel}`
+                robot.messageRoom(channel, 'Standup configuration reset by ' + username)
+                robot.messageRoom(userid, 'Standup configuration reset successfully. \nSay `standup show` to see current configuration.')
+                showStandups(channel)
+            })
+            .catch(error => {
+                robot.logger.error(error)
+                robot.messageRoom(userid, error.message)
             })
     }
 
@@ -416,7 +427,7 @@ module.exports = function (robot) {
             }).then((standup) => {
                 var username = robot.brain.userForId(userid).name
                 var realname = robot.brain.userForId(userid).real_name
-                robot.messageRoom(userid, `Standup time succesfully changed.`)
+                robot.messageRoom(userid, `Standup channel succesfully changed.`)
                 robot.messageRoom('#' + standup.channel, `Standup *${standup.name}* channel changed to *${channel}* by ${realname} (${username})`)
             })
             .catch(error => {
