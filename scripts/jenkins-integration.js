@@ -8,7 +8,7 @@
 //   `jenkins last build of job <job name>`
 //   `jenkins build info <build number> of job <job name>`
 //   `jenkins build console <build number> of job <job name>`
-//   `jenkins build #<build number>`
+//   `jenkins build job <job_name>`
 
 
 var jenkinsapi = require('jenkins-api');
@@ -21,7 +21,6 @@ var dateFormat = require('dateformat');
 var slackmsg = require('./slackMsgs.js')
 
 // config
-var username = process.env.JENKINS_USERNAME;
 var jenkins_url = process.env.JENKINS_URL
 var url = process.env.JENKINS_URL.split('//');
 var uri = url[1]
@@ -37,7 +36,7 @@ module.exports = function (robot) {
     robot.respond(/jenkins builds of job (.*)/i, function (res) {
         getAllBuilds(res)
     })
-    
+
     robot.respond(/jenkins last success?f?u?l? build of job (.*)/i, function (res) {
         getLastSuccessfulBuild(res)
     })
@@ -59,7 +58,7 @@ module.exports = function (robot) {
         getBuildConsole(res)
     })
 
-    robot.respond(/jenkins build #(.*)/, function (res) {
+    robot.respond(/jenkins build job (.*)/, function (res) {
         buildJob(res)
     })
 
@@ -371,7 +370,7 @@ module.exports = function (robot) {
             var token = cache.get(userid).jenkins_token
             var username = cache.get(userid).jenkins_username
             //TODO
-            var crumb = null//cache.get(userid).jenkins_crumb
+            var crumb = cache.get(userid).jenkins_crumb
             if (!token || !username) { // catch the case where username or token are null/undefined
                 throw error
             }
@@ -389,9 +388,11 @@ module.exports = function (robot) {
     function errorHandler(userid, error) {
         if (error.statusCode == 401) {
             robot.messageRoom(userid, c.jenkins.badCredentialsMsg)
-        } else if (error.statusCode == 404) {
+        }
+        else if (error.statusCode == 404) {
             robot.messageRoom(userid, c.jenkins.jobNotFoundMsg)
-        } else {
+        }
+        else {
             robot.messageRoom(userid, c.errorMessage + 'Status Code: ' + error.statusCode)
             robot.logger.error(error)
         }
@@ -410,9 +411,11 @@ module.exports = function (robot) {
         // color
         if (item.result == 'SUCCESS') {
             att.color = 'good'
-        } else if (att.color.includes('FAIL')) {
+        }
+        else if (att.color.includes('FAIL')) {
             att.color = 'danger'
-        } else {
+        }
+        else {
             att.color = 'warning'
         }
 

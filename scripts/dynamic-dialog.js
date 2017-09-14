@@ -4,7 +4,7 @@ function startDialog(switchBoard, res, convModel, answers = {}, n = 0) {
 
         var conversation = convModel.conversation
         if (n < conversation.length) {
-            var dialog = switchBoard.startDialog(res, 6000 * 10);
+            var dialog = switchBoard.startDialog(res, 1000 *60* 10);
             var question = conversation[n].question
             
             // handle multiple questions. Reply with a random one each time
@@ -15,7 +15,7 @@ function startDialog(switchBoard, res, convModel, answers = {}, n = 0) {
                 res.reply(question);
             }
 
-            dialog.addChoice(/ (.*)/i, function (res) {
+            dialog.addChoice(/ ((.*\s*)+)/i, function (res) {
                 msg = res.match[1]
                 dialog.finish()
 

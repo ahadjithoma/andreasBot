@@ -1,3 +1,9 @@
+// Commands:
+//   `jenkins login`
+//   `jenkins token <token>`
+//   `jenkins username <username>`
+
+
 'use strict'
 
 // init
@@ -24,19 +30,14 @@ module.exports = robot => {
 
     var r = new RegExp("^(?=.*\bjenkins\b)(?=.*\blogin).*$", "i")
     robot.respond(/(?=.*\bjenkins\b)(?=.*\blogin).*$/i, function (res) {
-        getJenkinsToken(res)
+        jenkinsLoginDisplayMsg(res)
     })
-
-    robot.respond(/(jenkins\b)(login\b)/, function (res) {
-        console.log(res.match[0])
-    })
-
 
     robot.on('jenkinsLogin', function (data, res) {
-        getJenkinsToken(res)
+        jenkinsLoginDisplayMsg(res)
     })
 
-    function getJenkinsToken(res) {
+    function jenkinsLoginDisplayMsg(res) {
         try {
             var userId = res.message.user.id
         } catch (error) {

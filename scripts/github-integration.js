@@ -3,11 +3,21 @@
 //	 `github repos`
 //	 `github open|closed|all issues of repo <repo_name>`
 //	 `github commits of repo <repo_name>`
+//	 `github issues of repo <repo_name>`
+
+//	 `github issue <issue_num>` - get the the commit of the last repo lookup
+//	 `github repo <repo_name> issue <issue_num> comments`
+//	 `github issue reply <comment_text>`
+
+// convert this to the above 2nd	
 //	 `github comments of issue <issue num> of repo <repo_name>`
-//	 `github open|closed|all pull requests of repo <repo_name>`
+
+//	 `github (open|closed|all) pull requests of repo <repo_name>` - Default: open
 //	 `github create issue`
 //	 `github open|closed|all pull requests of all repos`
-// 	 `github my sumup open|closed|all`
+// 	 `github show sumup open|closed|all`
+
+// 	 `github sumup( all| closed| open|)`
 
 'use strict';
 
@@ -20,6 +30,7 @@ var cache = require('./cache.js').getCache()
 const Conversation = require('./hubot-conversation/index.js');
 var dialog = require('./dynamic-dialog.js')
 var convModel = require('./conversation-models.js')
+var color = require('./colors.js')
 var path = require('path')
 var async = require('async')
 var dateFormat = require('dateformat')
@@ -57,17 +68,23 @@ module.exports = function (robot) {
 	})
 
 	robot.respond(/github (open |closed |all |)issues( of)?( repo)? (.*)/i, function (res) {
+		var userid = res.message.user.id
 		var repo = res.match.pop()
 		var state = res.match[1].trim()
-		var userid = res.message.user.id
-		updateConversationContent(userid, { repo: repo })
+		if (state == '') {
+			state = 'open'
+		}
+		updateConversationContent(userid, { github_repo: repo })
 		listRepoIssues(userid, repo, state)
 	})
 
-	robot.respond(/github comments of issue ([0-9]) of repo (.*)/i, function (res) {
+	robot.respond(/github comments of issue (\d+) of repo (.*)/i, function (res) {
+		var userid = res.message.user.id
 		var repo = res.match[2].trim()
 		var issueNum = res.match[1].trim()
-		listIssueComments(res.message.user.id, issueNum, repo)
+		updateConversationContent(userid, { github_repo: repo, github_issue: issueNum })
+		// updateConversationContent(userid, { github_issue: issueNum })
+		listIssueComments(userid, issueNum, repo)
 	})
 
 	robot.respond(/github (open |closed |all |)pull requests of repo (.*)/i, function (res) {
@@ -97,55 +114,75 @@ module.exports = function (robot) {
 	})
 
 	// TODO: maybe replace it with api.ai
-	robot.respond(/github (create|open)(| a new) issue\b/, function (res) {
-
+	robot.respond(/\bgithub\s(create|open)\sissue\b/i, function (res) {
 		var userid = res.message.user.id
-
 		dialog.startDialog(switchBoard, res, convModel.createIssue)
 			.then(data => {
-				var owner
-				var repo = data.repo.split('/')
-				if (repo[1]) {
-					repo = repo[1]
-					owner = repo[0]
-				} else {
-					repo = repo[0]
-					owner = cache.get('GithubApp')[0].account
-				}
-
-				try {
-					var assignees = data.assignees.replace(/\s/g, '').split(',')
-
-				} catch (error) {
-					var assignees = []
-				}
-				try {
-					var labels = data.labels.replace(/\s/g, '').split(',')
-
-				} catch (error) {
-					var labels = []
-				}
-
-				createIssue(userid, repo, owner, data.title, data.body, labels, assignees)
-			}).catch(err => console.log(err))
+				createIssue(userid, 'anbot', data.title, data.body)
+			})
+			.catch(err => console.log(err))
 	})
 
-	// robot.on(/github /i, function(res){
+	//TODO
+	robot.respond(/github issue comment (.*)/i, function (res) {
+		var commentText = res.match.pop()
+	})
+	robot.respond(/github issue (\d+) comment (.*)/i, function (res) {
+		var userid = res.message.user.id
+		var issueNum = res.match[1]
+		var commentText = res.match.pop()
+		var repo = getConversationContent(userid, 'github_repo')
+		if (repo) {
+			createIssueComment(userid, repo, issueNum, commentText)
+		} else {
+			// TODO: send the bellow msg or use api.ai event to ask for the repo
+			robot.messageRoom(userid, 'Sorry but i dont have your last repo lookup.'
+				+ '\nYou need to search for a repo first for this command. i.e. `github commits repo <repo_name>`'
+				+ '\nor use another command to specify repo as well.')
+		}
+	})
 
-	// })
+	// TODO 
+	robot.respond(/^github issue (\d+) comment$/, function (res) {
+		var issueNum = res.match[1]
+		// ask for the comment text	
+	})
 
-	// robot.on(/github /i, function(res){
+	function createIssueComment(userid, repo, issueNum, comment) {
+		var ghApp = cache.get('GithubApp')
+		var appToken = ghApp[0].token
+		var owner = ghApp[0].account
 
-	// })
+		var cred = getCredentials(userid)
+		if (!cred) { return 0 }
+
+		var dataString = { body: comment }
+		var options = {
+			url: `${GITHUB_API}/repos/${owner}/${repo}/issues/${issueNum}/comments`,
+			method: 'POST',
+			body: dataString,
+			headers: getUserHeaders(cred.token),
+			json: true
+		}
+
+		request(options)
+			.then(r => {
+				robot.messageRoom(userid, `Comment added on issue #${issueNum} of repo ${repo}!`)
+			})
+			.catch(error => {
+				robot.logger.error(error)
+				robot.messageRoom(userid, error.message)
+			})
+	}
 
 	robot.on('githubSumUp', function (userid, query, saveLastSumupDate) {
 		listGithubSumUp(userid, query, saveLastSumupDate)
 	})
 
-	robot.respond(/github my sumup( all| closed| open|)/i, function (res) {
+	robot.respond(/github sum-?ups?( all| closed| open|)/i, function (res) {
 		var queryObj, state
 		state = res.match[1].trim()
-		if (state!=null) {
+		if (state != null) {
 			queryObj = { state: state }
 		}
 		else {
@@ -154,12 +191,50 @@ module.exports = function (robot) {
 		listGithubSumUp(res.message.user.id, queryObj, false)
 	})
 
+	robot.respond(/github (close |re-?open )issue (\d+) repo (.*)/i, function (res) {
+		var userid = res.message.user.id
+		var repoName = res.match[3].trim()
+		var issueNum = parseInt(res.match[2])
+		var state = res.match[1].trim()
+		if (state.includes('open')) {
+			state = 'open'
+		} else {
+			state = 'closed'
+		}
+		updateIssue(userid, repoName, issueNum, { state: state })
+
+	})
+
 	/*************************************************************************/
 	/*                             API Calls                                 */
 	/*************************************************************************/
+	function updateIssue(userid, repo, issueNum, updateObj) {
+		var ghApp = cache.get('GithubApp')
+		var owner = ghApp[0].account
+
+		var cred = getCredentials(userid)
+		if (!cred) { return 0 }
+
+		var options = {
+			url: `${GITHUB_API}/repos/${owner}/${repo}/issues/${issueNum}`,
+			method: 'PATCH',
+			headers: getUserHeaders(cred.token),
+			body: updateObj,
+			json: true
+		}
+
+		request(options).then(res => {
+			console.log(res)
+		}).catch(error => {
+			robot.messageRoom(userid, error.message)
+			robot.logger.error(error)
+		})
+
+
+	}
 
 	function listPullRequestsForAllRepos(userid, state) {
-		getAccesibleReposFullName(userid)
+		getAccesibleReposName(userid)
 			.then(repos => {
 				for (var i = 0; i < repos.length; i++) {
 					listPullRequests(userid, repos[i], state)
@@ -172,6 +247,8 @@ module.exports = function (robot) {
 	}
 
 	function listGithubSumUp(userid, query, saveLastSumupDate = false) {
+		var ghApp = cache.get('GithubApp')
+		var orgName = ghApp[0].account
 
 		var credentials = getCredentials(userid)
 		if (!credentials) { return 0 }
@@ -195,28 +272,34 @@ module.exports = function (robot) {
 				})
 		}
 
-		getAccesibleReposFullName(userid)
+		getAccesibleReposName(userid)
 			.then(repos => {
-				// var msg = {attachments: []}
-				// var attachment = slackMsgs.attachment()
-
+				var sinceText = ''
+				if (query.since) {
+					sinceText = ` since *${dateFormat(new Date(query.since), 'mmm dS yyyy, HH:MM')}*`
+				}
+				robot.messageRoom(userid, `Here is your github summary${sinceText}:`)
 				for (var i = 0; i < repos.length; i++) {
 					var repoName = repos[i]
-					var sumUpsArray = [
-						getPullRequestsSumup(userid, repoName, query.state),
+					Promise.mapSeries([
+						`<${githubURL}${orgName}/${repoName}|[${orgName}/${repoName}]>`,
+						getCommitsSumup(userid, repoName, query.since),
 						getIssuesSumup(userid, repoName, query.state, query.since),
-						getCommitsSumup(userid, repoName, query.since)
-					]
-
-					Promise.mapSeries(sumUpsArray, function (msg) {
-						return msg
+						getPullRequestsSumup(userid, repoName, query.state)
+					], function (sumupMsg) {
+						return sumupMsg
 					}).then(function (data) {
-						var msg = { attachments: [] }
-						Promise.each(data, function (attachment) {
-							msg.attachments.push(attachment)
-						}).then(() => {
-							robot.messageRoom(userid, msg)
-						})
+						var msg = {
+							unfurl_links: false,
+							text: `${data[0]}`,
+							attachments: []
+						}
+						for (var i = 1; i < data.length; i++) {
+							msg.attachments.push(data[i])
+						}
+						return msg
+					}).then((msg) => {
+						robot.messageRoom(userid, msg)
 					})
 				}
 			})
@@ -252,7 +335,22 @@ module.exports = function (robot) {
 			request(options)
 				.then(pullRequests => {
 					var attachment = slackMsgs.attachment()
-					attachment.text = `[${owner}/${repo}] has ${pullRequests.length} ${state} pull requests`
+					var quantityText, s = 's'
+					if (pullRequests.length > 1) {
+						quantityText = 'There are ' + pullRequests.length
+					}
+					else if (pullRequests.length == 1) {
+						quantityText = 'There is 1'
+						s = ''
+					}
+					else {
+						quantityText = 'There are no'
+					}
+					if (state == '' || state == 'all') {
+						state = 'open/closed'
+					}
+					attachment.text = `${quantityText} (${state}) ${bold('pull request' + s)}.`
+					attachment.color = color.rgbToHex(parseInt(pullRequests.length) * 25, 0, 0)
 					resolve(attachment)
 				})
 				.catch(error => {
@@ -278,13 +376,16 @@ module.exports = function (robot) {
 			headers: getAppHeaders(appToken),
 			json: true
 		}
-		console.log('issues\n', options.url)
 		return new Promise((resolve, reject) => {
 			request(options)
 				.then(issues => {
 					var attachment = slackMsgs.attachment()
-					attachment.text = `[${owner}/${repo}] has ${issues.length} issues`
-					attachment.color = 'danger'
+					var s = ''
+					if (issues.length > 1) {
+						s = 's'
+					}
+					attachment.text = `${issues.length} ${bold('issue' + s)} (including PRs) created or updated.`
+					attachment.color = color.rgbToHex(parseInt(issues.length) * 25, 0, 0)
 					resolve(attachment)
 				})
 				.catch(error => {
@@ -318,8 +419,16 @@ module.exports = function (robot) {
 			request(options)
 				.then(commits => {
 					var attachment = slackMsgs.attachment()
-					attachment.text = `[${owner}/${repo}] has ${commits.length} commits`
-					attachment.color = 'good'
+					var s = 's'
+					var commitsNum = commits.length
+					if (commitsNum == 1) {
+						s = ''
+					}
+					if (commitsNum == 30) { // 30 = the max commits github returns
+						commitsNum = '30 or more'
+					}
+					attachment.text = `${commitsNum} ${bold('commit' + s)} were made.`
+					attachment.color = color.rgbToHex(parseInt(commitsNum) * 25, 0, 0)
 					resolve(attachment)
 				})
 				.catch(error => {
@@ -356,23 +465,23 @@ module.exports = function (robot) {
 					msg.text = `There aren't any Pull Requests on <https://www.github.com/${owner}/${repo}|${owner}/${repo}>`
 				}
 				Promise.each(pullRequests, function (pr) {
-					var attachement = slackMsgs.attachment()
+					var attachment = slackMsgs.attachment()
 					var title = pr.title
 					var url = pr.html_url
 					var num = pr.number
-					attachement.text = `<${url}|#${num} ${title}>`
+					attachment.text = `<${url}|#${num} ${title}>`
 
 
-					attachement.author_name = pr.user.login
-					attachement.author_link = pr.user.html_url
-					attachement.author_icon = pr.user.avatar_url
+					attachment.author_name = pr.user.login
+					attachment.author_link = pr.user.html_url
+					attachment.author_icon = pr.user.avatar_url
 
 					if (pr.state.includes('open')) {
-						attachement.color = 'good'
+						attachment.color = 'good'
 					} else {
-						attachement.color = 'danger'
+						attachment.color = 'danger'
 					}
-					msg.attachments.push(attachement)
+					msg.attachments.push(attachment)
 				}).done(() => {
 					robot.messageRoom(userid, msg)
 				})
@@ -387,18 +496,6 @@ module.exports = function (robot) {
 		var cred = getCredentials(userid)
 		if (!cred) { return 0 }
 
-		try {
-			var token = cache.get(userid).github_token //robot.brain.get(userid).github_token
-			var githubUsername = robot.brain.get(userid).github_username
-		}
-		catch (e) {
-			var token = null
-			var githubUsername = null
-			robot.messageRoom(userid, 'you are not logged in')
-			oauthLogin(userid)
-			return
-		}
-
 		/* (Possible feature) having more than one Github App installations  */
 		var installations = cache.get('GithubApp').length
 		for (var i = 0; i < installations; i++) {
@@ -407,7 +504,7 @@ module.exports = function (robot) {
 
 			var options = {
 				url: `${GITHUB_API}/user/installations/${installation_id}/repositories`,
-				headers: getUserHeaders(token),
+				headers: getUserHeaders(cred.token),
 				json: true,
 			};
 
@@ -431,7 +528,7 @@ module.exports = function (robot) {
 		}
 	}
 
-	function getAccesibleReposFullName(userid) {
+	function getAccesibleReposName(userid) {
 
 		var cred = getCredentials(userid)
 		if (!cred) { return 0 }
@@ -480,7 +577,7 @@ module.exports = function (robot) {
 		request(options)
 			.then(repoCommits => {
 				var msg = { attachments: [] }
-				var attachement = slackMsgs.attachment()
+				var attachment = slackMsgs.attachment()
 				msg.unfurl_links = false
 
 				if (repoCommits.length > 0) {
@@ -497,9 +594,9 @@ module.exports = function (robot) {
 					var commitMsg = commit.commit.message.split('\n', 1); 	// get only the commit msg, not the description
 					var commitURL = commit.html_url;
 					commitID = "`" + commitID + "`"
-					attachement.text += `\n<${commitURL}|${commitID}> ${commitMsg} - ${authorUsername}`;
+					attachment.text += `\n<${commitURL}|${commitID}> ${commitMsg} - ${authorUsername}`;
 				}).then(() => {
-					msg.attachments.push(attachement)
+					msg.attachments.push(attachment)
 				}).done(() => {
 					robot.messageRoom(userid, msg)
 				})
@@ -507,7 +604,7 @@ module.exports = function (robot) {
 			.catch(err => { console.log(err) })
 	}
 
-	function listRepoIssues(userid, repo, state) {
+	function listRepoIssues(userid, repo, state = 'open') {
 		var ghApp = cache.get('GithubApp')
 		var appToken = ghApp[0].token
 		var owner = ghApp[0].account
@@ -530,18 +627,25 @@ module.exports = function (robot) {
 					msg.text = `There aren't any issues on <https://www.github.com/${owner}/${repo}|${owner}/${repo}>`
 				}
 				Promise.each(repoIssues, function (issue) {
-					var attachement = slackMsgs.attachment()
+					var attachment = slackMsgs.attachment()
 					var title = issue.title
 					var url = issue.html_url
 					var num = `#${issue.number}`
-					attachement.text = `${title} <${url}|${num}>`
+					var userLogin = issue.user.login
+					var userAvatar = issue.user.avatar_url
+					var userUrl = issue.user.html_url
+
+					attachment.author_name = userLogin
+					attachment.author_icon = userAvatar
+					attachment.author_link = userUrl
+					attachment.text = ` <${url}|${num}>: ${title}`
 
 					if (issue.state.includes('open')) {
-						attachement.color = 'good'
+						attachment.color = 'good'
 					} else {
-						attachement.color = 'danger'
+						attachment.color = 'danger'
 					}
-					msg.attachments.push(attachement)
+					msg.attachments.push(attachment)
 				}).done(() => {
 					robot.messageRoom(userid, msg)
 				})
@@ -568,25 +672,33 @@ module.exports = function (robot) {
 			.then(issueComments => {
 				var msg = {}
 				msg.unfurl_links = false
-				var repo_url = `${GITHUB_API}/repos/${owner}/${repo}`
+				var repo_url = `${githubURL}${owner}/${repo}`
 
 				if (issueComments.length > 0) {
 					msg.attachments = []
-					msg.text = `Comments of <${repo_url}/issues/${issueNum}|issue #${issueNum}> of <${repo_url}|${repo}> repo:`
+					msg.text = `<${repo_url}|[${owner}/${repo}]> <${repo_url}/issues/${issueNum}|Issue #${issueNum}>:`
 				} else {
 					msg.text = `<${repo_url}/issues/${issueNum}|Issue #${issueNum}> of repository ${repo} hasn't any comments yet.`
 				}
 				Promise.each(issueComments, function (comment) {
-					var attachement = slackMsgs.attachment()
+					var attachment = slackMsgs.attachment()
 					var body = comment.body
-					var created_at = dateFormat(new Date(comment.created_at), 'mmm dS yyyy, HH:MM')
+					// tODO: should i use created_at instead of updated_at 	?
+					var ts = Date.parse(comment.updated_at) / 1000//dateFormat(new Date(comment.created_at), 'mmm dS yyyy, HH:MM'
 					var url = comment.html_url
-					var user = comment.user.login
-					attachement.color = 'warning'
-					attachement.pretext = `*${user}* commented on <${url}|${created_at}>`
-					attachement.text = body
+					var userLogin = comment.user.login
+					var userUrl = comment.user.html_url
+					var userAvatar = comment.user.avatar_url
 
-					msg.attachments.push(attachement)
+					attachment.author_name = userLogin
+					attachment.author_icon = userAvatar
+					attachment.author_link = userUrl
+					attachment.ts = ts
+					attachment.color = 'warning'
+					// attachment.pretext = `*${user}* commented on <${url}|${created_at}>`
+					attachment.text = body
+
+					msg.attachments.push(attachment)
 				}).done(() => {
 					robot.messageRoom(userid, msg)
 				})
@@ -598,11 +710,14 @@ module.exports = function (robot) {
 			})
 	}
 
-	function createIssue(userid, repo, owner, title, body, label, assignees) {
+	function createIssue(userid, repo, title, body, label = [], assignees = []) {
 		var cred = getCredentials(userid)
 		if (!cred) { return 0 }
 
-		var dataString = {
+		var ghApp = cache.get('GithubApp')
+		var owner = ghApp[0].account
+
+		var dataObj = {
 			title: title,
 			body: body,
 			labels: label,
@@ -612,14 +727,16 @@ module.exports = function (robot) {
 		var options = {
 			url: `${GITHUB_API}/repos/${owner}/${repo}/issues`,
 			method: 'POST',
-			body: dataString,
+			body: dataObj,
 			headers: getUserHeaders(cred.token),
 			json: true
 		}
 
 		request(options)
 			.then(res => {
-				console.log(res)
+				// TODO: maybe format the massage and give a url for the issue
+				robot.messageRoom(userid, `issue created. `)
+				// console.log(res)
 			})
 			.catch(err => {
 				//TODO handle error codes: i.e. 404 not found -> dont post
@@ -640,9 +757,10 @@ module.exports = function (robot) {
 			var username = cache.get(userid).github_username
 
 			if (!token || !username) { // catch the case where username or token are null/undefined
-				throw error
+				throw `User credentials not found. userid: ${userid}`
 			}
 		} catch (error) {
+			console.log(error)
 			oauthLogin(userid)
 			return false
 		}
@@ -702,6 +820,18 @@ module.exports = function (robot) {
 		cache.set(userid, { content: content })
 	}
 
+	function getConversationContent(userid, key) {
+		try {
+			var content = cache.get(userid, content)[key]
+			if (!content) {
+				throw 'content ' + key + ' for userid ' + userid + ' not found.'
+			} else {
+				return content
+			}
+		} catch (error) {
+			return false
+		}
+	}
 
 	function getSlackUser(username) {
 
@@ -721,6 +851,16 @@ module.exports = function (robot) {
 
 			}
 			return false
+		}
+	}
+
+	function bold(text) {
+		if (robot.adapterName == 'slack') {
+			return `*${text}*`
+		}
+		// Add any other adapters here  
+		else {
+			return text
 		}
 	}
 }

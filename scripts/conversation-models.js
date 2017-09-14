@@ -1,15 +1,14 @@
 var cache = require("./cache.js").getCache()
 
 var createIssue = {
-    "abortKeyword": "quit",
+    "abortKeyword": ["cancel","quit"],
     "onAbortMessage": "You have cancelled the creation of an issue.",
     "requiredMessage": "This value is required!",
-    "onCompleteMessage": "Thank you.",
+    "onCompleteMessage": "Processing..",
     "conversation": [
         {
             "question": [
-                "Specify `repo` name and `owner` in this format: `owner/repo`"
-                + "\nLeave owner blank for Default Team's Organisation "
+                "Specify `repo` name:"
             ],
             "answer": {
                 "name": "repo",
@@ -36,6 +35,7 @@ var createIssue = {
                 "required": false
             }
         },
+        /*
         {
             "question": "Apply a label to this issue:",
             "answer": {
@@ -44,6 +44,8 @@ var createIssue = {
                 "required": false,
             }
         },
+        */
+        /*
         {
             "question": "Are there any assignees? (comma separated)",
             "answer": {
@@ -52,6 +54,7 @@ var createIssue = {
                 "required": false
             }
         }
+        */
     ]
 }
 
