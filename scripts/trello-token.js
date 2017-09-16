@@ -65,6 +65,7 @@ module.exports = function (robot) {
             }
             request(options).then(res => {
                 var values = {
+                    trello_member_id : res.id,
                     trello_username: res.username,
                     trello_token: data['oauth_access_token']
                 }
@@ -76,7 +77,7 @@ module.exports = function (robot) {
                         db.users.findAndModifyAsync(
                             { _id: userId },
                             [["_id", 1]],
-                            { $set: { trello_token: token, trello_username: res.username } },
+                            { $set: { trello_token: token, trello_username: res.username, trello_member_id: res.id } },
                             { upsert: true })
                             .then(res => {
                                 // console.log(res)

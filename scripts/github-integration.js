@@ -179,7 +179,7 @@ module.exports = function (robot) {
 		listGithubSumUp(userid, query, saveLastSumupDate)
 	})
 
-	robot.respond(/github sum-?ups?( all| closed| open|)/i, function (res) {
+	robot.respond(/\wgithub sum-?ups?( all| closed| open|)\b/i, function (res) {
 		var queryObj, state
 		state = res.match[1].trim()
 		if (state != null) {
@@ -760,7 +760,6 @@ module.exports = function (robot) {
 				throw `User credentials not found. userid: ${userid}`
 			}
 		} catch (error) {
-			console.log(error)
 			oauthLogin(userid)
 			return false
 		}

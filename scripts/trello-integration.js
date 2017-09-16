@@ -54,6 +54,28 @@ var trello = Promise.promisifyAll(trelloAuth);
 
 module.exports = function (robot) {
 
+    robot.respond(/test my db/, res => {
+        var userid = res.message.user.id
+        updateTrelloResources(userid).then(() => {
+
+            var query = {
+                "lists.cards":
+                {
+                    $elemMatch: {
+                        idMembers: "59243fadba41b95d300c3d5e"
+                    }
+                }
+
+            }
+            var project = { "lists.cards.idMembers.$": 1 }//{ "lists.cards.idMembers": "59243fadba41b95d300c3d5e" }
+
+            var db = mongoskin.MongoClient.connect(mongodb_uri);
+            db.bind('trelloBoards').aggregateAsync(
+                { '$unwind': '$lists' }, { '$unwind': '$lists.cards' }, { '$match': { 'lists.cards.idMembers': '58d94ef8d420d31c5bada951' } }
+            ).then(r => { console.log(r) })
+
+        })
+    })
 
     /*************************************************************************/
     /*                             Listeners                                 */
@@ -95,12 +117,123 @@ module.exports = function (robot) {
         }
         getNotificationsSumUp(userid, query)
     })
+    robot.respond(/trello my cards/i, function (res) {
+        var userid = res.message.user.id
+        updateTrelloResources(userid).then(() => {
+            listUserCards(userid)
+        }).catch(error => {
+            /* When catch occures means that the user is not logged in 
+             * but this is handled by the getCredentials() function, 
+             * so there is nothing to care about here 
+             */
+        })
+
+    })
+
+    function listUserCards(userid) {
+        var memberId = getMemberId(userid)
+        if (!memberId) return 0
+
+        var db = mongoskin.MongoClient.connect(mongodb_uri);
+        db.bind('trelloBoards').aggregateAsync(
+            { '$unwind': '$lists' },
+            { '$unwind': '$lists.cards' },
+            { '$match': { 'lists.cards.idMembers': memberId } }
+        ).then(boards => {
+
+            var msg = { attachments: [] }
+
+            return Promise.each(boards, function (board) {
+                var attachment = slackmsg.attachment()
+                attachment.author_name = 'Card'
+                attachment.author_icon = 'TODO'
+
+                attachment.title = `<${board.lists.cards.shortUrl}|${board.lists.cards.name}>`
+                var listName = board.lists.name
+                attachment.text = `In list ${bold(listName)} on <${board.url}|${board.name}>\n`
+                attachment.color = color.getHex(board.prefs.background)
+
+                var badges = board.lists.cards.badges
+
+                if (badges.due) {
+                    var due = new Date(badges.due)
+                    var df = 'dd mmm yy'
+                    if (due.getFullYear == new Date().getFullYear) {
+                        df = 'mmm dd' // no need to display the year
+                    }
+                    // slack clock represents only hours and half past hours. => Need to round with 30
+                    var clock = due.getHours() + '' + (due.getMinutes() + (30 - due.getMinutes()))
+                    attachment.text += `:clock${clock}: ${dateFormat(due, df)} `
+                }
+
+                if (badges.comments) {
+                    attachment.text += `:speech_balloon: ${badges.comments} `
+                }
+
+                if (badges.attachments) {
+                    attachment.text += `:paperclip: ${badges.attachments} `
+                }
+
+                if (badges.checkItems) {
+                    var checkBox = ':ballot_box_with_check:'
+                    if (badges.checkItems == badges.checkItemsChecked) {
+                        checkBox = ':white_check_mark:'
+                    }
+                    attachment.text += `${checkBox} ${badges.checkItemsChecked}/${badges.checkItems} `
+                }
+
+                if (badges.attachments) {
+                    attachment.text += `:paperclip: ${badges.attachments} `
+                }
+
+                if (board.lists.cards.idMembers.length) {
+                    attachment.text += `:bust_in_silhouette: ${board.lists.cards.idMembers.length} `
+                }
+
+                var labels = board.lists.cards.labels
+                if (labels.length) {
+                    var labelsString = ''
+                    for (var i = 0; i < labels.length; i++) {
+
+                        if (labels[i].name) {
+                            labelsString += labels[i].name + ', '
+                        }
+                        else {
+                            labelsString += labels[i].color + ', '
+                        }
+                    }
+                    attachment.text += "\nLabels: " + labelsString.slice(0, -2)
+
+                }
+
+                attachment.text += '\n' + board.lists.cards.desc
+
+                attachment.footer = 'Last Activiy'
+                attachment.ts = Date.parse(board.lists.cards.dateLastActivity) / 1000
+
+                msg.attachments.push(attachment)
+            }).then(() => {
+                // return msg
+                robot.messageRoom(userid, msg)
+            })
+        })
+    }
+
+    function getChannelBoard(id) {
+        var boardId
+        try {
+            boardId = cache.get('channelsToBoards')[id].id
+            return boardId
+        } catch (error) {
+            return false
+        }
+    }
 
     robot.on('trelloSumUp', function (userid, query, saveLastNotif) {
         getNotificationsSumUp(userid, query, saveLastNotif)
     })
 
-    robot.hear(/trello link (.*)trello.com\/(.*)/i, function (res) {
+    robot.hear(/trello webhooks? link (.*)trello.com\/(.*)/i, function (res) {
         var room = slackmsg.getChannelName(robot, res)
         var userid = res.message.user.id
         var modelUrl = res.match[2].trim()
@@ -118,94 +251,8 @@ module.exports = function (robot) {
             })
     })
 
-    robot.respond(/trello boards/i, function (res) {
-        var userid = res.message.user.id
-        listBoards(userid)
-    })
-    function listBoards(userid, filter = 'open') {
-        var credentials = getCredentials(userid)
-        if (!credentials) { return 0 }
 
-        var query = { filter: filter, fields: 'all' }
-
-        var options = {
-            url: `${TRELLO_API}/organizations/${trelloTeam}/boards?${credentials}`,
-            method: 'GET',
-            qs: query,
-            headers: trello_headers,
-            json: true
-        }
-
-        request(options).then(boardsArray => {
-            var msg = { attachments: [] }
-            Promise.each(boardsArray, function (board) {
-                var attachment = slackmsg.attachment()
-                var boardName = board.name
-                var boardDesc = board.desc
-                var boardURL = board.shortUrl
-                var boardColor = board.prefs.background
-                var boardLastActivity = board.dateLastActivity
-                attachment.author_name = 'Board'
-                // TODO attachment.author_icon = 
-                attachment.title = `<${boardURL}|${boardName}>`
-                attachment.text = `${boardDesc}`
-                attachment.color = color.getHex(boardColor)
-                attachment.footer = 'Last activity'
-                attachment.ts = Date.parse(boardLastActivity) / 1000
-                msg.attachments.push(attachment)
-            }).done(() => {
-                robot.messageRoom(userid, msg)
-            })
-        })
-    }
-
-    robot.respond(/trello res/, res => {
-        updateTrelloResources(res.message.user.id)
-    })
-    function updateTrelloResources(userid) {
-        var credentials = getCredentials(userid)
-        if (!credentials) { return 0 }
-
-        var query = {
-            filter: 'all',
-            fields: 'name,id'
-        }
-
-        var options = {
-            url: `${TRELLO_API}/organizations/${trelloTeam}/boards?${credentials}`,
-            method: 'GET',
-            qs: query,
-            headers: trello_headers,
-            json: true
-        }
-        request(options).then(teamBoards => {
-            Promise.each(teamBoards, function (board) {
-                var query = { _id: board.id }
-                var doc = { $set: { name: board.name } }
-                var options = { upsert: true }
-                dbFindAndModify('trelloBoards', query, [['_id',1]], doc, options)
-            })
-        })
-    }
-    function dbFindAndModify(collection, query, sort, doc, options) {
-        return new Promise((resolve, reject) => {
-            var db = mongoskin.MongoClient.connect(mongodb_uri);
-            db.bind(collection).findAndModifyAsync(query, sort, doc, options).then(res => {
-                resolve(res)
-            }).catch(error => {
-                reject(error)
-            })
-        })
-    }
-    robot.respond(/^trello lists$/i, function (res) {
-        var userid = res.message.user.id
-        listBoardLists(userid)
-    })
-    function listBoardLists(userid, boardId) {
-
-    }
-
-    robot.hear(/trello unlink (.*)trello.com\/(.*)/i, function (res) {
+    robot.hear(/trello webhooks? unlink (.*)trello.com\/(.*)/i, function (res) {
         var room = slackmsg.getChannelName(robot, res)
         var userid = res.message.user.id
         var modelShortLink = res.match[2].trim().split('/')[1]
@@ -229,6 +276,99 @@ module.exports = function (robot) {
                     + `Script: ${path.basename(__filename)}`)
             })
     })
+
+    robot.hear(/trello link (.*)trello.com\/b\/(.*)/i, function (res) {
+        var roomid = res.message.room
+        var userid = res.message.user.id
+        var modelUrl = 'b/' + res.match[2].trim()
+        if (roomid[0] == 'D') { // D = Direct Message
+            roomid = robot.brain.userForName(res.message.user.name).id
+        }
+        getModelInfo(userid, modelUrl)
+            .then(board => {
+                linkBoardChannel(userid, board, roomid)
+            })
+            .catch(error => {
+                robot.logger.error(error)
+                robot.messageRoom(c.errorsChannel, c.errorMessage
+                    + `Script: ${path.basename(__filename)}`)
+            })
+    })
+
+    robot.hear(/trello unlink (.*)trello.com\/b\/(.*)/i, function (res) {
+        var roomid = res.message.room
+        var userid = res.message.user.id
+        var modelUrl = 'b/' + res.match[2].trim()
+        if (roomid[0] == 'D') { // D = Direct Message
+            roomid = robot.brain.userForName(res.message.user.name).id
+        }
+        getModelInfo(userid, modelUrl)
+            .then(board => {
+                unlinkBoardChannel(userid, board, roomid)
+            })
+            .catch(error => {
+                robot.logger.error(error)
+                robot.messageRoom(c.errorsChannel, c.errorMessage
+                    + `Script: ${path.basename(__filename)}`)
+            })
+    })
+
+    function linkBoardChannel(userid, board, roomid) {
+        var query = { _id: roomid }
+        var doc = { $set: { _id: roomid, board } }
+        dbFindAndModify('channelsToTrelloBoards', query, [['_id', 1]], doc, { upsert: true })
+            .then(() => {
+                cache.set(`channelsToBoards.${roomid}`, board)
+                var handled = robot.emit('setCache', { _id: roomid, board }) // emits an event for brain.js
+                if (!handled) {
+                    robot.logger.warning('No script handled the setCache event.')
+                }
+            })
+    }
+
+    function unlinkBoardChannel(userid, board, roomid) {
+        var room = slackmsg.getChannelName(robot, res)
+        var userid = res.message.user.id
+        var modelShortLink = res.match[2].trim().split('/')[1]
+        if (room == 'DM') {
+            room = '@' + res.message.user.name
+        }
+        var queryObj = {
+            userid: userid,
+            modelShortLink: modelShortLink,
+            room: room
+        }
+        getWebhookId(queryObj)
+            .then(webhooksIds => {
+                Promise.each(webhooksIds, function (webhookId) {
+                    deleteWebhook(res.message.user.id, webhookId)
+                })
+            })
+            .catch(error => {
+                robot.logger.error(error)
+                robot.messageRoom(c.errorsChannel, c.errorMessage
+                    + `Script: ${path.basename(__filename)}`)
+            })
+    }
+
+
+
+    robot.respond(/trello boards/i, function (res) {
+        var userid = res.message.user.id
+        listBoards(userid)
+    })
+    robot.respond(/trello res/, res => {
+        updateTrelloResources(res.message.user.id).then(r => console.log())
+    })
+
+    robot.respond(/\wtrello lists\b/i, function (res) {
+        var userid = res.message.user.id
+        listBoardLists(userid)
+    })
+    function listBoardLists(userid, boardId) {
+
+    }
+
 
     robot.respond(/trello (disable|pause|stop|deactivate) webhook (.*)/i, function (res) {
         var webhookId = res.match[2].trim()
@@ -325,6 +465,100 @@ module.exports = function (robot) {
     /*                             API Calls                                 */
     /*************************************************************************/
 
+    function updateTrelloResources(userid) {
+        var credentials = getCredentials(userid)
+        if (!credentials) {
+            return new Promise(function (resolve, reject) {
+                return reject('not logged in')
+            })
+        }
+
+        var query = {
+            filter: 'all',
+            fields: 'all'
+        }
+
+        var options = {
+            url: `${TRELLO_API}/organizations/${trelloTeam}/boards?${credentials}`,
+            method: 'GET',
+            qs: query,
+            headers: trello_headers,
+            json: true
+        }
+
+
+        return request(options).then(teamBoards => {
+            return Promise.each(teamBoards, function (board) {
+                var options = {
+                    method: 'GET',
+                    url: `https://api.trello.com/1/boards/${board.id}/lists?${credentials}`,
+                    qs:
+                    {
+                        lists: 'all',
+                        fields: 'all',
+                        cards: 'all',
+                        card_fields: 'all',
+                        card_members: true,
+                        card_member_fields: 'all'
+                        /* card_members is a nested card resource but for some reason it doen't work. 
+                         * Based on trello api website it should return the 
+                         * members resources assigned on each card.
+                         * It might be usefull in the future. (e.g. Display assigned members on cards)
+                         * More info: https://developers.trello.com/reference#cards-nested-resource
+                         */
+                    },
+                    headers: trello_headers,
+                    json: true
+                }
+                return request(options).then(lists => {
+                    board.lists = lists
+
+                    var query = { _id: board.id }
+                    var doc = { $set: board }
+                    var options = { upsert: true }
+                    return dbFindAndModify('trelloBoards', query, [['_id', 1]], doc, options)
+                })
+            })
+        })
+    }
+
+    function listBoards(userid, filter = 'open') {
+        var credentials = getCredentials(userid)
+        if (!credentials) { return 0 }
+
+        var query = { filter: filter, fields: 'all' }
+
+        var options = {
+            url: `${TRELLO_API}/organizations/${trelloTeam}/boards?${credentials}`,
+            method: 'GET',
+            qs: query,
+            headers: trello_headers,
+            json: true
+        }
+
+        request(options).then(boardsArray => {
+            var msg = { attachments: [] }
+            Promise.each(boardsArray, function (board) {
+                var attachment = slackmsg.attachment()
+                var boardName = board.name
+                var boardDesc = board.desc
+                var boardURL = board.shortUrl
+                var boardColor = board.prefs.background
+                var boardLastActivity = board.dateLastActivity
+                attachment.author_name = 'Board'
+                // TODO attachment.author_icon = 
+                attachment.title = `<${boardURL}|${boardName}>`
+                attachment.text = `${boardDesc}`
+                attachment.color = color.getHex(boardColor)
+                attachment.footer = 'Last activity'
+                attachment.ts = Date.parse(boardLastActivity) / 1000
+                msg.attachments.push(attachment)
+            }).done(() => {
+                robot.messageRoom(userid, msg)
+            })
+        })
+    }
+
 
     function addCardComment(userid, cardId, commentText) {
         var credentials = getCredentials(userid)
@@ -391,7 +625,7 @@ module.exports = function (robot) {
                     })
             })
             .then(() => {
-                var handled = robot.emit('resetCacheForTrelloWebhooks')
+                var handled = robot.emit('resetCacheForTrelloWebhooks') // emits an event for brain.js
                 if (!handled) {
                     robot.logger.warning('No script handled the resetCacheForTrelloWebhooks event.')
                 }
@@ -732,7 +966,7 @@ module.exports = function (robot) {
                     })
             })
             .then(() => {
-                // then update cache (cache 'looks' at db so update it later than db)
+                // then update cache (cache is a db 'mirror' so we need to update it after db update)
                 var handled = robot.emit('resetCacheForTrelloWebhooks')
                 if (!handled) {
                     robot.logger.warning('No script handled the resetCacheForTrelloWebhooks event.')
@@ -746,7 +980,7 @@ module.exports = function (robot) {
 
     }
 
-
+    // modelUrl must be www.trello.com/<modelUrl>
     function getModelInfo(userid, modelUrl) {
         var credentials = getCredentials(userid)
         if (!credentials) { return 0 }
@@ -1097,6 +1331,22 @@ module.exports = function (robot) {
 
     }
 
+    function getMemberId(userid) {
+
+        try {
+            var memberId = cache.get(userid).trello_member_id
+            if (!memberId) { // catch the case where username or token are null/undefined
+                throw error
+            }
+        } catch (error) {
+            robot.emit('trelloOAuthLogin', userid)
+            return false
+        }
+        return memberId
+
+    }
+
+
 
     // TODO change the messages
     function errorHandler(userid, error) {
@@ -1142,6 +1392,17 @@ module.exports = function (robot) {
             }
             return false
         }
+    }
+
+    function dbFindAndModify(collection, query, sort, doc, options) {
+        return new Promise((resolve, reject) => {
+            var db = mongoskin.MongoClient.connect(mongodb_uri);
+            db.bind(collection).findAndModifyAsync(query, sort, doc, options).then(res => {
+                resolve(res)
+            }).catch(error => {
+                reject(error)
+            })
+        })
     }
     /*******************************************************************/
     /*          Slack Buttons Implementation - TEMPLATE                */

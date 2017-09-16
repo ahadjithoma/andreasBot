@@ -4,6 +4,9 @@ module.exports = {
         return (robot.adapter.client.rtm.dataStore.getChannelGroupOrDMById(res.message.room)).name;
     },
 
+    getChannelNameById: function (robot, roomid) {
+        return (robot.adapter.client.rtm.dataStore.getChannelGroupOrDMById(roomid)).name;
+    },
     getUserName: function (res) {
         return res.message.user.name;
     },

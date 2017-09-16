@@ -15,6 +15,7 @@ module.exports = (robot) => {
     adapterUsersIDsToCache()
     usersDataToCache()
     trelloWebhooksInfoToCache()
+    channelsTrelloBoardsToCache()
     robot.brain.constructor(robot)
 
     robot.on('refreshBrain', function () {
@@ -40,6 +41,7 @@ module.exports = (robot) => {
                     var jenkins_crumb = document.jenkins_crumb
                     var trello_token = document.trello_token
                     var trello_last_notification = document.trello_last_notification
+                    var trello_member_id = document.trello_member_id
                     var github_last_sumup_date = document.github_last_sumup_date
                     var id = document._id // represents the userid in chat adapter
 
@@ -66,7 +68,8 @@ module.exports = (robot) => {
                     if (trello_token) {
                         var values = {
                             trello_username: document.trello_username,
-                            trello_token: encryption.decryptSync(trello_token)
+                            trello_token: encryption.decryptSync(trello_token),
+                            trello_member_id: trello_member_id
                         }
                         cache.set(id, values)
                     }
@@ -103,6 +106,24 @@ module.exports = (robot) => {
                         room: webhook.room
                     }
                     cache.union('trelloWebhooks', webhookObj)
+                })
+            }).catch(dbError => {
+                robot.logger.error(dbError)
+                if (c.errorsChannel)
+                    robot.messageRoom(c.errorsChannel, c.errorMessage
+                        + `Script: ${path.basename(__filename)}`)
+            }).done(() => {
+                db.close()
+            })
+    }
+
+    function channelsTrelloBoardsToCache() {
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
+
+        db.collection('channelsToTrelloBoards').find().toArrayAsync()
+            .then(data => {
+                data.forEach(function (channel) {
+                    cache.set(`channelsToBoards.${channel._id}`, channel.board)
                 })
             }).catch(dbError => {
                 robot.logger.error(dbError)
