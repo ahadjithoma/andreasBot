@@ -14,3 +14,7 @@ Date.prototype.toIsoString = function () {
         dif + pad(tzo / 60) +
         ':' + pad(tzo % 60);
 }
+
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}

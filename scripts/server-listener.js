@@ -33,4 +33,20 @@ module.exports = function (robot) {
         })
 
     })
+
+    robot.router.get('/icons/trelloCard', function (request, response) {
+
+        fs.readFile(__dirname + '/icons/trelloCard.png', function (err, icon) {
+            if (err) {
+                console.log(err)
+                response.writeHead(404);
+                response.write('Not Found');
+            } else {
+                response.writeHead(200, { 'Content-Type': 'image/png' });
+                response.write(icon);
+            }
+            response.end()
+
+        })
+    })
 }

@@ -22,12 +22,13 @@
 'use strict';
 
 // init
-var GitHubApi = require("github");
-var slackMsgs = require('./slackMsgs.js');
+const querystring = require('querystring')
+var GitHubApi = require("github")
+var slackMsgs = require('./slackMsgs.js')
 var c = require('./config.json')
 var encryption = require('./encryption.js')
 var cache = require('./cache.js').getCache()
-const Conversation = require('./hubot-conversation/index.js');
+const Conversation = require('./hubot-conversation/index.js')
 var dialog = require('./dynamic-dialog.js')
 var convModel = require('./conversation-models.js')
 var color = require('./colors.js')
@@ -63,19 +64,25 @@ module.exports = function (robot) {
 	robot.respond(/github repos/, (res) => {
 		listRepos(res.message.user.id)
 	})
-	robot.on('listRepos', (data, res) => {
+	robot.on('listGithubRepos', (data, res) => {
 		listRepos(res.message.user.id)
 	})
 
-	robot.respond(/github (open |closed |all |)issues( of)?( repo)? (.*)/i, function (res) {
+	robot.respond(/github( last (\d+)|) (open |closed |all |mentioned |)issues( of)? repo (.*)/i, function (res) {
 		var userid = res.message.user.id
 		var repo = res.match.pop()
-		var state = res.match[1].trim()
-		if (state == '') {
-			state = 'open'
+		var issuesCnt = res.match[2]
+		console.log(issuesCnt)
+		var parameter = res.match[3].trim()
+		console.log(res.match)
+		if (parameter == 'mentioned') {
+			var paramsObj = { mentioned: getCredentials(userid).username }
+		}
+		else if (parameter != '') {
+			paramsObj = { state: parameter }
 		}
 		updateConversationContent(userid, { github_repo: repo })
-		listRepoIssues(userid, repo, state)
+		listRepoIssues(userid, repo, paramsObj, issuesCnt)
 	})
 
 	robot.respond(/github comments of issue (\d+) of repo (.*)/i, function (res) {
@@ -123,10 +130,7 @@ module.exports = function (robot) {
 			.catch(err => console.log(err))
 	})
 
-	//TODO
-	robot.respond(/github issue comment (.*)/i, function (res) {
-		var commentText = res.match.pop()
-	})
+
 	robot.respond(/github issue (\d+) comment (.*)/i, function (res) {
 		var userid = res.message.user.id
 		var issueNum = res.match[1]
@@ -179,6 +183,39 @@ module.exports = function (robot) {
 		listGithubSumUp(userid, query, saveLastSumupDate)
 	})
 
+	// reply instantly to the last github issue mentioned
+	robot.respond(/github reply (.*)/i, function (res) {
+		var userid = res.message.user.id
+		var commentText = res.match[1]
+		try {
+			var repo = cache.get(userid).github_last_repo
+			var issue = cache.get(userid).github_last_issue
+			if (repo && issue) {
+				createIssueComment(userid, repo, issue, commentText)
+			} else {
+				throw null
+			}
+		} catch (error) {
+			robot.messageRoom(userid, 'Sorry but i couldn\'t process your query.')
+		}
+	})
+
+	robot.respond(/\bgithub close$/i, function (res) {
+		var userid = res.message.user.id
+		var commentText = res.match[1]
+		try {
+			var repo = cache.get(userid).github_last_repo
+			var issue = cache.get(userid).github_last_issue
+			if (repo && issue) {
+				updateIssue(userid, repo, issue, { state: 'close' })
+			} else {
+				throw null
+			}
+		} catch (error) {
+			robot.messageRoom(userid, 'Sorry but i couldn\'t process your query.')
+		}
+	})
+
 	robot.respond(/\wgithub sum-?ups?( all| closed| open|)\b/i, function (res) {
 		var queryObj, state
 		state = res.match[1].trim()
@@ -224,7 +261,10 @@ module.exports = function (robot) {
 		}
 
 		request(options).then(res => {
-			console.log(res)
+			var updateInfo = `${Object.keys(updateObj)}: ${updateObj[Object.keys(updateObj)]}`
+			var msg = { unfurl_links: true }
+			msg.text = `Issue <${res.html_url}|#${res.number}: ${res.title}> updated. ${updateInfo}.`
+			robot.messageRoom(userid, msg)
 		}).catch(error => {
 			robot.messageRoom(userid, error.message)
 			robot.logger.error(error)
@@ -604,13 +644,14 @@ module.exports = function (robot) {
 			.catch(err => { console.log(err) })
 	}
 
-	function listRepoIssues(userid, repo, state = 'open') {
+	function listRepoIssues(userid, repo, paramsObj = { state: 'open' }, issuesCnt) {
 		var ghApp = cache.get('GithubApp')
 		var appToken = ghApp[0].token
 		var owner = ghApp[0].account
 
+		var params = querystring.stringify(paramsObj)
 		var options = {
-			url: `${GITHUB_API}/repos/${owner}/${repo}/issues?state=${state}`,
+			url: `${GITHUB_API}/repos/${owner}/${repo}/issues?${params}`,
 			method: 'GET',
 			headers: getAppHeaders(appToken),
 			json: true
@@ -622,9 +663,13 @@ module.exports = function (robot) {
 				msg.unfurl_links = false
 				if (repoIssues.length > 0) {
 					msg.attachments = []
-					msg.text = `Issues of <https://www.github.com/${owner}/${repo}|${owner}/${repo}>:`
-				} else {
+					msg.text = `${paramsObj.state.capitalize()} issues of <https://www.github.com/${owner}/${repo}|${owner}/${repo}>:`
+				}
+				else {
 					msg.text = `There aren't any issues on <https://www.github.com/${owner}/${repo}|${owner}/${repo}>`
+				}
+				if (issuesCnt) {
+					repoIssues = repoIssues.slice(0, issuesCnt)
 				}
 				Promise.each(repoIssues, function (issue) {
 					var attachment = slackMsgs.attachment()
@@ -638,7 +683,22 @@ module.exports = function (robot) {
 					attachment.author_name = userLogin
 					attachment.author_icon = userAvatar
 					attachment.author_link = userUrl
-					attachment.text = ` <${url}|${num}>: ${title}`
+					attachment.text = ` <${url}|${num}: ${title}>`
+
+					if (issue.body) {
+						attachment.fields.push({
+							title: '',
+							value: '```'+issue.body+'```',
+							short: false
+						})
+					}
+
+					/* Do i have to provide the state of issue when i use green and red color instead? */
+					// attachment.fields.push({
+					// 	title: 'State',
+					// 	value: issue.state,
+					// 	short: true
+					// })
 
 					if (issue.state.includes('open')) {
 						attachment.color = 'good'

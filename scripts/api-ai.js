@@ -23,6 +23,7 @@ module.exports = robot => {
         if (res.message.text.match(regex)) { // captures only direct messages and not messages in channels 
             var msg = res.message.text.match(regex)[1]
             apiaiAsk(msg, res)
+            console.log('api.ai', msg)
         }
     })
 
@@ -56,7 +57,7 @@ module.exports = robot => {
                 var intentName = response.result.metadata.intentName
                 res.reply(`Do you mean ${intentName} ?`)
                 apiaiEvent('notSure', res)
-                return 
+                return
             }
             else {
                 responseCallback(response, res)

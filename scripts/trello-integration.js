@@ -140,13 +140,12 @@ module.exports = function (robot) {
             { '$unwind': '$lists.cards' },
             { '$match': { 'lists.cards.idMembers': memberId } }
         ).then(boards => {
-
+            var fs = require('fs')
             var msg = { attachments: [] }
-
             return Promise.each(boards, function (board) {
                 var attachment = slackmsg.attachment()
                 attachment.author_name = 'Card'
-                attachment.author_icon = 'TODO'
+                attachment.author_icon = hubot_host_url + '/icons/trelloCard'
 
                 attachment.title = `<${board.lists.cards.shortUrl}|${board.lists.cards.name}>`
                 var listName = board.lists.name
@@ -161,8 +160,10 @@ module.exports = function (robot) {
                     if (due.getFullYear == new Date().getFullYear) {
                         df = 'mmm dd' // no need to display the year
                     }
-                    // slack clock represents only hours and half past hours. => Need to round with 30
-                    var clock = due.getHours() + '' + (due.getMinutes() + (30 - due.getMinutes()))
+                    // Hours must be in 12H Format
+                    // Minutes must be 00 or 30 
+                    var hours = due.getHours() > 12 ? due.getHours() - 12 : due.getHours();
+                    var clock = hours + '' + (due.getMinutes() + (30 - due.getMinutes()))
                     attachment.text += `:clock${clock}: ${dateFormat(due, df)} `
                 }
 
@@ -304,7 +305,7 @@ module.exports = function (robot) {
         }
         getModelInfo(userid, modelUrl)
             .then(board => {
-                unlinkBoardChannel(userid, board, roomid)
+                unlinkBoardChannel(res, board, roomid)
             })
             .catch(error => {
                 robot.logger.error(error)
@@ -326,7 +327,7 @@ module.exports = function (robot) {
             })
     }
 
-    function unlinkBoardChannel(userid, board, roomid) {
+    function unlinkBoardChannel(res, board, roomid) {
         var room = slackmsg.getChannelName(robot, res)
         var userid = res.message.user.id
         var modelShortLink = res.match[2].trim().split('/')[1]
@@ -341,7 +342,7 @@ module.exports = function (robot) {
         getWebhookId(queryObj)
             .then(webhooksIds => {
                 Promise.each(webhooksIds, function (webhookId) {
-                    deleteWebhook(res.message.user.id, webhookId)
+                    // deleteWebhook(res.message.user.id, webhookId)
                 })
             })
             .catch(error => {
@@ -385,6 +386,7 @@ module.exports = function (robot) {
     robot.respond(/trello update webhooks callback url/i, function (res) {
         // var webhookId = res.match[1].trim()
         var userid = res.message.user.id
+        robot.messageRoom(userid, 'Processing..')
         robot.messageRoom(userid, 'Note that webhooks not created by you can\'t be updated.')
         updateWebhooksCallbackURL(userid)
 
@@ -749,7 +751,7 @@ module.exports = function (robot) {
             .then(action => {
                 displayNotifications(room, [action])
 
-                // Add here any logic fot user mentions.
+                // Add here any logic for user mentions.
                 /* Problem is that:
                  * action.type == 'mentionedOnCard' does not exist. nor webhook.type
                  * but only notification.type which is not included in webhooks but only
@@ -775,7 +777,6 @@ module.exports = function (robot) {
 
                 if (action.type == 'commentCard') {
                     var commentText = action.data.text
-                    var cardId = action.data.card.id
                     var regex = /(?:^|\W)@(\w+)(?!\w)/g, match, matches = [];
                     while (match = regex.exec(commentText)) {
                         var matchedUser = match[1]
@@ -875,7 +876,8 @@ module.exports = function (robot) {
                         attachment.color = 'danger'
                     }
 
-                    attachment.pretext = webhook.description
+                    attachment.pretext = `Created by ${webhook.username} for the ${webhook.modelType} `
+                    + `<${webhook.modelShortUrl}|${webhook.modelName}>`
                     attachment.fields.push({
                         title: "Channel",
                         value: webhook.room,

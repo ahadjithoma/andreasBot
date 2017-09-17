@@ -3,6 +3,7 @@ var querystring = require('querystring');
 var slackMsgs = require('./slackMsgs.js')
 var color = require('./colors.js')
 var Promise = require('bluebird')
+var cache = require('./cache.js').getCache()
 
 var githubURL = 'https://www.github.com/'
 
@@ -186,8 +187,8 @@ module.exports = function (robot) {
 					})
 				}
 				msg.attachments.push(attachment)
-
 				robot.messageRoom(room, msg)
+				checkForUserMentions(msg, payload.repository.name, issueNum)
 				break
 			case 'edited':
 			case 'deleted':
@@ -195,6 +196,25 @@ module.exports = function (robot) {
 				break
 		}
 	};
+
+	function checkForUserMentions(msg, repo, issue) {
+		var commentText = msg.attachments[0].text
+		var regex = /(?:^|\W)@(\w+)(?!\w)/g, match, matches = [];
+		while (match = regex.exec(commentText)) {
+			var matchedUser = match[1]
+			var user = getSlackUser(matchedUser)
+
+			if (user) {
+				cache.set(user.id, { github_last_repo: repo })
+				cache.set(user.id, { github_last_issue: issue })
+				robot.messageRoom(user.id, 'You are mentioned on a Github Issue.')
+				robot.messageRoom(user.id, msg)
+				robot.messageRoom(user.id, '`github reply <text>` to add a comment to this issue.')
+
+			}
+
+		}
+	}
 
 
 	function createAndDeleteEvent(eventBody) {
@@ -339,7 +359,6 @@ module.exports = function (robot) {
 		}
 		msg.attachments.push(attachment)
 		robot.messageRoom(room, msg)
-
 	}
 
 
@@ -360,7 +379,7 @@ module.exports = function (robot) {
 			unfurl_links: false,
 			attachments: []
 		}
-		var attachement = slackMsgs.attachment()
+		var attachment = slackMsgs.attachment()
 
 		for (var i = 0; i < commits; i++) {
 			var authorUsername = payload.commits[i].author.username;
@@ -370,7 +389,7 @@ module.exports = function (robot) {
 			var commitMsg = payload.commits[i].message.split('\n', 1); 	// get only the commit msg, not the description
 			var commitURL = payload.commits[i].url;
 			commitID = "`" + commitID + "`"
-			attachement.text += `\n<${commitURL}|${commitID}> ${commitMsg} - ${authorUsername}`;
+			attachment.text += `\n<${commitURL}|${commitID}> ${commitMsg} - ${authorUsername}`;
 		}
 
 		// manage plural
@@ -394,9 +413,9 @@ module.exports = function (robot) {
 				+ `by <${senderURL}|${senderUsername}>:`
 		}
 
-		attachement.color = color.getHex('blue')
-		attachement.fallback = msg.text
-		msg.attachments.push(attachement)
+		attachment.color = color.getHex('blue')
+		attachment.fallback = msg.text
+		msg.attachments.push(attachment)
 
 		robot.messageRoom(room, msg);
 	}
@@ -467,8 +486,8 @@ module.exports = function (robot) {
 		}
 		attachment.fallback = attachment.pretext
 
-		// assign attachement color 
-		// CURRENTLY WE ARE NOT USING ATTACHEMENTS FOR ALL ISSUES SO IT'S USELESS
+		// assign attachment color 
+		// CURRENTLY WE ARE NOT USING attachmentS FOR ALL ISSUES SO IT'S USELESS
 		// 	if (action.includes('open')){
 		// 		attachment.color = '#00ff00'; // set color = green
 		// 	} else if (action.includes('close')){
@@ -483,6 +502,31 @@ module.exports = function (robot) {
 
 	};
 
+
+	/*************************************************************************/
+	/*                          helpful functions                            */
+	/*************************************************************************/
+
+	function getSlackUser(githubUsername) {
+
+		var userids = cache.get('userIDs')
+
+		for (var i = 0; i < userids.length; i++) {
+			var id = userids[i]
+
+			var user = cache.get(id)
+			var cachedGithubUsername
+			try {
+				var cachedGithubUsername = user.github_username
+				if (cachedGithubUsername == githubUsername) {
+					return robot.brain.userForId(id)
+				}
+			} catch (e) {
+
+			}
+			return false
+		}
+	}
 
 
 	function bold(text) {
