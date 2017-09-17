@@ -688,7 +688,7 @@ module.exports = function (robot) {
 					if (issue.body) {
 						attachment.fields.push({
 							title: '',
-							value: '```'+issue.body+'```',
+							value: issue.body,
 							short: false
 						})
 					}
