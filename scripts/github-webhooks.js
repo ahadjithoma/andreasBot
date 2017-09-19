@@ -205,8 +205,7 @@ module.exports = function (robot) {
 			var user = getSlackUser(matchedUser)
 
 			if (user) {
-				cache.set(user.id, { github_last_repo: repo })
-				cache.set(user.id, { github_last_issue: issue })
+				updateConversationContent(user.id, { github_last_repo: repo, github_last_issue: issue })
 				robot.messageRoom(user.id, 'You are mentioned on a Github Issue.')
 				robot.messageRoom(user.id, msg)
 				robot.messageRoom(user.id, '`github reply <text>` to add a comment to this issue.')
@@ -546,6 +545,23 @@ module.exports = function (robot) {
 		}
 		return usersString.toString().replace(/,/g, ', ')
 
+	}
+
+	function updateConversationContent(userid, content) {
+		cache.set(userid, { content: content })
+	}
+
+	function getConversationContent(userid, key) {
+		try {
+			var content = cache.get(userid, content)[key]
+			if (!content) {
+				throw 'content ' + key + ' for userid ' + userid + ' not found.'
+			} else {
+				return content
+			}
+		} catch (error) {
+			return false
+		}
 	}
 
 }

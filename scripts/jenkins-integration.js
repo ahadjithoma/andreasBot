@@ -1,7 +1,6 @@
 // Configuration:
 // Commands:
 //   `JENKINS`
-//   `jenkins login`
 //   `jenkins builds of job <job name>`
 //   `jenkins last successful build of job <job name>`
 //   `jenkins last completed build of job <job name>`
@@ -9,6 +8,7 @@
 //   `jenkins build info <build number> of job <job name>`
 //   `jenkins build console <build number> of job <job name>`
 //   `jenkins build job <job_name>`
+//   `jenkins jobs`
 
 
 var jenkinsapi = require('jenkins-api');
@@ -19,6 +19,7 @@ var async = require('async')
 var c = require('./config.json')
 var dateFormat = require('dateformat');
 var slackmsg = require('./slackMsgs.js')
+var color = require('./colors.js')
 
 // config
 var jenkins_url = process.env.JENKINS_URL
@@ -28,50 +29,160 @@ var protocol = url[0];
 var df = "dd/mm/yyyy, hh:MM TT"
 
 module.exports = function (robot) {
-    /*************************************************************************
-     *                           robot instances      
-     */
 
+    /*************************************************************************/
+    /*                              Listeners                                */
+    /*************************************************************************/
 
     robot.respond(/jenkins builds of job (.*)/i, function (res) {
-        getAllBuilds(res)
+        var userid = res.message.user.id
+        var jobName = res.match[1]
+        getAllBuilds(userid, jobName)
     })
+
+    robot.on('listJobBuilds', function (data, res) {
+        var userid = res.message.user.id
+        var jobName = data.parameters.jobName
+        getAllBuilds(userid, jobName)
+    })
+
 
     robot.respond(/jenkins last success?f?u?l? build of job (.*)/i, function (res) {
-        getLastSuccessfulBuild(res)
+        var userid = res.message.user.id
+        var jobName = res.match[1]
+        getLastSuccessfulBuild(userid, jobName)
     })
+
+    robot.on('listLastSuccessfulBuild', function (data, res) {
+        var userid = res.message.user.id
+        var jobName = data.parameters.jobName
+        getLastSuccessfulBuild(userid, jobName)
+    })
+
 
     robot.respond(/jenkins last completed? build of job (.*)/i, function (res) {
-        getLastCompletedBuild(res)
+        var userid = res.message.user.id
+        var jobName = res.match[1]
+        getLastCompletedBuild(userid, jobName)
     })
 
+    robot.on('listLastCompletedBuild', function (data, res) {
+        var userid = res.message.user.id
+        var jobName = data.parameters.jobName
+        getLastCompletedBuild(userid, jobName)
+    })
+
+
     robot.respond(/jenkins last build of job (.*)/i, function (res) {
-        getLastBuildInfo(res)
+        var userid = res.message.user.id
+        var jobName = res.match[1]
+        getLastBuildInfo(userid, jobName)
+    })
+
+    robot.on('listLastBuild', function (data, res) {
+        var userid = res.message.user.id
+        var jobName = data.parameters.jobName
+        getLastBuildInfo(userid, jobName)
     })
 
 
     robot.respond(/jenkins build info (.*) of job (.*)/i, function (res) {
-        getBuildInfo(res)
+        var userid = res.message.user.id
+        var jobName = res.match[2]
+        var buildNum = res.match[1]
+        getBuildInfo(userid, jobName, buildNum)
     })
 
-    robot.respond(/jenkins build console (.*) of job (.*)/, function (res) {
-        getBuildConsole(res)
+    robot.on('showBuildInfo', function (data, res) {
+        var userid = res.message.user.id
+        var jobName = data.parameters.jobName
+        var buildNum = data.parameters.buildNum
+        getBuildInfo(userid, jobName, buildNum)
     })
+
+
+    robot.respond(/jenkins build console (\d+) of job (.*)/, function (res) {
+        var userid = res.message.user.id
+        var jobName = res.match[2]
+        var buildNum = res.match[1]
+        getBuildConsole(userid, jobName, buildNum)
+    })
+
+    robot.on('showBuildConsole', function (data, res) {
+        var userid = res.message.user.id
+        var jobName = data.parameters.jobName
+        var buildNum = data.parameters.buildNum
+        getBuildConsole(userid, jobName, buildNum)
+    })
+
 
     robot.respond(/jenkins build job (.*)/, function (res) {
-        buildJob(res)
-    })
-
-    /*************************************************************************/
-    /*                               BUILDS                                  */
-    /*************************************************************************/
-
-    function getAllBuilds(res) {
-        var username, token
         var userid = res.message.user.id
         var jobName = res.match[1]
+        buildJob(userid, jobName)
+    })
 
-        var cred = getCredentials(res)
+    robot.on('buildJob', function (data, res) {
+        var userid = res.message.user.id
+        var jobName = data.parameters.jobName
+        buildJob(userid, jobName)
+    })
+
+
+    robot.respond(/\bjenkins jobs$\b/i, function (res) {
+        var userid = res.message.user.id
+        getAllJobs(userid)
+    })
+
+    robot.on('listJobs', function (data, res) {
+        var userid = res.message.user.id
+        getAllJobs(userid)
+    })
+
+    
+    /*************************************************************************/
+    /*                            API CALLS                                  */
+    /*************************************************************************/
+
+    function getAllJobs(userid) {
+        var cred = getCredentials(userid)
+        if (!cred) { return 0 }
+
+        var args = '?tree=jobs[name,id,url,color]&pretty=true'
+        var options = {
+            url: `${jenkins_url}/api/json${args}`,
+            method: 'GET',
+            auth: {
+                'user': cred.username,
+                'pass': cred.token
+            },
+            json: true
+        };
+
+        request(options)
+            .then(data => {
+                var jobs = data.jobs
+                var msg = { attachments: [] }
+                jobs.forEach(function (job) {
+                    var att = slackmsg.attachment()
+
+                    att.title = `<${job.url}|${job.name}>`
+                    att.fallback = att.title
+                    att.text = `Class: ${job._class}`
+                    att.color = color.getHex(job.color)
+                    msg.attachments.push(att)
+                })
+                return msg
+            })
+            .then(msg => {
+                robot.messageRoom(userid, msg)
+            })
+
+
+    }
+
+    function getAllBuilds(userid, jobName) {
+        var cred = getCredentials(userid)
         if (!cred) { return 0 }
 
         var args = '?depth=1&tree=builds[id,timestamp,result,duration]&pretty=true'
@@ -115,11 +226,8 @@ module.exports = function (robot) {
             })
     }
 
-    function getLastSuccessfulBuild(res) {
-        var userid = res.message.user.id
-        var jobName = res.match[1]
-        var cred = getCredentials(res)
-
+    function getLastSuccessfulBuild(userid, jobName) {
+        var cred = getCredentials(userid)
         if (!cred) { return 0 }
 
         var options = {
@@ -144,11 +252,8 @@ module.exports = function (robot) {
             })
     }
 
-    function getLastCompletedBuild(res) {
-        var userid = res.message.user.id
-        var jobName = res.match[1]
-        var cred = getCredentials(res)
-
+    function getLastCompletedBuild(userid, jobName) {
+        var cred = getCredentials(userid)
         if (!cred) { return 0 }
 
         var options = {
@@ -173,11 +278,8 @@ module.exports = function (robot) {
             })
     }
 
-    function getLastBuildInfo(res) {
-        var userid = res.message.user.id
-        var jobName = res.match[1]
-
-        var cred = getCredentials(res)
+    function getLastBuildInfo(userid, jobName) {
+        var cred = getCredentials(userid)
         if (!cred) { return 0 }
 
         var options = {
@@ -192,7 +294,6 @@ module.exports = function (robot) {
 
         request(options)
             .then(data => {
-                var lastBuild = data.lastBuild
                 return generateBuildInfoMsg(data)
             })
             .then(msg => {
@@ -203,12 +304,8 @@ module.exports = function (robot) {
             })
     }
 
-    function getBuildInfo(res) {
-        var userid = res.message.user.id
-        var jobName = 'myJob'//res.match[2]
-        var buildNum = 78//res.match[1]
-
-        var cred = getCredentials(res)
+    function getBuildInfo(userid, jobName, buildNum) {
+        var cred = getCredentials(userid)
         if (!cred) { return 0 }
 
         var options = {
@@ -234,12 +331,8 @@ module.exports = function (robot) {
             })
     }
 
-    function getBuildConsole(res) {
-        var userid = res.message.user.id
-        var jobName = res.match[2]
-        var buildNum = res.match[1]
-
-        var cred = getCredentials(res)
+    function getBuildConsole(userid, jobName, buildNum) {
+        var cred = getCredentials(userid)
         if (!cred) { return 0 }
 
         var options = {
@@ -264,12 +357,10 @@ module.exports = function (robot) {
             })
     }
 
-    function buildJob(res) {
-        var jobName = res.match[1]
-        var userid = res.message.user.id
-
-        var cred = getCredentials(res)
+    function buildJob(userid, jobName) {
+        var cred = getCredentials(userid)
         if (!cred) { return 0 }
+
         var options = {
             url: `http://localhost:9999/job/${jobName}/build`,
             method: 'POST',
@@ -293,48 +384,6 @@ module.exports = function (robot) {
 
     }
 
-
-    /*************************************************************************
-     *                               JOBS      
-     */
-
-    function getAllJobs() {
-        jenkins.all_jobs({}, function (err, data) {
-            if (err) { return console.log(err); }
-            console.log(data)
-        });
-    }
-
-    function getJobConfigXML(jobName) {
-
-        jenkins.get_config_xml(jobName, {}, function (err, data) {
-            if (err) { return console.log(err); }
-            console.log(data)
-        });
-    }
-
-    function getJobInfo(jobName) {
-        jenkins.job_info(jobName, {}, function (err, data) {
-            if (err) { return console.log(err); }
-            console.log(data)
-        });
-    }
-
-    function getJobsLastSuccessBuild(jobName) {
-        jenkins.last_success(jobName, {}, function (err, data) {
-            if (err) { return console.log(err); }
-            console.log(data)
-        });
-    }
-
-
-    function getJobsLastResult(jobName) {
-        jenkins.last_result(jobName, {}, function (err, data) {
-            if (err) { return console.log(err); }
-            console.log(data)
-        });
-    }
-
     /*
         NOT IMPLEMENTED:
         update
@@ -346,25 +395,12 @@ module.exports = function (robot) {
     */
 
 
-    /*************************************************************************
-     *                               VIEWS      
-     */
-
-    function getAllViews() {
-        jenkins.all_views({}, function (err, data) {
-            if (err) { return console.log(err); }
-            console.log(data)
-        });
-    }
-
-
     /*************************************************************************/
     /*                          helpful functions                            */
     /*************************************************************************/
 
 
-    function getCredentials(res) {
-        var userid = res.message.user.id
+    function getCredentials(userid) {
 
         try {
             var token = cache.get(userid).jenkins_token
@@ -375,7 +411,7 @@ module.exports = function (robot) {
                 throw error
             }
         } catch (error) {
-            robot.emit('jenkinsLogin', {}, res)
+            robot.emit('jenkinsLogin', userid)
             return false
         }
         return {
@@ -398,57 +434,62 @@ module.exports = function (robot) {
         }
     }
 
+
     function generateBuildInfoMsg(item) {
-        var msg = { attachments: [] }
-        var att = slackmsg.attachment()
+        return new Promise(function (resolve, reject) {
+            var msg = { attachments: [] }
+            var att = slackmsg.attachment()
 
-        // msg text & fallback: Build #num (timestamp)
-        var date = new Date(item.timestamp)
-        msg.text = `*<${item.url}|${item.fullDisplayName}>`
-            + ` (${dateFormat(date, df)})*`
-        att.fallback = msg.text
+            // msg text & fallback: Build #num (timestamp)
+            var date = new Date(item.timestamp)
+            msg.text = `*<${item.url}|${item.fullDisplayName}>`
+                + ` (${dateFormat(date, df)})*`
+            att.fallback = msg.text
 
-        // color
-        if (item.result == 'SUCCESS') {
-            att.color = 'good'
-        }
-        else if (att.color.includes('FAIL')) {
-            att.color = 'danger'
-        }
-        else {
-            att.color = 'warning'
-        }
+            // color
+            if (item.result == 'SUCCESS') {
+                att.color = 'good'
+            }
+            else if (att.color.includes('FAIL')) {
+                att.color = 'danger'
+            }
+            else {
+                att.color = 'warning'
+            }
 
-        // attachement text
-        // build result: <result> | Duration: #.### s
-        att.text = `Result: ${item.result} | Duration: ${item.duration / 1000} s`
+            // attachement text
+            // build result: <result> | Duration: #.### s
+            att.text = `Result: ${item.result} | Duration: ${item.duration / 1000} s`
 
-        // FIELDS
-        // build description
-        if (item.description) {
+            // FIELDS
+            // build description
+            if (item.description) {
+                att.fields.push({
+                    title: 'Description:',
+                    value: item.description,
+                    short: false
+                })
+            }
+
+            // build changes
+            var fieldTitle2 = '', value2 = ''
+            if (item.changeSet.items.length) {
+                fieldTitle2 = 'Changes:'
+            }
+            item.changeSet.items.forEach(function (change) {
+                value2 += `• ${change.comment}`
+            })
             att.fields.push({
-                title: 'Description:',
-                value: item.description,
+                title: fieldTitle2,
+                value: value2,
                 short: false
             })
-        }
 
-        // build changes
-        var fieldTitle2 = '', value2 = ''
-        if (item.changeSet.items.length) {
-            fieldTitle2 = 'Changes:'
-        }
-        item.changeSet.items.forEach(function (change) {
-            value2 += `• ${change.comment}`
-        })
-        att.fields.push({
-            title: fieldTitle2,
-            value: value2,
-            short: false
-        })
+            msg.attachments.push(att)
+            return resolve(msg)
 
-        msg.attachments.push(att)
-        return msg
+        })
     }
+
 
 }

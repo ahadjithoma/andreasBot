@@ -11,7 +11,7 @@ var app = apiai(apiai_token)
 
 module.exports = robot => {
 
-    // ask api.ai
+    // ask api.ai directly
     robot.respond(/ai (.*)/i, res => {
         var msg = res.match[1]
         apiaiAsk(msg, res)
@@ -106,6 +106,7 @@ module.exports = robot => {
     function responseCallback(response, res) {
         var result = response.result
         var userId = res.message.user.id
+        var roomid = res.message.room
 
         // console.log(response)
         if (result.score < SCORE_THRESHOLD) {
@@ -124,7 +125,7 @@ module.exports = robot => {
 
         // reply back to user
         if (result.fulfillment.speech) {
-            robot.messageRoom(userId, result.fulfillment.speech)
+            robot.messageRoom(roomid, result.fulfillment.speech)
         }
     }
 

@@ -5,14 +5,14 @@
 //   `standup report` - triggers a new standup 
 //   `standup disable|deactivate|pause` - disable the default standup
 //   `standup enable|activate|resume`
-//   `standup show`
+//   `standup settings`
 //   `standup edit|change channel to <channel name>`
 //   `standup edit|change days to <dayName1, dayName2, ...>`
 //   `standup edit time to <HH:MM>`
 //   `standup add question "<question>" to <order number> with <color name>`
 //   `standup remove|delete question <Question Number>`
-//   `standup edit|change standup question <Question Number> color to <color name>`
-//   `standup edit|change standup question <Question Number> text to <color name>`
+//   `standup edit|change question <Question Number> color to <color name>`
+//   `standup edit|change question <Question Number> text to <color name>`
 //   `standup move question <number> to <number>`
 //   `standup reset`
 
@@ -56,12 +56,9 @@ module.exports = function (robot) {
 
 
     /** triggers a standup **/
-    robot.on('triggerStandupReport', function ({ }, res) {
-        getStandupData('defaultStandup', res.message.user.id)
-    })
-
     robot.hear(/standup (start|begin|trigger|report)/i, function (res) {
         var roomid = res.message.user.room
+        var userid = res.message.user.id
         if (roomid[0] != 'D') { // if msg is not a direct msg (DM) with a user but in channel. (tested in slack only)
             getStandupData('defaultStandup', roomid)
         } else {
@@ -69,6 +66,17 @@ module.exports = function (robot) {
         }
 
     })
+
+    robot.on('triggerStandupReport', function ({ }, res) {
+        var userid = res.message.user.id
+        var roomid = res.message.user.room
+        if (roomid[0] != 'D') { // if msg is not a direct msg (DM) with a user but in channel. (tested in slack only)
+            getStandupData('defaultStandup', roomid)
+        } else {
+            getStandupData('defaultStandup', userid)
+        }
+    })
+
 
     robot.respond(/standup (pause|deactivate|disable)/i, function (res) {
         var userid = res.message.user.id
@@ -80,15 +88,35 @@ module.exports = function (robot) {
         updateStandupStatus(userid, 'defaultStandup', true)
     })
 
-    robot.respond(/standups? (show|view|get)/i, function (res) {
-        showStandups(res.message.user.id)
+    robot.on('changeStandupStatus', function (data, res) {
+        var userid = res.message.user.id
+        updateStandupStatus(userid, 'defaultStandup', data.parameters.status)
     })
+
+
+    robot.respond(/standups? (show |view |get |)settings/i, function (res) {
+        var userid = res.message.user.id
+        showStandups(userid)
+    })
+
+    robot.on('showStandupConfiguration', function ({ }, res) {
+        var userid = res.message.user.id
+        showStandups(userid)
+    })
+
 
     robot.respond(/standup (edit|change|modify|update) channel ?t?o? (.*)/i, function (res) {
         var channel = res.match[2].trim()
         var userid = res.message.user.id
         updateChannel(userid, channel, 'defaultStandup')
     })
+
+    robot.on('changeStandupChannel', function (data, res) {
+        var channel = data.parameters.channelName
+        var userid = res.message.user.id
+        updateChannel(userid, channel, 'defaultStandup')
+    })
+
 
     robot.respond(/standup (edit|change|modify|update) time ?t?o? (.*)/i, function (res) {
         var time = res.match[2].trim()
@@ -100,9 +128,29 @@ module.exports = function (robot) {
         }
     })
 
+    robot.on('changeStandupTime', function (data, res) {
+        var time = data.parameters.time
+        var userid = res.message.user.id
+        if (!isTimeValid(time)) {
+            res.reply('Sorry but this is not a valid time. Try again using this `HH:MM` 24h-format.')
+        } else {
+            updateTime(userid, 'defaultStandup', time)
+        }
+    })
+
+
     robot.respond(/standup (edit|change|modify|update) days ?t?o? (.*)/i, function (res) {
         // trim and replace spaces
         var days = res.match[2].trim().replace(/\s/g, '');
+        changeDaysListener(res, days)
+    })
+
+    robot.on('changeStandupDays', function (data, res) {
+        var days = data.parameters.days.toString()
+        changeDaysListener(res, days)
+    })
+
+    function changeDaysListener(res, days) {
         var userid = res.message.user.id
         var cronDays = getCronDays(days)
         if (!isCronDaysValid(cronDays)) {
@@ -110,50 +158,179 @@ module.exports = function (robot) {
         } else {
             updateDays(userid, 'defaultStandup', cronDays)
         }
-    })
+    }
+
 
     robot.respond(/standup add question "(.*)" to ([0-9]*)( with (.*))?/i, function (res) {
         var text = res.match[1].trim()
         var questionIndex = parseInt(res.match[2]) - 1
-        var colorName = res.match[4].trim()
+        var colorName = res.match[4]
         var questionObj = { text: text, color: color.getHex(colorName) }
-        pushQuestion('defaultStandup', questionObj, questionIndex)
+        addStandupQuestionListener(res, questionObj, questionIndex)
     })
+
+    robot.on('addStandupQuestion', function (data, res) {
+        var text = data.parameters.text
+        var questionIndex = data.parameters.index - 1
+        var colorName = data.parameters.color
+        if (!questionIndex) {
+            questionIndex = 0
+        }
+        var questionObj = { text: text, color: color.getHex(colorName) }
+        addStandupQuestionListener(res, questionObj, questionIndex)
+    })
+
+    function addStandupQuestionListener(res, questionObj, questionIndex, standupId = 'defaultStandup') {
+        pushQuestion(standupId, questionObj, questionIndex).then((standup) => {
+            var msg = { attachments: [] }
+            msg.text = `${res.message.user.name} added a new standup question`
+            msg.attachments.push({
+                text: questionObj.text,
+                color: questionObj.color
+            })
+            robot.messageRoom(standup.channel, msg)
+            res.reply('Question added to the standup.')
+        }).catch(e => {
+            res.reply(e.message)
+        })
+    }
+
 
     robot.respond(/standup (remove|delete) question ([0-9]*)/i, function (res) {
         var questionIndex = parseInt(res.match[2]) - 1
-        var userid = res.message.user.id
-        pullQuestion(userid, 'defaultStandup', questionIndex)
+        removeStandupQuestionListener(res, questionIndex)
     })
+
+    robot.on('removeStandupQuestion', function (data, res) {
+        var questionIndex = data.parameters.index - 1
+        removeStandupQuestionListener(res, questionIndex)
+    })
+
+    function removeStandupQuestionListener(res, questionIndex, standupId = 'defaultStandup') {
+        pullQuestion('defaultStandup', questionIndex).then(standup => {
+            var msg = { attachments: [] }
+            msg.text = `${res.message.user.name} removed a standup question`
+            msg.attachments.push({
+                text: standup.questions[questionIndex].text,
+                color: standup.questions[questionIndex].color
+            })
+            robot.messageRoom(standup.channel, msg)
+            res.reply('Question ' + bold(standup.questions[questionIndex].text) + ' removed as you requested.')
+        }).catch(e => {
+            robot.logger.error(e)
+            res.reply('I couldn\'t process your request. :/')
+        })
+    }
+
 
     robot.respond(/standup (change|update|modify|edit) question'?s? (\d+) colou?r to (.*)/, function (res) {
         var questionIndex = parseInt(res.match[2]) - 1
         var colorHex = color.getHex(res.match[3].trim())
-        var userid = res.message.user.id
         var updateObj = { color: colorHex }
-        updateQuestion(userid, 'defaultStandup', questionIndex, updateObj)
+        changeStandupQuestionColorListener(res, questionIndex, updateObj)
     })
+
+    robot.on('changeStandupQuestionColor', function (data, res) {
+        var questionIndex = data.parameters.index - 1
+        var colorHex = color.getHex(data.parameters.color)
+        var updateObj = { color: colorHex }
+        changeStandupQuestionColorListener(res, questionIndex, updateObj)
+    })
+
+    function changeStandupQuestionColorListener(res, questionIndex, updateObj, standupId = 'defaultStandup') {
+        updateQuestion(standupId, questionIndex, updateObj)
+            .then(standup => {
+                var msg = { attachments: [] }
+                msg.text = `${res.message.user.name} change standup question ${questionIndex + 1} color`
+                msg.attachments.push({
+                    text: standup.questions[questionIndex].text,
+                    color: updateObj.color
+                })
+                robot.messageRoom(standup.channel, msg)
+                res.reply('That was easy!')
+            }).catch(e => {
+                robot.logger.error(e)
+                res.reply('An error occured. Check `standup settings` to see if the changes applied normally.')
+            })
+    }
+
 
     robot.respond(/standup (change|update|modify|edit) question'?s? ([0-9]*) text to "?(.*)"?/, function (res) {
         var questionIndex = parseInt(res.match[2]) - 1
         var questionText = res.match[3]
-        var userid = res.message.user.id
         var updateObj = { index: questionIndex, text: questionText }
-        updateQuestion(userid, 'defaultStandup', questionIndex, updateObj)
+        changeStandupQuestionTextListener(res, questionIndex, updateObj)
     })
 
+    robot.on('changeStandupQuestionText', function (data, res) {
+        var questionIndex = data.parameters.index - 1
+        var questionText = data.parameters.text
+        var updateObj = { index: questionIndex, text: questionText }
+        changeStandupQuestionTextListener(res, questionIndex, updateObj)
+    })
+
+    function changeStandupQuestionTextListener(res, questionIndex, updateObj, standupId = 'defaultStandup') {
+        updateQuestion(standupId, questionIndex, updateObj)
+            .then(standup => {
+                var msg = { attachments: [] }
+                msg.text = `${res.message.user.name} change standup question ${questionIndex + 1} text`
+                msg.attachments.push({
+                    text: updateObj.text,
+                    color: standup.questions[questionIndex].color
+                })
+                robot.messageRoom(standup.channel, msg)
+                res.reply('That was easy!')
+            }).catch(e => {
+                robot.logger.error(e)
+                res.reply('An error occured. Check `standup settings` to see if the changes applied normally.')
+            })
+    }
 
     robot.respond(/standup (move) question'?s? ([0-9]*) to ([0-9]*)/, function (res) {
         var questionIndex = parseInt(res.match[2]) - 1
         var newIndex = parseInt(res.match[3]) - 1
-        var userid = res.message.user.id
-        updateQuestionIndex(userid, 'defaultStandup', questionIndex, newIndex)
+        questionsRearrangeListener(res, questionIndex, newIndex)
     })
 
-    robot.respond(/standup reset/i, function (res) {
-        var userid = res.message.user.id
-        resetStandup(userid, 'defaultStandup')
+    robot.on('rearrangeStandupQuestions', function (data, res) {
+        var questionIndex = data.parameters.questionIndex - 1
+        var newIndex = data.parameters.newIndex - 1
+        questionsRearrangeListener(res, questionIndex, newIndex)
     })
+
+    function questionsRearrangeListener(res, questionIndex, newIndex, standupId = 'defaultStandup') {
+        updateQuestionIndex(standupId, questionIndex, newIndex).then(data => {
+            var channel = data.value.channel
+            robot.messageRoom(channel, `${res.message.user.name} rearranged the order of the standup's questions ${questionIndex + 1} and ${newIndex + 1}`)
+            res.reply('Standup\'s questions rearranged as you asked.')
+        }).catch(error => {
+            res.reply('An error occured. Check `standup settings` to see if the changes applied normally.')
+        })
+    }
+
+
+    robot.respond(/standup reset/i, function (res) {
+        resetStandupListener(res)
+
+    })
+
+    robot.on('resetStandup', function ({ }, res) {
+        resetStandupListener(res)
+    })
+
+    function resetStandupListener(res, standupId = 'defaultStandup') {
+        var username = res.message.user.name
+        resetStandup('defaultStandup').then(channel => {
+            robot.messageRoom(channel, 'Standup configuration reset by ' + username
+                + '.\nSay `standup show settings` to see current standup configuration.')
+            res.reply('Standup configuration reset successfully. \nSay `standup show settings` to see current configuration.')
+            return channel
+        }).catch(error => {
+            res.reply('I couldn\'t process your request. :/')
+            robot.logger.error(error)
+        })
+    }
+
 
     robot.on(/updateStandupsCronJobs/, function (res) {
         updateStandupsCronJobs()
@@ -167,7 +344,7 @@ module.exports = function (robot) {
 
     function initDefaultStandup() {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('standups').insertAsync(c.defaultStandup)
+        return db.bind('standups').insertAsync(c.defaultStandup)
             .then(data => {
             })
             .catch(error => {
@@ -180,25 +357,19 @@ module.exports = function (robot) {
             })
     }
 
-    function resetStandup(userid, standupid) {
+    function resetStandup(standupid) {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('standups').removeAsync({ _id: standupid })
-            .then((r) => {
+        return db.bind('standups').findOneAndDeleteAsync({ _id: standupid })
+            .then((result) => {
                 initDefaultStandup()
+                return result.value.channel
             })
-            .then(() => {
+            .then((channel) => {
                 updateStandupsCronJobs()
-            })
-            .then(() => {
-                var username = robot.brain.userForId(userid).name
-                var channel = `#${c.defaultStandup.channel}`
-                robot.messageRoom(channel, 'Standup configuration reset by ' + username)
-                robot.messageRoom(userid, 'Standup configuration reset successfully. \nSay `standup show` to see current configuration.')
-                showStandups(channel)
+                return channel
             })
             .catch(error => {
-                robot.logger.error(error)
-                robot.messageRoom(userid, error.message)
+                return Promise.reject(error)
             })
     }
 
@@ -401,7 +572,7 @@ module.exports = function (robot) {
                 }).then(() => {
                     robot.messageRoom(userid, msg)
                 }).catch(error => {
-
+                    robot.logger.error(error)
                 })
             })
             .catch(error => {
@@ -427,7 +598,7 @@ module.exports = function (robot) {
             }).then((standup) => {
                 var username = robot.brain.userForId(userid).name
                 var realname = robot.brain.userForId(userid).real_name
-                robot.messageRoom(userid, `Standup channel succesfully changed.`)
+                robot.messageRoom(userid, `Standup channel successfully changed.`)
                 robot.messageRoom('#' + standup.channel, `Standup *${standup.name}* channel changed to *${channel}* by ${realname} (${username})`)
             })
             .catch(error => {
@@ -449,7 +620,7 @@ module.exports = function (robot) {
             }).then((standup) => {
                 var username = robot.brain.userForId(userid).name
                 var realname = robot.brain.userForId(userid).real_name
-                robot.messageRoom(userid, `Standup time succesfully changed.`)
+                robot.messageRoom(userid, `Standup time successfully changed.`)
                 robot.messageRoom('#' + standup.channel, `Standup *${standup.name}* time changed to *${time}* by ${realname} (${username})`)
             })
             .catch(error => {
@@ -470,7 +641,7 @@ module.exports = function (robot) {
             }).then((standup) => {
                 var username = robot.brain.userForId(userid).name
                 var realname = robot.brain.userForId(userid).real_name
-                robot.messageRoom(userid, `Standup days succesfully changed.`)
+                robot.messageRoom(userid, `Standup days successfully changed.`)
                 robot.messageRoom('#' + standup.channel, `Standup *${standup.name}* days changed to *${getDaysNames(days)}* by ${realname} (${username})`)
             })
             .catch(error => {
@@ -500,17 +671,18 @@ module.exports = function (robot) {
                 var realname = robot.brain.userForId(userid).real_name
                 var standup = standup
                 var newStatus, oldStatus
-                if (status) {
+                if (status == true) {
                     newStatus = 'activated'
                     oldStatus = 'deactivate'
-                } else {
+                }
+                else {
                     newStatus = 'deactivated'
                     oldStatus = 'activate'
                 }
                 robot.messageRoom('#' + standup.channel, `${realname} (${username}) *${newStatus}* ${standup.name} standup.`)
                 showStandups(standup.channel, { _id: 'defaultStandup' })
                 robot.messageRoom(standup.channel, `You can ${oldStatus} again by saying ` + '`activate standup`')
-                robot.messageRoom(userid, `Standup ${standup.name} ${newStatus} succesfully.`)
+                robot.messageRoom(userid, `Standup ${standup.name} ${newStatus} successfully.`)
             })
             .catch(error => {
                 robot.logger.error(error)
@@ -526,7 +698,7 @@ module.exports = function (robot) {
             questionIndex = 0
         }
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('standups').updateAsync(
+        return db.bind('standups').findOneAndUpdateAsync(
             { _id: standupid },
             {
                 $push: {
@@ -537,14 +709,15 @@ module.exports = function (robot) {
                 }
             })
             .then((standup) => {
-                // updateQuestionsOrder('defaultStandup')
+                return standup.value
             }).catch(error => {
-                console.log(error)
+                robot.logger.error(error)
+                return Promise.reject(error)
             })
     }
 
     // removes a question to the specified standup
-    function pullQuestion(userid, standupid, questionIndex) {
+    function pullQuestion(standupid, questionIndex) {
         if (questionIndex < 0) {
             questionIndex = 0
         }
@@ -552,18 +725,22 @@ module.exports = function (robot) {
         unsetObj['questions.' + questionIndex] = 1
 
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('standups').updateAsync({ _id: 'defaultStandup' }, { $unset: unsetObj })
-            .then(db.standups.updateAsync(
+        return db.bind('standups').findOneAndUpdateAsync({ _id: 'defaultStandup' }, { $unset: unsetObj })
+            .then(db.standups.findOneAndUpdateAsync(
                 { _id: 'defaultStandup' },
                 {
                     $pull:
                     { "questions": null }
                 }))
-            .then()
-            .done(() => { db.close() })
+            .then(standup => {
+                return standup.value
+            })
+            .catch(error => {
+                return Promise.reject(error.message)
+            })
     }
 
-    function updateQuestion(userid, standupid, questionIndex, updateObj) {
+    function updateQuestion(standupid, questionIndex, updateObj) {
         if (questionIndex < 0) {
             questionIndex = 0
         }
@@ -586,7 +763,7 @@ module.exports = function (robot) {
         }
 
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('standups').updateAsync(
+        return db.bind('standups').findOneAndUpdateAsync(
             {
                 $and: [
                     { _id: standupid },
@@ -596,26 +773,33 @@ module.exports = function (robot) {
             {
                 $set: setObj
             })
-            .then(res => {
+            .then(data => {
+                return data.value
             })
             .catch(error => {
-                robot.logger.error(error)
+                return Promise.reject(error)
             })
     }
 
 
-    function updateQuestionIndex(userid, standupid, oldIndex, newIndex) {
+    function updateQuestionIndex(standupid, oldIndex, newIndex) {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('standups').find({ _id: standupid }).toArrayAsync()
+        return db.bind('standups').find({ _id: standupid }).toArrayAsync()
             .then(standup => {
                 var questions = standup[0].questions
+                if (questions.length - 1 < oldIndex) {
+                    oldIndex = questions.length - 1
+                }
+                if (questions.length - 1 < newIndex) {
+                    newIndex = questions.length - 1
+                }
                 var tmpQuestion = questions[newIndex]
                 questions[newIndex] = questions[oldIndex]
                 questions[oldIndex] = tmpQuestion
-                db.standups.updateAsync({ _id: standupid }, { $set: { questions: questions } })
+                return db.standups.findOneAndUpdateAsync({ _id: standupid }, { $set: { questions: questions } })
             })
             .catch(error => {
-                robot.logger.error(error)
+                return robot.logger.error(error)
             })
     }
 
@@ -667,6 +851,16 @@ module.exports = function (robot) {
     /*                           helpful functions                           */
     /*************************************************************************/
 
+
+    function bold(text) {
+        if (robot.adapterName == 'slack') {
+            return `*${text}*`
+        }
+        // Add any other adapters here  
+        else {
+            return text
+        }
+    }
 
     function getCronDays(days) {
         if (['everyday', 'all', 'every day'].includes(days)) {

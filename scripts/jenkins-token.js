@@ -18,23 +18,28 @@ var jenkins_url = process.env.JENKINS_URL
 
 module.exports = robot => {
 
-    robot.respond(/jenkins token (.*)/i, function (res) {
-        var token = res.match[1]
-        storeJenkinsToken(token, res);
-    })
-
-    robot.respond(/jenkins username (.*)/i, function (res) {
-        var username = res.match[1]
-        storeJenkinsUsername(username, res);
-    })
 
     var r = new RegExp("^(?=.*\bjenkins\b)(?=.*\blogin).*$", "i")
     robot.respond(/(?=.*\bjenkins\b)(?=.*\blogin).*$/i, function (res) {
         jenkinsLoginDisplayMsg(res)
     })
 
-    robot.on('jenkinsLogin', function (data, res) {
-        jenkinsLoginDisplayMsg(res)
+    robot.on('jenkinsLogin', function (userid) {
+        jenkinsLoginDisplayMsg(userid)
+    })
+
+    robot.respond(/jenkins token (.*)/i, function (res) {
+        var token = res.match[1]
+        storeJenkinsToken(token, res);
+    })
+    robot.on('jenkinsAddToken',function(data,res){
+        var token = data.parameters.token
+        storeJenkinsToken(token, res)
+    })
+
+    robot.respond(/jenkins username (.*)/i, function (res) {
+        var username = res.match[1]
+        storeJenkinsUsername(username, res);
     })
 
     function jenkinsLoginDisplayMsg(res) {
@@ -167,5 +172,5 @@ module.exports = robot => {
             // TODO: make sure i should not do something else here
         }
     }
-    
+
 }

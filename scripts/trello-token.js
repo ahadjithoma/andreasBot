@@ -41,8 +41,8 @@ module.exports = function (robot) {
             oauth_secrets['id'] = userid
             oauth_secrets[data.oauth_token] = data.oauth_token_secret;
 
-            // TODO: edit message
-            robot.messageRoom(userid, data.redirect);
+            var loginMsg = `Click <${data.redirect}|here> to authenticate your Trello account`
+            robot.messageRoom(userid, loginMsg);
         })
     }
 
@@ -65,7 +65,7 @@ module.exports = function (robot) {
             }
             request(options).then(res => {
                 var values = {
-                    trello_member_id : res.id,
+                    trello_member_id: res.id,
                     trello_username: res.username,
                     trello_token: data['oauth_access_token']
                 }

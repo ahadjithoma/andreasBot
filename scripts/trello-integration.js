@@ -31,26 +31,18 @@ var Conversation = require('hubot-conversation');
 var path = require('path')
 var async = require('async')
 var color = require('./colors.js')
+const Promise = require("bluebird");
 
 // config
+var mongodb_uri = process.env.MONGODB_URI
+var hubot_host_url = process.env.HUBOT_HOST_URL;
 var TRELLO_API = 'https://api.trello.com/1'
+var trelloKey = process.env.HUBOT_TRELLO_KEY;
 var trelloTeam = process.env.HUBOT_TRELLO_TEAM
 var trello_headers = {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
 }
-// auth
-var mongodb_uri = process.env.MONGODB_URI
-var hubot_host_url = process.env.HUBOT_HOST_URL;
-var trelloKey = process.env.HUBOT_TRELLO_KEY;
-var secret = process.env.HUBOT_TRELLO_OAUTH;
-var token = process.env.HUBOT_TRELLO_TOKEN;
-// TODO : login based on user
-var trelloAuth = new Trello(trelloKey, token);
-
-// convert node-trello callbacks to promises
-const Promise = require("bluebird");
-var trello = Promise.promisifyAll(trelloAuth);
 
 module.exports = function (robot) {
 
@@ -82,13 +74,28 @@ module.exports = function (robot) {
     /*************************************************************************/
     var switchBoard = new Conversation(robot);
 
-    robot.respond(/trello (all |unread |read |)notifications/i, function (res) {
-        var read_filter = res.match[1].trim()
-        if (!read_filter) {
-            read_filter = 'unread'
-        }
+    robot.respond(/trello( last (\d+)|) (all |unread |read |)notifications?/i, function (res) {
+        var limit = res.match[2]
+        var read_filter = res.match[3].trim()
         var query = { read_filter: read_filter }
-        getNotifications(res.message.user.id, query)
+        if (!read_filter) {
+            query.read_filter = 'all'
+        }
+        if (limit) {
+            query.limit = limit
+        }
+        getNotifications(res.message.user.id, query).then((d) => {
+            console.log(d)
+            if (read_filter == 'all' || read_filter == 'unread') {
+                if (limit == 1000) {
+                    // markNotificationsAsRead(userid)
+                }
+                else {
+
+                }
+            }
+        }).catch(e => { })
+        // TODO. mark them read? 
     })
 
 
@@ -128,6 +135,10 @@ module.exports = function (robot) {
              */
         })
 
+    })
+
+    robot.respond(/trello list (.*) add card (.*)/i, function(res){
+        
     })
 
     function listUserCards(userid) {
@@ -220,14 +231,48 @@ module.exports = function (robot) {
         })
     }
 
-    function getChannelBoard(id) {
-        var boardId
-        try {
-            boardId = cache.get('channelsToBoards')[id].id
-            return boardId
-        } catch (error) {
-            return false
-        }
+    robot.hear(/trello channel board/i, function (res) {
+        var roomid = res.message.room
+        var userid = res.message.user.id
+        getChannelBoard(roomid).then(board => {
+            console.log(board)
+            // listChannelBoard(userid, roomid, board.id)
+        }).catch(error => {
+            console.log(error)
+        })
+    })
+    function listChannelBoard(userid, roomid, boardid) { }
+
+
+    function getChannelBoard(roomId) {
+        var db = mongoskin.MongoClient.connect(mongodb_uri);
+        return db.bind('channelsToTrelloBoards').findOneAsync(
+            {}, { _id: roomId, board: 1 }).then((result) => {
+                return result
+            })
+        // var boardId
+        // try {
+        //     boardId = cache.get('channelsToBoards')[id].id
+        //     return boardId
+        // } catch (error) {
+        //     return false
+        // }
+    }
+
+    function getChannelCard(roomid) {
+        var db = mongoskin.MongoClient.connect(mongodb_uri);
+        return db.bind('channelsToTrelloBoards').findOneAsync(
+            {}, { _id: roomId, card: 1 }).then((result) => {
+                return result
+            })
+    }
+
+    function getChannelList(roomid) {
+        var db = mongoskin.MongoClient.connect(mongodb_uri);
+        return db.bind('channelsToTrelloBoards').findOneAsync(
+            {}, { _id: roomId, list: 1 }).then((result) => {
+                return result
+            })
     }
 
     robot.on('trelloSumUp', function (userid, query, saveLastNotif) {
@@ -287,7 +332,7 @@ module.exports = function (robot) {
         }
         getModelInfo(userid, modelUrl)
             .then(board => {
-                linkBoardChannel(userid, board, roomid)
+                linkBoardChannel(roomid, board)
             })
             .catch(error => {
                 robot.logger.error(error)
@@ -296,59 +341,43 @@ module.exports = function (robot) {
             })
     })
 
-    robot.hear(/trello unlink (.*)trello.com\/b\/(.*)/i, function (res) {
+    robot.hear(/trello unlink/i, function (res) {
         var roomid = res.message.room
-        var userid = res.message.user.id
-        var modelUrl = 'b/' + res.match[2].trim()
+        // var userid = res.message.user.id
         if (roomid[0] == 'D') { // D = Direct Message
             roomid = robot.brain.userForName(res.message.user.name).id
         }
-        getModelInfo(userid, modelUrl)
-            .then(board => {
-                unlinkBoardChannel(res, board, roomid)
-            })
-            .catch(error => {
-                robot.logger.error(error)
-                robot.messageRoom(c.errorsChannel, c.errorMessage
-                    + `Script: ${path.basename(__filename)}`)
-            })
+
+        unlinkBoardFromChannel(roomid).then(unlinked => {
+            if (unlinked) {
+                res.reply('unlinked this channel from its Trello board. It can be re-linked with `trello link <board_url>`.')
+            } else {
+                res.send('This channel has not yet been linked to a Trello board.'
+                    + '\nYou can link a board using trello link <board_url>`')
+            }
+        })
+
     })
 
-    function linkBoardChannel(userid, board, roomid) {
+    function linkBoardChannel(roomid, board) {
         var query = { _id: roomid }
         var doc = { $set: { _id: roomid, board } }
         dbFindAndModify('channelsToTrelloBoards', query, [['_id', 1]], doc, { upsert: true })
             .then(() => {
                 cache.set(`channelsToBoards.${roomid}`, board)
-                var handled = robot.emit('setCache', { _id: roomid, board }) // emits an event for brain.js
-                if (!handled) {
-                    robot.logger.warning('No script handled the setCache event.')
-                }
+                // var handled = robot.emit('setCache', { _id: roomid, board }) // emits an event for brain.js
+                // if (!handled) {
+                //     robot.logger.warning('No script handled the setCache event.')
+                // }
             })
     }
 
-    function unlinkBoardChannel(res, board, roomid) {
-        var room = slackmsg.getChannelName(robot, res)
-        var userid = res.message.user.id
-        var modelShortLink = res.match[2].trim().split('/')[1]
-        if (room == 'DM') {
-            room = '@' + res.message.user.name
-        }
-        var queryObj = {
-            userid: userid,
-            modelShortLink: modelShortLink,
-            room: room
-        }
-        getWebhookId(queryObj)
-            .then(webhooksIds => {
-                Promise.each(webhooksIds, function (webhookId) {
-                    // deleteWebhook(res.message.user.id, webhookId)
-                })
-            })
-            .catch(error => {
-                robot.logger.error(error)
-                robot.messageRoom(c.errorsChannel, c.errorMessage
-                    + `Script: ${path.basename(__filename)}`)
+    function unlinkBoardFromChannel(roomid) {
+        var db = mongoskin.MongoClient.connect(mongodb_uri);
+        return db.bind('channelsToTrelloBoards').removeAsync({ _id: roomid })
+            .then((response) => {
+                db.close()
+                return response.result.n
             })
     }
 
@@ -356,7 +385,7 @@ module.exports = function (robot) {
 
     robot.respond(/trello boards/i, function (res) {
         var userid = res.message.user.id
-        listBoards(userid)
+        listTeamBoards(userid)
     })
     robot.respond(/trello res/, res => {
         updateTrelloResources(res.message.user.id).then(r => console.log())
@@ -367,7 +396,7 @@ module.exports = function (robot) {
         listBoardLists(userid)
     })
     function listBoardLists(userid, boardId) {
-
+        console.log('trello lists: todo')
     }
 
 
@@ -467,6 +496,22 @@ module.exports = function (robot) {
     /*                             API Calls                                 */
     /*************************************************************************/
 
+    function markNotificationsAsRead(userid) {
+        var credentials = getCredentials(userid)
+        if (!credentials) { return 0 }
+
+        var options = {
+            url: `${TRELLO_API}/notifications/all/read?${credentials}`,
+            method: 'POST',
+            headers: trello_headers,
+            json: true
+        }
+
+        request(option).then(() => {
+            robot.messageRoom(userid, 'Trello notifications marked as read.')
+        })
+    }
+
     function updateTrelloResources(userid) {
         var credentials = getCredentials(userid)
         if (!credentials) {
@@ -524,7 +569,7 @@ module.exports = function (robot) {
         })
     }
 
-    function listBoards(userid, filter = 'open') {
+    function listTeamBoards(userid, filter = 'open') {
         var credentials = getCredentials(userid)
         if (!credentials) { return 0 }
 
@@ -539,28 +584,31 @@ module.exports = function (robot) {
         }
 
         request(options).then(boardsArray => {
-            var msg = { attachments: [] }
-            Promise.each(boardsArray, function (board) {
-                var attachment = slackmsg.attachment()
-                var boardName = board.name
-                var boardDesc = board.desc
-                var boardURL = board.shortUrl
-                var boardColor = board.prefs.background
-                var boardLastActivity = board.dateLastActivity
-                attachment.author_name = 'Board'
-                // TODO attachment.author_icon = 
-                attachment.title = `<${boardURL}|${boardName}>`
-                attachment.text = `${boardDesc}`
-                attachment.color = color.getHex(boardColor)
-                attachment.footer = 'Last activity'
-                attachment.ts = Date.parse(boardLastActivity) / 1000
-                msg.attachments.push(attachment)
-            }).done(() => {
-                robot.messageRoom(userid, msg)
-            })
+            displayBoards(userid, boardsArray)
         })
     }
 
+    function displayBoards(roomid, boardsArray) {
+        var msg = { attachments: [] }
+        Promise.each(boardsArray, function (board) {
+            var attachment = slackmsg.attachment()
+            var boardName = board.name
+            var boardDesc = board.desc
+            var boardURL = board.shortUrl
+            var boardColor = board.prefs.background
+            var boardLastActivity = board.dateLastActivity
+            attachment.author_name = 'Board'
+            // TODO attachment.author_icon = 
+            attachment.title = `<${boardURL}|${boardName}>`
+            attachment.text = `${boardDesc}`
+            attachment.color = color.getHex(boardColor)
+            attachment.footer = 'Last activity'
+            attachment.ts = Date.parse(boardLastActivity) / 1000
+            msg.attachments.push(attachment)
+        }).done(() => {
+            robot.messageRoom(roomid, msg)
+        })
+    }
 
     function addCardComment(userid, cardId, commentText) {
         var credentials = getCredentials(userid)
@@ -877,7 +925,7 @@ module.exports = function (robot) {
                     }
 
                     attachment.pretext = `Created by ${webhook.username} for the ${webhook.modelType} `
-                    + `<${webhook.modelShortUrl}|${webhook.modelName}>`
+                        + `<${webhook.modelShortUrl}|${webhook.modelName}>`
                     attachment.fields.push({
                         title: "Channel",
                         value: webhook.room,
@@ -985,8 +1033,11 @@ module.exports = function (robot) {
     // modelUrl must be www.trello.com/<modelUrl>
     function getModelInfo(userid, modelUrl) {
         var credentials = getCredentials(userid)
-        if (!credentials) { return 0 }
-
+        if (!credentials) {
+            return new Promise(function (resolve, reject) {
+                reject(401)
+            })
+        }
         var typeLetter = modelUrl.split('/')[0]
         var id = modelUrl.split('/')[1]
         var modelType
@@ -1024,7 +1075,11 @@ module.exports = function (robot) {
 
     function getNotifications(userid, query) {
         var credentials = getCredentials(userid)
-        if (!credentials) { return 0 }
+        if (!credentials) {
+            return new Promise(function (resolve, reject) {
+                reject('not logged in')
+            })
+        }
 
         var qs = Object.assign(
             { entities: true },
@@ -1038,18 +1093,18 @@ module.exports = function (robot) {
             json: true
         }
 
-        request(options)
+        return request(options)
             .then(notifications => {
                 if (!notifications.length) {
                     robot.messageRoom(userid, 'Nothing found!')
+                    return notifications
                 } else {
                     displayNotifications(userid, notifications)
+                    return notifications
                 }
             })
             .catch(error => {
-                //TODO handle error codes: i.e. 404 not found -> dont post
-                errorHandler(userid, error)
-                robot.logger.error(error)
+                return robot.logger.error(error.message)
             })
     }
 
@@ -1326,6 +1381,7 @@ module.exports = function (robot) {
                 throw error
             }
         } catch (error) {
+            robot.messageRoom(userid, 'Hey, it seems your account is not autheticated to Trello.')
             robot.emit('trelloOAuthLogin', userid)
             return false
         }
@@ -1353,9 +1409,9 @@ module.exports = function (robot) {
     // TODO change the messages
     function errorHandler(userid, error) {
         if (error.statusCode == 401) {
-            robot.messageRoom(userid, c.jenkins.badCredentialsMsg)
+            robot.messageRoom(userid, error.message)
         } else if (error.statusCode == 404) {
-            robot.messageRoom(userid, c.jenkins.jobNotFoundMsg)
+            robot.messageRoom(userid, error.message)
         } else {
             robot.messageRoom(userid, c.errorMessage + 'Status Code: ' + error.statusCode)
             robot.logger.error(error)
