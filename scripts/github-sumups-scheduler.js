@@ -1,5 +1,5 @@
 // Commands:
-//   `github sumups info`
+//   `github sumups info|settings`
 //   `github sumups change|edit|update channel (to) <channel_name>`
 //   `github sumups change|edit|update time (to) <HH:MM>`
 //   `github sumups change|edit|update days (to) <days>`
@@ -35,7 +35,7 @@ module.exports = (robot) => {
     /*                             Listeners                                 */
     /*************************************************************************/
 
-    robot.respond(/github sum-?ups? (show|get|give me)? info/i, function (res) {
+    robot.respond(/github sum-?ups? (show|get|give me)? (info|settings)/i, function (res) {
         var userid = res.message.user.id
         showSumupInfo(userid)
     })
@@ -354,6 +354,7 @@ module.exports = (robot) => {
 
 
     function getCronDays(days) {
+        days = days.toLowerCase()
         if (['everyday', 'all', 'every day'].includes(days)) {
             return '*'
         }
@@ -361,7 +362,7 @@ module.exports = (robot) => {
             return '1-5'
         }
         else {
-            var daysArray = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+            var daysArray = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
             for (var i = 0; i < 7; i++) {
                 days = days.replace(daysArray[i], i)
                 days = days.replace(daysArray[i].substring(0, 3), i)

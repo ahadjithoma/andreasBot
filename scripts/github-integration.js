@@ -2,32 +2,18 @@
 //	 `github login`
 //	 `github repos`
 //	 `github (last <num>) (open|closed|all|mentioned) issues of repo <repo_name>`
-
 //	 `github comments issue <num> repo <repo>`
 //	 `github (open|closed|all) pull requests repo <repo>` - Default: open
 //	 `github (open|closed|all) pull requests all repos`
-//	 `github commits repo <repo>`
-//	 `github create issue`
+//	 `github (last <num>) commits repo <repo>`
+//	 `github create|open issue`
 // 	 `github repo <repo> create issue <title> `
 // 	 `github repo <repo> issue <num> add comment`
-// 	 `github reply <comment>` - reply instantly to the last issue comment where mentioned
+// 	 `github reply <comment>` - reply instantly to the last issue comment you've been mentioned
+//	 `github close` - instanlty close the last issue you've been mentioned
+// 	 `github sumup (open|closed|all)(since)`
+// 	 `github close|reopen issue <num> repo <repo>`
 
-
-
-
-
-//	 `github issues of repo <repo_name>`
-
-//	 `github issue <number>` - get the the commit of the last repo lookup
-//	 `github repo <repo_name> issue <issue_num> comments`
-//	 `github issue reply <comment_text>`
-
-// convert this to the above 2nd	
-//	 `github comments of issue <issue num> of repo <repo_name>`
-
-// 	 `github show sumup open|closed|all`
-
-// 	 `github sumup( all| closed| open|)`
 
 'use strict';
 
@@ -117,77 +103,93 @@ module.exports = function (robot) {
 
 
 	robot.respond(/github comments( of)? issue (\d+)( of)? repo (.*)/i, function (res) {
-		console.log(res.match)
-
-		var userid = res.message.user.id
-		var repo = res.match.pop()//.trim()
+		var repo = res.match.pop().replace(/"/g, '')
 		var issueNum = res.match[2]//.trim()
-		updateConversationContent(userid, { github_repo: repo, github_issue: issueNum })
+		githubIssueCommentsListener(res, issueNum, repo)
+	})
+
+	// api.ai dysfunctions with this one
+	robot.on('listGithubIssueComments', (data, res) => {
+		var repo = data.parameters.repo
+		var issueNum = data.parameters.issueNum
+		githubIssueCommentsListener(res, issueNum, repo)
+	})
+
+	function githubIssueCommentsListener(res, issueNum, repo) {
+		var userid = res.message.user.id
+		// NOT SURE ABOUT THIS updateConversationContent(userid, { github_repo: repo, github_issue: issueNum })
 		listIssueComments(userid, issueNum, repo)
-	})
-
-	robot.on('', (data, res) => {
-		var userid = res.message.user.id
-	})
+	}
 
 
 
-	robot.respond(/github (open |closed |all |)pull requests of repo (.*)/i, function (res) {
-		var userid = res.message.user.id
+	robot.respond(/github (open |closed |all |)pull requests( of)? repo (.*)/i, function (res) {
 		var state = res.match[1].trim()
 		var repo = res.match[2].trim()
+		listGithubPullRequestsListener(res, repo, state)
+	})
+
+	// api.ai disabled
+	robot.on('listGithubPullRequests', (data, res) => {
+		var state = data.parameters.state.replace(/"/g, '')
+		var repo = data.parameters.repo.replace(/"/g, '')
+		listGithubPullRequestsListener(res, repo, state)
+	})
+
+	function listGithubPullRequestsListener(res, repo, state) {
+		var userid = res.message.user.id
 		listPullRequests(userid, repo, state)
-	})
-
-	robot.on('', (data, res) => {
-		var userid = res.message.user.id
-	})
+	}
 
 
 
-	robot.respond(/github (open |closed |all |)pull requests of all repos/i, function (res) {
-		var userid = res.message.user.id
+	robot.respond(/github (open |closed |all |)pull requests( of)? all repos/i, function (res) {
 		var state = res.match[1].trim()
+		listGithubPullRequestsAllReposListener(res, state)
+	})
+
+	robot.on('listGithubPullRequestsAllRepos', (data, res) => {
+		var state = data.parameters.state
+		listGithubPullRequestsAllReposListener(res, state)
+	})
+
+	function listGithubPullRequestsAllReposListener(res, state) {
+		var userid = res.message.user.id
 		listPullRequestsForAllRepos(userid, state)
-	})
-
-	robot.on('', (data, res) => {
-		var userid = res.message.user.id
-	})
+	}
 
 
 
-	robot.respond(/github commits( of)?( repo)? (.*)/i, function (res) {
+	robot.respond(/github( last (\d+)|) commits( of)?( repo)? (.*)/i, function (res) {
 		var repo = res.match.pop().trim()
+		var commitsCnt = res.match[2]
 		var userid = res.message.user.id
-		updateConversationContent(userid, { repo: repo })
-		listRepoCommits(userid, repo)
+		// updateConversationContent(userid, { repo: repo })
+		listRepoCommits(userid, repo, commitsCnt)
 	})
 
-	robot.on('listRepoCommits', function (result, res) {
+	// api.ai disabled
+	robot.on('listGithubRepoCommits', function (data, res) {
 		var userid = res.message.user.id
-		var since = result.parameters['date-time']
-		var repoName = result.parameters['repo']
-		listRepoCommits(userid, repoName, since)
+		var commitsCnt = data.parameters.commitsCnt
+		var repo = data.parameters.repo
+		listRepoCommits(userid, repo)
 	})
 
 
 
 	// could be replaced with api.ai
-	robot.respond(/\bgithub\s(create|open)\sissue\b/i, function (res) {
+	robot.respond(/\bgithub\s(create|open)\sissue\b$/i, function (res) {
 		var userid = res.message.user.id
 		dialog.startDialog(switchBoard, res, convModel.createIssue)
 			.then(data => {
 				createIssue(userid, data.repo, data.title, data.body)
 			})
-			.catch(err => console.log(err))
+			.catch(error => {
+				res.reply(error.message)
+				robot.logger.error(error)
+			})
 	})
-
-	robot.on('', (data, res) => {
-		var userid = res.message.user.id
-	})
-
-
 
 	robot.respond(/github repo (.*) create issue (.*)/i, function (res) {
 		var userid = res.message.user.id
@@ -195,13 +197,14 @@ module.exports = function (robot) {
 		var title = res.match[2]
 		res.reply('Describe the issue:')
 		var dialog = switchBoard.startDialog(res, 1000 * 60 * 5) // 5 minutes timeout 
-		dialog.addChoice(/(.*)/i, function (body) {
-			createIssue(userid, repo, title, body)
+		dialog.addChoice(/ ((.*\s*)+)/i, function (res) {
+			var issueBody = res.match[1]
+			createIssue(userid, repo, title, issueBody)
 		})
 	})
 
-	robot.on('', (data, res) => {
-		var userid = res.message.user.id
+	// api.ai disabled
+	robot.on('createGithubIssue', (data, res) => {
 	})
 
 
@@ -219,8 +222,8 @@ module.exports = function (robot) {
 
 	})
 
-	robot.on('githubSumUp', function (userid, query, saveLastSumupDate) {
-		listGithubSumUp(userid, query, saveLastSumupDate)
+	// api.ai disabled
+	robot.on('addGithubIssueComment', (data, res) => {
 	})
 
 
@@ -242,12 +245,8 @@ module.exports = function (robot) {
 		}
 	})
 
-	robot.on('', (data, res) => {
-		var userid = res.message.user.id
-	})
 
-
-
+	// close an issue instantly to the last github issue mentioned
 	robot.respond(/\bgithub close$\b/i, function (res) {
 		var userid = res.message.user.id
 		var commentText = res.match[1]
@@ -264,31 +263,43 @@ module.exports = function (robot) {
 		}
 	})
 
-	robot.on('', (data, res) => {
+
+
+	robot.respond(/\bgithub sum-?ups?( all| closed| open|)( since|)\b$/i, function (res) {
 		var userid = res.message.user.id
-	})
+		var queryObj = {}
+		var state = res.match[1].trim()
+		var since = res.match[2].trim()
+		var saveDate = false
+		if (since) {
+			saveDate = true
+			var lastGithubSumupDate = cache.get(userid, 'github_last_sumup_date')
+			if (!lastGithubSumupDate) {
+				var date = new Date()
+				var yesterday = new Date(date.setDate(date.getDate() - 1)).toISOString()
+				queryObj.since = yesterday
 
-
-
-	robot.respond(/\wgithub sum-?ups?( all| closed| open|)\b/i, function (res) {
-		var queryObj, state
-		state = res.match[1].trim()
+			} else {
+				queryObj.since = lastGithubSumupDate
+			}
+		}
 		if (state != null) {
-			queryObj = { state: state }
+			queryObj.state = state
 		}
 		else {
-			queryObj = { state: 'open' }
+			queryObj.state = 'open'
 		}
-		listGithubSumUp(res.message.user.id, queryObj, false)
+		listGithubSumUp(res.message.user.id, queryObj, saveDate)
 	})
 
-	robot.on('', (data, res) => {
+	// api.ai disabled
+	robot.on('listGithubSumup', (data, res) => {
 		var userid = res.message.user.id
 	})
 
 
 
-	robot.respond(/github (close |re-?open )issue (\d+) repo (.*)/i, function (res) {
+	robot.respond(/github (close |r?e?-?open )issue (\d+) repo (.*)/i, function (res) {
 		var userid = res.message.user.id
 		var repoName = res.match[3].trim()
 		var issueNum = parseInt(res.match[2])
@@ -299,7 +310,16 @@ module.exports = function (robot) {
 			state = 'closed'
 		}
 		updateIssue(userid, repoName, issueNum, { state: state })
+	})
 
+	// api.ai disabled
+	robot.on('changeGithubIssueStatus', function(data, res){
+
+	})
+
+
+	robot.on('githubSumUp', function (userid, query, saveLastSumupDate) {
+		listGithubSumUp(userid, query, saveLastSumupDate)
 	})
 
 	/*************************************************************************/
@@ -684,7 +704,7 @@ module.exports = function (robot) {
 		})
 	}
 
-	function listRepoCommits(userid, repo, since) {
+	function listRepoCommits(userid, repo, commitsCnt, since) {
 		var ghApp = cache.get('GithubApp')
 		var appToken = ghApp[0].token
 		var owner = ghApp[0].account
@@ -713,7 +733,9 @@ module.exports = function (robot) {
 				} else {
 					msg.text = `<${githubURL}${owner}/${repo}|{${owner}/${repo}]>: No Commits found`
 				}
-
+				if (commitsCnt) {
+					repoCommits = repoCommits.slice(0, commitsCnt)
+				}
 				Promise.each(repoCommits, function (commit) {
 					var authorUsername = commit.author.login;
 					var authorURL = githubURL + authorUsername;
@@ -752,7 +774,7 @@ module.exports = function (robot) {
 					msg.attachments = []
 					if (paramsObj.mentioned) {
 						var issueStatus = 'Your mentioned'
-					} 
+					}
 					else {
 						issueStatus = paramsObj.state.capitalize()
 					}

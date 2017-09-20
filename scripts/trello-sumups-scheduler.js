@@ -346,6 +346,7 @@ module.exports = (robot) => {
 
 
     function getCronDays(days) {
+        days = days.toLowerCase()
         if (['everyday', 'all', 'every day'].includes(days)) {
             return '*'
         }
@@ -353,7 +354,7 @@ module.exports = (robot) => {
             return '1-5'
         }
         else {
-            var daysArray = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+            var daysArray = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
             for (var i = 0; i < 7; i++) {
                 days = days.replace(daysArray[i], i)
                 days = days.replace(daysArray[i].substring(0, 3), i)
