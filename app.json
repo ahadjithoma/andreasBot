@@ -40,8 +40,8 @@
     "JENKINS_URL": {
       "description": "Jenkins full host url",
       "required": false
-    },
-  },
+    }
+      },
   "logo": "https://node-js-sample.herokuapp.com/node.png",
   "keywords": ["node", "npm", "hubot", "bot", "chatOps"]
 }
