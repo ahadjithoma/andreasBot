@@ -530,6 +530,7 @@ module.exports = function (robot) {
     }
 
     function storeReport(report, date){
+        console.log(date.getDay())
         var db = mongoskin.MongoClient.connect(mongodb_uri)
         db.bind('standupReports')
     }
