@@ -52,6 +52,6 @@
       "required": false
     }
 	},
-  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "logo": "https://github.com/andreash92/andreasBot/blob/master/avatars/687474703a2f2f7777772e6170706e6574612e636f6d2f626c6f672f77702d636f6e74656e742f75706c6f6164732f323031332f30382f6875626f742d66656174757265642e706e67.png",
   "keywords": ["node", "npm", "hubot", "bot", "chatOps"]
 }

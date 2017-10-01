@@ -45,8 +45,12 @@ module.exports = (robot) => {
             robot.logger.warning('Missing environment variable JENKINS_URL')
         }
         if (!process.env.MONGODB_URL) {
-            missing = true
-            robot.logger.warning('Missing environment variable MONGODB_URL')
+            if (process.env.MONGOLAB_URI) {
+                process.env.MONGODB_URL = process.env.MONGOLAB_URI
+            } else {
+                missing = true
+                robot.logger.warning('Missing environment variable MONGODB_URL')
+            }
         }
         if (!process.env.GITHUB_PEM_DIR) {
             missing = true
