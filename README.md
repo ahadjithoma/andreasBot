@@ -1,3 +1,5 @@
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
 ## andreasbot
 
 andreasbot is a chat bot built on the [Hubot][hubot] framework. It was
