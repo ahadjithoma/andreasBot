@@ -32,7 +32,7 @@ var mongoskin = require('mongoskin')
 Promise.promisifyAll(mongoskin)
 
 // config
-var mongodb_uri = process.env.MONGODB_URI
+var mongodb_uri = process.env.MONGODB_URL
 var errorChannel = process.env.HUBOT_ERRORS_CHANNEL || null
 if (!mongodb_uri) {
     return

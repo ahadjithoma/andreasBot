@@ -9,6 +9,5 @@
   "hubot-maps",
   "hubot-mongodb-brain",
   "hubot-rules",
-  "hubot-shipit",
-  "hubot-trello-organization"
+  "hubot-shipit"  
 ]

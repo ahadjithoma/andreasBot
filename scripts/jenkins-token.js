@@ -16,6 +16,10 @@ var request = require('request-promise')
 var mongodb_uri = process.env.MONGODB_URI
 var jenkins_url = process.env.JENKINS_URL
 
+if (!jenkins_url) {
+    return
+}
+
 module.exports = robot => {
 
 

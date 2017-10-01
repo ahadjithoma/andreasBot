@@ -46,6 +46,9 @@ module.exports = (robot) => {
         }
         if (!process.env.MONGODB_URL) {
             if (process.env.MONGOLAB_URI) {
+                /* This is when setting up a heroku mLab addon. 
+                 * in which a MONGOLAB_URI env var created by default
+                 */
                 process.env.MONGODB_URL = process.env.MONGOLAB_URI
             } else {
                 missing = true
