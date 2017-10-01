@@ -56,6 +56,6 @@
     "window": "^3.1.6"
   },
   "engines": {
-    "node": "7.x"
+    "node": "0.x"
   }
 }
