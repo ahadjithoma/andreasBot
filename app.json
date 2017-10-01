@@ -1,0 +1,7 @@
+{
+  "name": "Hubot",
+  "description": "Hubot for chatOps",
+  "repository": "https://github.com/andreash92/andreasbot",
+  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "keywords": ["node", "express", "static"]
+}
