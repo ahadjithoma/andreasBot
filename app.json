@@ -12,43 +12,7 @@
     "HUBOT_SLACK_TOKEN": {
       "description": "Enables Hubot integration with Slack",
       "required": true
-    },
-    "APIAI_TOKEN": {
-      "description": "Enables Hubot integration with api.ai",
-      "required": false
-    },
-    "ENCRYPTION_ALGORITHM": {
-      "description": "Algorithm for the data encryption (like Tokens)",
-      "value": "aes-256-ctr"
-    },
-    "ENCRYPTION_KEY": {
-      "description": "Set a 32-chars key for the encryption. Please don't leave default value. http://www.unit-conversion.info/texttools/random-string-generator/",
-      "value":"qg31qsANkNtcTdL9WrLAHSRG3Zs1oaSg"
-    },
-    "GITHUB_APP_ID": {
-      "description": "ID of the registered Github App",
-      "required": false
-    },
-    "HUBOT_HOST_URL": {
-      "description": "Full url of the bot. Heroku example: https://<app name>.herokapp.com",
-      "required": false
-    },
-    "HUBOT_TRELLO_KEY": {
-      "description": "Located in the first box here: https://trello.com/app-key",
-      "required": false
-    },
-    "HUBOT_TRELLO_TEAM": {
-      "description": "Trello Team shortName. Located in settings of your team",
-      "required": false
-    },
-    "HUBOT_TRELLO_OAUTH": {
-      "description": "Scroll down here: https://trello.com/app-key",
-      "required": false
-    },
-    "JENKINS_URL": {
-      "description": "Jenkins full host url",
-      "required": false
-    },
+    }
   },
   "logo": "https://node-js-sample.herokuapp.com/node.png",
   "keywords": ["node", "npm", "hubot", "bot", "chatOps"]
