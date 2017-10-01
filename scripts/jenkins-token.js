@@ -94,7 +94,7 @@ module.exports = robot => {
 
     }
 
-    function    (username, res) {
+    function storeJenkinsUsername(username, res) {
         var userId = res.message.user.id;
 
         var values = {
