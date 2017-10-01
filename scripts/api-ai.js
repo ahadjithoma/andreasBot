@@ -1,8 +1,8 @@
 var apiai = require('apiai')
-var util = require('util')
 var path = require('path')
 var cache = require('./cache.js').getCache()
 
+if (!process.env.APIAI_TOKEN) { return }
 var apiai_token = process.env.APIAI_TOKEN
 var errorChannel = process.env.HUBOT_ERRORS_CHANNEL
 var SCORE_THRESHOLD = 0.75
@@ -140,4 +140,17 @@ module.exports = robot => {
         apiaiEvent(activeAction[userid], res)
     })
 
+
+    function missingEnvironmentForApi() {
+        var missingAnything;
+        missingAnything = false;
+        if (process.env.APIAI_TOKEN == null) {
+            robot.logger.warning("SomeAPI Client ID is missing: Ensure that SOMEAPI_CLIENT_ID is set.");
+            missingAnything |= true;
+        }
+        return missingAnything;
+    }
+
 }
+
+

@@ -7,6 +7,7 @@ var cache = require('./cache.js').getCache()
 var crypto = require('crypto')
 
 var githubURL = 'https://www.github.com/'
+var webhookSecret = process.env.GITHUB_WEBHOOK_SECRET || 'noset'
 
 module.exports = function (robot) {
 	robot.router.post('/hubot/github-hooks', function (req, res) {
@@ -25,7 +26,7 @@ module.exports = function (robot) {
 			res.send('OK');
 
 			if (eventBody.signature) {
-				var isSignatureMatched = evaluateWebhookSignature(eventBody.signature, JSON.stringify(eventBody.payload), "aloha")
+				var isSignatureMatched = evaluateWebhookSignature(eventBody.signature, JSON.stringify(eventBody.payload), webhookSecret)
 			} 
 			if (isSignatureMatched || !eventBody.signature) {
 				webhooksEventsBranching(eventBody)

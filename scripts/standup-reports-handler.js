@@ -34,6 +34,9 @@ Promise.promisifyAll(mongoskin)
 // config
 var mongodb_uri = process.env.MONGODB_URI
 var errorChannel = process.env.HUBOT_ERRORS_CHANNEL || null
+if (!mongodb_uri) {
+    return
+}
 
 module.exports = function (robot) {
 
@@ -501,7 +504,7 @@ module.exports = function (robot) {
 
                 msg.reply(`Thanks for reporting on ${standup.name} standup! Keep up the good work :wink:`)
 
-                // Display standup in channel
+                // Display standup in channel & saveit to DB
                 Promise.each(report, function (element) {
                     var attachment = slackMsg.attachment()
                     attachment.title = element.q
@@ -512,6 +515,7 @@ module.exports = function (robot) {
                     var date = dateFormat(new Date(), "dd/mm/yyyy")
                     reportMsg.text = `*${user}* (${username}) posted a status update for *${date}* on *${standup.name}* standup`
                     robot.messageRoom(standup.channel, reportMsg)
+                    storeReport(reportMsg, date)
                 }).catch(err => {
                     console.log(err)
                 })
@@ -525,7 +529,12 @@ module.exports = function (robot) {
         })
     }
 
-    // set query = {} to get All the stored standups
+    function storeReport(report, date){
+        var db = mongoskin.MongoClient.connect(mongodb_uri)
+        db.bind('standupReports')
+    }
+
+    // set query = {} to get All the stored standups (actually is for a future feature when having more standups)
     function showStandups(userid, query = { _id: 'defaultStandup' }) {
         var db = mongoskin.MongoClient.connect(mongodb_uri)
         db.bind('standups').find(query).toArrayAsync() // Although we have a single standup, we are using Array for future feature of having multiple standups

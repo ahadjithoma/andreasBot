@@ -1,0 +1,57 @@
+module.exports = (robot) => {
+    missingEnvVars()
+
+    // check for environment variables
+    function missingEnvVars() {
+        var missing = false
+        if (!process.env.APIAI_TOKEN) {
+            missing = true
+            robot.logger.warning('Missing environment variable APIAI_TOKEN')
+        }
+        if (!process.env.ENCRYPTION_ALGORITHM) {
+            missing = true
+            robot.logger.warning('Missing environment variable ENCRYPTION_ALGORITHM')
+        }
+        if (!process.env.ENCRYPTION_KEY) {
+            missing = true
+            robot.logger.warning('Missing environment variable ENCRYPTION_KEY')
+        }
+        if (!process.env.GITHUB_APP_ID) {
+            missing = true
+            robot.logger.warning('Missing environment variable GITHUP_APP_ID')
+        }
+        if (!process.env.HUBOT_HOST_URL) {
+            missing = true
+            robot.logger.warning('Missing environment variable HUBOT_HOST_URL')
+        }
+        if (!process.env.HUBOT_SLACK_TOKEN) {
+            missing = true
+            robot.logger.warning('Missing environment variable HUBOT_SLACK_TOKEN')
+        }
+        if (!process.env.HUBOT_TRELLO_KEY) {
+            missing = true
+            robot.logger.warning('Missing environment variable HUBOT_TRELLO_KEY')
+        }
+        if (!process.env.HUBOT_TRELLO_TEAM) {
+            missing = true
+            robot.logger.warning('Missing environment variable HUBOT_TRELLO_TEAM')
+        }
+        if (!process.env.HUBOT_TRELLO_OAUTH) {
+            missing = true
+            robot.logger.warning('Missing environment variable HUBOT_TRELLO_OAUTH')
+        }
+        if (!process.env.JENKINS_URL) {
+            missing = true
+            robot.logger.warning('Missing environment variable JENKINS_URL')
+        }
+        if (!process.env.MONGODB_URL) {
+            missing = true
+            robot.logger.warning('Missing environment variable MONGODB_URL')
+        }
+        if (!process.env.GITHUB_PEM_DIR) {
+            missing = true
+            robot.logger.warning('Missing environment variable GITHUB_PEM_DIR')
+        }
+        return missing
+    }
+}

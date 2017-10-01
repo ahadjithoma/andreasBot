@@ -5,14 +5,16 @@ var cache = require('./cache.js').getCache()
 var oauth = require("oauth").OAuth2;
 
 var bot_host = process.env.HUBOT_HOST_URL
-var mongodb_uri = process.env.MONGODB_URI
+var mongodb_uri = process.env.MONGODB_URL
 var client_id = process.env.GITHUB_APP_CLIENT_ID;
 var client_secret = process.env.GITHUB_APP_CLIENT_SECRET;
 var hostUrl = 'http://github.com/login/oauth/authorize';
 var authorization_base_url = 'https://github.com/login/oauth/authorize'
 var token_url = 'https://github.com/login/oauth/access_token'
 
-
+if (!bot_host || !mongodb_uri || !client_id || !client_secret) {
+    return
+}
 
 var OAuth2 = new oauth(
     client_id,
@@ -21,6 +23,7 @@ var OAuth2 = new oauth(
     "login/oauth/authorize",
     "login/oauth/access_token");
 
+// TODO: remove github dependency and convert it to the classic 'request' method. (like github-integration.js)
 var github = new GitHubApi({
     /* optional */
     // debug: true,

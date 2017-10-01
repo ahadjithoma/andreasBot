@@ -40,14 +40,17 @@ const Promise = require("bluebird");
 // config
 var mongodb_uri = process.env.MONGODB_URI
 var hubot_host_url = process.env.HUBOT_HOST_URL;
-var TRELLO_API = 'https://api.trello.com/1'
 var trelloKey = process.env.HUBOT_TRELLO_KEY;
 var trelloTeam = process.env.HUBOT_TRELLO_TEAM
+var TRELLO_API = 'https://api.trello.com/1'
 var trello_headers = {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
 }
 
+if (!mongodb_uri || !hubot_host_url || !trelloKey || !trelloTeam) {
+    return
+}
 module.exports = function (robot) {
 
     /*************************************************************************/

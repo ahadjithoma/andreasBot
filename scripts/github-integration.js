@@ -1,18 +1,18 @@
 // Commands:
-//	 `github login`
-//	 `github repos`
-//	 `github (last <num>) (open|closed|all|mentioned) issues of repo <repo_name>`
-//	 `github comments issue <num> repo <repo>`
-//	 `github (open|closed|all) pull requests repo <repo>` - Default: open
-//	 `github (open|closed|all) pull requests all repos`
-//	 `github (last <num>) commits repo <repo>`
-//	 `github create|open issue`
-// 	 `github repo <repo> create issue <title> `
-// 	 `github repo <repo> issue <num> add comment`
-// 	 `github reply <comment>` - reply instantly to the last issue comment you've been mentioned
-//	 `github close` - instanlty close the last issue you've been mentioned
-// 	 `github sumup (open|closed|all)(since)`
-// 	 `github close|reopen issue <num> repo <repo>`
+//	 `github login` - Login to GitHub. 
+//	 `github repos` - View GitHub's account/organization accessible repositories. 
+//	 `github (last <num>) (open|closed|all|mentioned) issues of repo <repo_name>` - View Issues of specific rerpo. 
+//	 `github comments issue <num> repo <repo>` - View comments of a GitHub Issue. 
+//	 `github (open|closed|all) pull requests repo <repo>` - View GitHub Pull Requests of specific reopsitory. Default: open.
+//	 `github (open|closed|all) pull requests all repos` - View GitHub Pull Requests of all accesible repositories.
+//	 `github (last <num>) commits repo <repo>` - View GitHub Commits of a specific repository.
+//	 `github create|open issue` - Create a GitHub issue. 
+// 	 `github repo <repo> create issue <title> ` - Create a GitHub issue.
+// 	 `github repo <repo> issue <num> add comment` - Add a comment to a GitHub issue.
+// 	 `github reply <comment>` - reply instantly to the last issue comment you've been mentioned.
+//	 `github close` - instanlty close the last issue you've been mentioned.
+// 	 `github sumup (open|closed|all)(since)` - View GitHub sumup.
+// 	 `github close|reopen issue <num> repo <repo>` - Change status of a GitHub issue. 
 
 
 'use strict';
@@ -37,10 +37,15 @@ var mongoskin = require('mongoskin')
 Promise.promisifyAll(mongoskin)
 
 // config
-var mongodb_uri = process.env.MONGODB_URI
+var mongodb_uri = process.env.MONGODB_URL
 var bot_host_url = process.env.HUBOT_HOST_URL;
 var GITHUB_API = 'https://api.github.com'
 var githubURL = 'https://www.github.com/'
+
+if (missingEnvVars()) {
+	// exiting this script if the needed env vars are not in place
+	return
+}
 
 module.exports = function (robot) {
 
@@ -313,7 +318,7 @@ module.exports = function (robot) {
 	})
 
 	// api.ai disabled
-	robot.on('changeGithubIssueStatus', function(data, res){
+	robot.on('changeGithubIssueStatus', function (data, res) {
 
 	})
 
@@ -1037,4 +1042,19 @@ module.exports = function (robot) {
 			return text
 		}
 	}
+}
+
+// check for environment variables
+function missingEnvVars() {
+	var missing = false
+	if (!process.env.MONGODB_URL) {
+		missing = true
+	}
+	if (!process.env.HUBOT_HOST_URL) {
+		missing = true
+	}
+	if (!process.env.GITHUB_APP_ID) {
+		missing = true
+	}
+	return missing
 }

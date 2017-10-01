@@ -23,10 +23,14 @@ var color = require('./colors.js')
 
 // config
 var jenkins_url = process.env.JENKINS_URL
-var url = process.env.JENKINS_URL.split('//');
-var uri = url[1]
-var protocol = url[0];
 var df = "dd/mm/yyyy, hh:MM TT"
+if (!jenkins_url) {
+    return
+} else {
+    var url = process.env.JENKINS_URL.split('//');
+    var uri = url[1]
+    var protocol = url[0];
+}
 
 module.exports = function (robot) {
 
@@ -139,7 +143,7 @@ module.exports = function (robot) {
         getAllJobs(userid)
     })
 
-    
+
     /*************************************************************************/
     /*                            API CALLS                                  */
     /*************************************************************************/
