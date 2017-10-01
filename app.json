@@ -19,12 +19,10 @@
     },
     "ENCRYPTION_ALGORITHM": {
       "description": "Algorithm for the data encryption (like Tokens)",
-      "required": false,
       "value": "aes-256-ctr"
     },
     "ENCRYPTION_KEY": {
       "description": "Set a 32-chars key for the encryption. Please don't leave default value. http://www.unit-conversion.info/texttools/random-string-generator/",
-      "required": false,
       "value":"qg31qsANkNtcTdL9WrLAHSRG3Zs1oaSg"
     },
     "GITHUB_APP_ID": {
