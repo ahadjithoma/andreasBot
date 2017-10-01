@@ -3,7 +3,6 @@
 
 var slackMsgs = require('./slackMsgs.js');
 var url = require('url');
-var Trello = require('node-trello');
 var Promise = require('bluebird');
 var request = require('request-promise');
 var encryption = require('./encryption.js');
@@ -85,7 +84,6 @@ module.exports = function (robot) {
                             { $set: { trello_token: token, trello_username: res.username, trello_member_id: res.id } },
                             { upsert: true })
                             .then(res => {
-                                // console.log(res)
                             }).catch(err => { //TODO better error handling
                                 console.log(err)
                             }).done(() => {
