@@ -26,7 +26,6 @@
 
 var slackmsg = require("./slackMsgs.js");
 var request = require('request-promise');
-var Trello = require('node-trello');
 var cache = require('./cache.js').getCache()
 var c = require('./config.json')
 var mongoskin = require('mongoskin');
