@@ -2,6 +2,12 @@
   "name": "Hubot",
   "description": "Hubot for chatOps",
   "repository": "https://github.com/andreash92/andreasbot",
+  "addons":[
+	  {
+		  "plan": "mongolab:sandbox",
+		  "as": "MONGOBD_URL"
+	  }
+  ],
   "logo": "https://node-js-sample.herokuapp.com/node.png",
-  "keywords": ["node", "express", "static"]
+  "keywords": ["node", "npm", "hubot", "bot", "chatOps"]
 }
