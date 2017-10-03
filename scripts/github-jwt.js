@@ -44,18 +44,20 @@ module.exports = robot => {
 
     function generateJWToken() {
         if (privateKeyText) {
-            var cert = privateKeyText
+            var cert = privateKeyText.replace(/\\n/g, '')
         } else {
-            var cert = fs.readFileSync(privateKeyDir)  // the get private key
+            var cert = fs.readFileSync(privateKeyDir, 'utf8')  // the get private key
         }
         console.log("\n*******************************************\nCERT", cert)
+        if (cert == cert2) { console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!') }
+
         var date = new Date()
         var payload = {
             iat: Math.round(new Date().getTime() / 1000),
             exp: Math.round(new Date().getTime() / 1000) + (10 * 60),
             iss: appID
         }
-        var JWToken = jwt.sign(payload, cert, { algorithm: 'RS256' })
+        var JWToken = jwt.sign(payload, cert2, { algorithm: 'RS256' })
         var options = {
             url: 'https://api.github.com/app/installations',
             headers: {
