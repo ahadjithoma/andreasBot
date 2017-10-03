@@ -9,12 +9,11 @@ module.exports = (robot) => {
             robot.logger.warning('Missing environment variable APIAI_TOKEN')
         }
         if (!process.env.ENCRYPTION_ALGORITHM) {
-            missing = true
-            robot.logger.warning('Missing environment variable ENCRYPTION_ALGORITHM')
+            process.env.ENCRYPTION_ALGORITHM='aes-256-ctr'
         }
         if (!process.env.ENCRYPTION_KEY) {
-            missing = true
-            robot.logger.warning('Missing environment variable ENCRYPTION_KEY')
+            process.env.ENCRYPTION_KEY='qg31qsANkNtcTdL9WrLAHSRG3Zs1oaSg'
+            robot.logger.warning('Using the default  ENCRYPTION_KEY')
         }
         if (!process.env.GITHUB_APP_ID) {
             missing = true

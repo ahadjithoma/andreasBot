@@ -15,8 +15,9 @@ Promise.promisifyAll(mongoskin)
 var appID = process.env.GITHUB_APP_ID
 var mongodb_uri = process.env.MONGODB_URL
 var privateKeyDir = process.env.GITHUB_PEM_DIR
+var privateKeyText = process.env.GITHUB_PEM
 
-if (!appID || !mongodb_uri) { return }
+if (!appID || !mongodb_uri || (!privateKeyDir && !privateKeyText)) { return }
 
 module.exports = robot => {
 
@@ -42,8 +43,12 @@ module.exports = robot => {
 
 
     function generateJWToken() {
-        var cert = fs.readFileSync(path.resolve(privateKeyDir))  // the get private key
-
+        if (privateKeyText) {
+            var cert = privateKeyText
+        } else {
+            var cert = fs.readFileSync(privateKeyDir)  // the get private key
+        }
+        console.log("\n*******************************************\nCERT", cert)
         var date = new Date()
         var payload = {
             iat: Math.round(new Date().getTime() / 1000),
