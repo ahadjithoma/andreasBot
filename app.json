@@ -31,6 +31,10 @@
       "description": "ID of the registered Github App",
       "required": false
     },
+    "GITHUB_PEM_DIR":{
+      "description": "Direcory of Github App private key file (.pem)",
+      "required": false
+    }
     "HUBOT_HOST_URL": {
       "description": "Full url of the bot. Heroku example: https://<app name>.herokapp.com",
       "required": false
