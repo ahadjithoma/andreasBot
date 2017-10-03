@@ -31,6 +31,14 @@
       "description": "ID of the registered Github App",
       "required": false
     },
+    "GITHUB_PEM_DIR":{
+      "description": "Direcory of Github App private key file (.pem)",
+      "required": false
+    },
+    "GITHUB_WEBHOOK_SECRET":{
+      "description": "If you use webhook secret, enter here the secret string.",
+      "required": false
+    },
     "HUBOT_HOST_URL": {
       "description": "Full url of the bot. Heroku example: https://<app name>.herokapp.com",
       "required": false
@@ -52,6 +60,6 @@
       "required": false
     }
 	},
-  "logo": "https://github.com/andreash92/andreasBot/blob/master/avatars/687474703a2f2f7777772e6170706e6574612e636f6d2f626c6f672f77702d636f6e74656e742f75706c6f6164732f323031332f30382f6875626f742d66656174757265642e706e67.png",
+  "logo": "https://a.slack-edge.com/ae7f/plugins/hubot/assets/service_512.png",
   "keywords": ["node", "npm", "hubot", "bot", "chatOps"]
 }
