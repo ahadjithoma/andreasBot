@@ -49,7 +49,6 @@ module.exports = robot => {
             var cert = fs.readFileSync(privateKeyDir, 'utf8')  // the get private key
         }
         console.log("\n*******************************************\nCERT", cert)
-        if (cert == cert2) { console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!') }
 
         var date = new Date()
         var payload = {
