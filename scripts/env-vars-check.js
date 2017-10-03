@@ -60,4 +60,6 @@ module.exports = (robot) => {
         }
         return missing
     }
+
+    console.log(process.env.GITHUB_PEM)
 }

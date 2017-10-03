@@ -1,21 +1,34 @@
-FROM google/nodejs
+FROM node:6.10.0-slim
 
 RUN mkdir /opt/hubot
 WORKDIR /opt/hubot
 
+# Install Dependencies
 RUN npm install -g hubot coffee-script yo generator-hubot
 
-RUN useradd -ms /bin/bash node
+# user node
 RUN chown -R node /opt/hubot
 USER node
 
+# Install Hubot
 RUN yo hubot --owner="Andreas Hadjithoma" --name="Hubot" --description="Hubot for chatOps" --adapter=slack --defaults --allow-root
 
+# Install Slack adapter
 RUN npm install hubot-slack
 
+
+# Load Scripts
+ADD scripts/ /opt/hubot/scripts
 ADD external-scripts.json /opt/hubot/external-scripts.json
 
-# override to set proper hubot slack integration token (see slack integrations)
-ENV HUBOT_SLACK_TOKEN=xxxxxxxxxxxxxxxxxxxx
+# Install App's Dependecnies
+ADD package.json /opt/hubot/package.json
+RUN npm install
 
-CMD ["./bin/hubot", "--adapter", "slack"]s
+# Set Environment Variables
+
+# Set port 
+EXPOSE 8080
+
+# Run
+CMD ["./bin/hubot", "--adapter", "slack"]
