@@ -1,4 +1,4 @@
-FROM node:6.10.0-slim
+FROM node:6.10.3-slim
 
 RUN mkdir /opt/hubot
 WORKDIR /opt/hubot
