@@ -60,9 +60,4 @@ module.exports = (robot) => {
         }
         return missing
     }
-
-
-    var t = (process.env.T).replace(/\\n/g, '\n');
-
-    console.log(t)
 }
