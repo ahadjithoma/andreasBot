@@ -37,7 +37,7 @@ var color = require('./colors.js')
 const Promise = require("bluebird");
 
 // config
-var mongodb_uri = process.env.MONGODB_URI
+var mongodb_uri = process.env.MONGODB_URL
 var hubot_host_url = process.env.HUBOT_HOST_URL;
 var trelloKey = process.env.HUBOT_TRELLO_KEY;
 var trelloTeam = process.env.HUBOT_TRELLO_TEAM

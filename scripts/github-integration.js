@@ -42,8 +42,7 @@ var bot_host_url = process.env.HUBOT_HOST_URL;
 var GITHUB_API = 'https://api.github.com'
 var githubURL = 'https://www.github.com/'
 
-if (missingEnvVars()) {
-	// exiting this script if the needed env vars are not in place
+if (!mongodb_uri || !bot_host_url) {
 	return
 }
 
@@ -1042,19 +1041,4 @@ module.exports = function (robot) {
 			return text
 		}
 	}
-}
-
-// check for environment variables
-function missingEnvVars() {
-	var missing = false
-	if (!process.env.MONGODB_URL) {
-		missing = true
-	}
-	if (!process.env.HUBOT_HOST_URL) {
-		missing = true
-	}
-	if (!process.env.GITHUB_APP_ID) {
-		missing = true
-	}
-	return missing
 }

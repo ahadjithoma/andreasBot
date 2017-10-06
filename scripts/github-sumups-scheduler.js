@@ -16,7 +16,7 @@ var async = require('async')
 var c = require('./config.json')
 
 // config
-var mongodb_uri = process.env.MONGODB_URI
+var mongodb_uri = process.env.MONGODB_URL
 if (!mongodb_uri){
     return
 }
@@ -38,7 +38,7 @@ module.exports = (robot) => {
     /*                             Listeners                                 */
     /*************************************************************************/
 
-    robot.respond(/github sum-?ups? (show|get|give me)? (info|settings)/i, function (res) {
+    robot.respond(/github sum-?ups?( show| get| give me|) (info|settings)/i, function (res) {
         var userid = res.message.user.id
         showSumupInfo(userid)
     })

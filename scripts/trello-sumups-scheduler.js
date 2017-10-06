@@ -15,7 +15,7 @@ var cache = require('./cache.js').getCache()
 var async = require('async')
 var c = require('./config.json')
 // config
-var mongodb_uri = process.env.MONGODB_URI
+var mongodb_uri = process.env.MONGODB_URL
 if (!mongodb_uri) {
     return
 }

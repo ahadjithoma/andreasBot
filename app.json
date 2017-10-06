@@ -2,6 +2,8 @@
   "name": "Hubot",
   "description": "Hubot for chatOps",
   "repository": "https://github.com/andreash92/andreasbot",
+  "logo": "https://a.slack-edge.com/ae7f/plugins/hubot/assets/service_512.png",
+  "keywords": ["node", "npm", "hubot", "bot", "chatOps"],
   "addons":[
 	  {
 		  "plan": "mongolab:sandbox",
@@ -59,7 +61,5 @@
       "description": "Jenkins full host url",
       "required": false
     }
-	},
-  "logo": "https://a.slack-edge.com/ae7f/plugins/hubot/assets/service_512.png",
-  "keywords": ["node", "npm", "hubot", "bot", "chatOps"]
+	}
 }
