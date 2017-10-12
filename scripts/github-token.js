@@ -51,26 +51,20 @@ module.exports = (robot) => {
             if (err) {
                 console.log(err);
             }
-
-            // ****
-            // TODO:
-            // BETTER Handling of promises!!
-            // ****
-
             var db = mongoskin.MongoClient.connect(mongodb_uri);
 
             github.authenticate({
                 "type": "token",
                 "token": access_token
             })
-            github.users.get({}, function (err, res) {
-                var github_username = res.data.login
+            github.users.get({}, function (err, gh_res) {
+                var github_username = gh_res.data.login
                 db.bind('users').findAndModifyAsync(
                     { _id: userid },
                     [["_id", 1]],
                     { $set: { github_username: github_username } },
                     { upsert: true })
-                    .then(res => { })
+                    .then(gh_res => { })
                     .catch(err => {
                         robot.logger.error(err)
                         if (c.errorsChannel) {
@@ -93,7 +87,7 @@ module.exports = (robot) => {
                     { $set: { github_token: encryptedToken } },
                     { upsert: true })
                     .then(res => {
-                        robot.logger.info(`${username}'s GitHub Token Added to DB!`)
+                        robot.logger.info(`${github_username}'s GitHub Token Added to DB!`)
                         robot.emit('refreshBrain') //refresh brain to update tokens       
                     })
                     .catch(err => {
