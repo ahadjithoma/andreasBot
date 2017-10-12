@@ -1,9 +1,6 @@
 [
-  "hubot-env",
-  "hubot-diagnostics",
   "hubot-help",
   "hubot-heroku-keepalive",
-  "hubot-google-translate",
   "hubot-mongodb-brain",
   "hubot-rules"
 ]
