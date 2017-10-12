@@ -26,14 +26,14 @@
       "value":"qg31qsANkNtcTdL9WrLAHSRG3Zs1oaSg"
     },
     "APIAI_TOKEN": {
-      "description": "Enables Hubot integration with api.ai",
+      "description": "Enables Hubot integration with Dialogflow (ex api.ai)",
       "required": false
     },
     "GITHUB_APP_ID": {
       "description": "ID of the registered Github App",
       "required": false
     },
-    "GITHUB_PEM_DIR":{
+    "GITHUB_PEM":{
       "description": "GitHub App's Private Key in text format",
       "required": false
     },
@@ -49,7 +49,7 @@
       "description": "Needed for user authentication (OAuth). \nCan be found at the botton of your registered GitHub App settings page",
       "required": false
     },
-        "GITHUB_APP_CLIENT_SECRET": {
+	"GITHUB_APP_CLIENT_SECRET": {
       "description": "Needed for user authentication (OAuth). \nCan be found at the botton of your registered GitHub App settings page",
       "required": false
     },
