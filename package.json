@@ -42,7 +42,7 @@
     "jquery": "^3.2.1",
     "jsdom": "^11.0.0",
     "jsonwebtoken": "^7.4.2",
-    "mongodb": "^2.2.29",
+    "mongodb": "^2.2.32",
     "mongoskin": "^2.1.0",
     "oauth": "^0.9.15",
     "passport-github2": "^0.1.10",
