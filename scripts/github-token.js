@@ -3,6 +3,7 @@ var GitHubApi = require('github')
 var mongoskin = require('mongoskin');
 var cache = require('./cache.js').getCache()
 var oauth = require("oauth").OAuth2;
+var c = require('./config.json')
 
 var bot_host = process.env.HUBOT_HOST_URL
 var mongodb_uri = process.env.MONGODB_URL
