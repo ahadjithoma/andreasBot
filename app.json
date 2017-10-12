@@ -37,8 +37,16 @@
       "description": "Direcory of Github App private key file (.pem)",
       "required": false
     },
-    "GITHUB_WEBHOOK_SECRET":{
+    "GITHUB_WEBHOOK_SECRET": {
       "description": "If you use webhook secret, enter here the secret string.",
+      "required": false
+    },
+    "GITHUB_APP_CLIENT_ID": {
+      "description": "Needed for user authentication (OAuth). \nCan be found at the botton of your registered GitHub App settings page",
+      "required": false
+    },
+        "GITHUB_APP_CLIENT_SECRET": {
+      "description": "Needed for user authentication (OAuth). \nCan be found at the botton of your registered GitHub App settings page",
       "required": false
     },
     "HUBOT_HOST_URL": {
