@@ -46,9 +46,6 @@ module.exports = robot => {
 
 
     function generateJWToken() {
-
-        console.log('info','generateJWToken started')    
-
         if (privateKeyText) {
             var cert = privateKeyText.replace(/\\n/g, '')
         } else {
@@ -82,9 +79,9 @@ module.exports = robot => {
                     generateInstallationToken(installation_id, installation_account, JWToken)
                 }
             })
-            .catch(function (err) {
-                console.log(err)
-            });
+            .catch(error => {   
+                robot.logger.error('JWT error: ' + error)
+            })
     }
 
     function generateInstallationToken(installation_id, installation_account, JWToken) {
@@ -107,7 +104,6 @@ module.exports = robot => {
                 robot.logger.info('Github App installation token created.')
             })
             .catch(function (err) {
-                // print eror 
                 console.log('ERROR: ', err)
             })
     }
