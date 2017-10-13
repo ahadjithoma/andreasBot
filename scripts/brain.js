@@ -161,6 +161,9 @@ module.exports = (robot) => {
     // FOR DEBUGGING
     robot.respond(/show cache/, function (res) {
         console.log(cache.data)
+        var userids = cache.get('userIDs')
+        console.log(userids)
+        console.log(userids[0])
     })
     // ***********************************************
 
