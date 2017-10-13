@@ -103,9 +103,9 @@ module.exports = (robot) => {
                     .done(() => {
                         db.close()
                     })
-            });
-        });
-        res_r.redirect('/token%20received');
+            })
+        })
+        res.redirect('/token%20received');
     });
 
 }
