@@ -1471,8 +1471,8 @@ module.exports = function (robot) {
             } catch (e) {
 
             }
-            return false
         }
+        return false
     }
 
     function dbFindAndModify(collection, query, sort, doc, options) {
