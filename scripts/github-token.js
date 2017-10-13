@@ -15,6 +15,7 @@ var authorization_base_url = 'https://github.com/login/oauth/authorize'
 var token_url = 'https://github.com/login/oauth/access_token'
 
 if (!bot_host || !mongodb_uri || !client_id || !client_secret) {
+    console.log('warning','script: '+path.basename(__filename)+' is disabled due to missing env vars')
     return
 }
 
