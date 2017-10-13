@@ -256,7 +256,7 @@ module.exports = function (robot) {
 			var repo = getConversationContent(userid, 'github_last_repo')
 			var issue = getConversationContent(userid, 'github_last_issue')
 			if (repo && issue) {
-				var dialog = switchBoard.startDialog(msg);
+				var dialog = switchBoard.startDialog(res);
 				res.reply(`Close issue ${issue} of repo ${repo}.\nAre you sure? (yes/no)`)
 				//Provide choices for the next step, wait for the user.
 				dialog.addChoice(/yes/, function (res2) {
@@ -266,7 +266,7 @@ module.exports = function (robot) {
 					res2.reply('ok then.')
 				})
 			} else {
-				throw null
+				throw `<github close> command works only after mention on issue comment. (${res.message.user.name})`
 			}
 		} catch (error) {
 			robot.logger.error(error)
