@@ -162,7 +162,7 @@ module.exports = function (robot) {
 		var payload = eventBody.payload
 
 		var msg = { attachments: [] }
-		var attachment = slackMsgs.attachment()
+		var attachment
 
 		var repoFullName = payload.repository.full_name
 		var repoURL = githubURL + repoFullName
@@ -187,9 +187,6 @@ module.exports = function (robot) {
 					`by <${senderURL}|${senderUsername}> on ${issueType} <${issueURL}|#${issueNum}: ${issueTitle}> `
 				attachment.text = payload.comment.body
 				attachment.color = color.getHex('gray')
-				msg.attachments.push(attachment)
-				attachment = slackMsgs.attachment()
-				attachment.color = color.getHex('blue')
 
 				if (payload.issue.assignees.length) {
 					attachment.fields.push({
