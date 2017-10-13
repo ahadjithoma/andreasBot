@@ -89,7 +89,7 @@ module.exports = (robot) => {
                     { $set: { github_token: encryptedToken } },
                     { upsert: true })
                     .then(res => {
-                        var username = robot.brain.userForId(userid)
+                        var username = robot.brain.userForId(userid).name
                         robot.logger.info(`${username}'s GitHub Token Added to DB.`)
                         robot.emit('refreshBrain') //refresh brain to update tokens       
                     })
