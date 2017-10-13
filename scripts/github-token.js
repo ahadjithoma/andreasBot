@@ -105,7 +105,7 @@ module.exports = (robot) => {
                     })
             });
         });
-        res.redirect('');
+        res_r.redirect('/token%20received');
     });
 
 }
