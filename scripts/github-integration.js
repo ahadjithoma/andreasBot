@@ -235,7 +235,6 @@ module.exports = function (robot) {
 	// reply instantly to the last github issue mentioned
 	robot.respond(/github reply (.*)/i, function (res) {
 		var userid = res.message.user.id
-		var commentText = res.match[1]
 		try {
 			var repo = getConversationContent(userid, 'github_last_repo')
 			var issue = getConversationContent(userid, 'github_last_issue')
@@ -253,7 +252,6 @@ module.exports = function (robot) {
 	// close an issue instantly to the last github issue mentioned
 	robot.respond(/\bgithub close$\b/i, function (res) {
 		var userid = res.message.user.id
-		var commentText = res.match[1]
 		try {
 			var repo = getConversationContent(userid, 'github_last_repo')
 			var issue = getConversationContent(userid, 'github_last_issue')
@@ -271,6 +269,7 @@ module.exports = function (robot) {
 				throw null
 			}
 		} catch (error) {
+			robot.logger.error(error)
 			robot.messageRoom(userid, 'Sorry but i couldn\'t process your query.')
 		}
 	})
