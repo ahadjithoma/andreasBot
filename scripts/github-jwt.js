@@ -46,6 +46,9 @@ module.exports = robot => {
 
 
     function generateJWToken() {
+
+        console.log('info','generateJWToken started')    
+
         if (privateKeyText) {
             var cert = privateKeyText.replace(/\\n/g, '')
         } else {
