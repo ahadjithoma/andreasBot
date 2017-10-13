@@ -1469,7 +1469,7 @@ module.exports = function (robot) {
                     return robot.brain.userForId(id)
                 }
             } catch (e) {
-
+                robot.logger.error(`script: ${path.basename(__filename)} in getSlackUser() ` + e)
             }
         }
         return false
