@@ -7,7 +7,7 @@ var cache = require('./cache.js').getCache()
 Promise.promisifyAll(mongoskin)
 
 // config
-var mongodb_uri = process.env.MONGODB_URL
+var mongodb_uri = process.env.MONGODB_URL || process.env.MONGOLAB_URI
 if (!process.env.MONGODB_URL) {
     return
 }
