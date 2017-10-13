@@ -17,7 +17,10 @@ var mongodb_uri = process.env.MONGODB_URL
 var privateKeyDir = process.env.GITHUB_PEM_DIR
 var privateKeyText = process.env.GITHUB_PEM
 
-if (!appID || !mongodb_uri || (!privateKeyDir && !privateKeyText)) { return }
+if (!appID || !mongodb_uri || (!privateKeyDir && !privateKeyText)) {
+    console.log('warning', 'script: ' + path.basename(__filename) + ' is disabled due to missing env vars')
+    return
+}
 
 module.exports = robot => {
 
