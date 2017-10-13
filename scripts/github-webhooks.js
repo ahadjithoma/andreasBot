@@ -211,7 +211,10 @@ module.exports = function (robot) {
 		var regex = /(?:^|\W)@(\w+)(?!\w)/g, match, matches = [];
 		while (match = regex.exec(commentText)) {
 			var matchedUser = match[1]
+			console.log('matchedUser ',matchedUser)
+
 			var user = getSlackUser(matchedUser)
+			console.log('slack user ', user)
 
 			if (user) {
 				updateConversationContent(user.id, { github_last_repo: repo, github_last_issue: issue })
