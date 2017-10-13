@@ -27,7 +27,7 @@ module.exports = function (robot) {
 
 			if (eventBody.signature) {
 				var isSignatureMatched = evaluateWebhookSignature(eventBody.signature, JSON.stringify(eventBody.payload), webhookSecret)
-			} 
+			}
 			if (isSignatureMatched || !eventBody.signature) {
 				webhooksEventsBranching(eventBody)
 			}
@@ -211,7 +211,7 @@ module.exports = function (robot) {
 		var regex = /(?:^|\W)@(\w+)(?!\w)/g, match, matches = [];
 		while (match = regex.exec(commentText)) {
 			var matchedUser = match[1]
-			console.log('matchedUser ',matchedUser)
+			console.log('matchedUser ', matchedUser)
 
 			var user = getSlackUser(matchedUser)
 			console.log('slack user ', user)
@@ -533,7 +533,7 @@ module.exports = function (robot) {
 					return robot.brain.userForId(id)
 				}
 			} catch (e) {
-
+				robot.logger.error('getSlackUser function: ' + e)
 			}
 			return false
 		}
