@@ -1,4 +1,6 @@
 [
+  "hubot-env",
+  "hubot-diagnostics",
   "hubot-help",
   "hubot-heroku-keepalive",
   "hubot-mongodb-brain",
