@@ -46,7 +46,6 @@ module.exports = (robot) => {
 
     robot.router.get('/auth/github/callback', function (req, res) {
         var userid = JSON.parse(req.query.state).userid;
-        var username = JSON.parse(req.query.state).username;
 
         var code = req.query.code;
 
@@ -90,7 +89,8 @@ module.exports = (robot) => {
                     { $set: { github_token: encryptedToken } },
                     { upsert: true })
                     .then(res => {
-                        robot.logger.info(`${github_username}'s GitHub Token Added to DB!`)
+                        var username = robot.brain.userForName(userid)
+                        robot.logger.info(`${username}'s GitHub Token Added to DB.`)
                         robot.emit('refreshBrain') //refresh brain to update tokens       
                     })
                     .catch(err => {

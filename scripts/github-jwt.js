@@ -21,7 +21,7 @@ if (!appID || !mongodb_uri || (!privateKeyDir && !privateKeyText)) {
     console.log('warning', 'script: ' + path.basename(__filename) + ' is disabled due to missing env vars')
     return
 }
-
+    
 module.exports = robot => {
 
     // runs once the bot starts 
