@@ -255,10 +255,18 @@ module.exports = function (robot) {
 		var userid = res.message.user.id
 		var commentText = res.match[1]
 		try {
-			var repo = cache.get(userid).github_last_repo
-			var issue = cache.get(userid).github_last_issue
+			var repo = getConversationContent(userid, 'github_last_repo')
+			var issue = getConversationContent(userid, 'github_last_issue')
 			if (repo && issue) {
-				updateIssue(userid, repo, issue, { state: 'close' })
+				var dialog = switchBoard.startDialog(msg);
+				res.reply(`Close issue ${issue} of repo ${repo}.\nAre you sure? (yes/no)`)
+				//Provide choices for the next step, wait for the user.
+				dialog.addChoice(/yes/, function (res2) {
+					updateIssue(userid, repo, issue, { state: 'close' })
+				})
+				dialog.addChoice(/no/, function (res2) { 
+					res2.reply('ok then.')
+				})
 			} else {
 				throw null
 			}
