@@ -162,7 +162,7 @@ module.exports = function (robot) {
 		var payload = eventBody.payload
 
 		var msg = { attachments: [] }
-		var attachment
+		var attachment = {}
 
 		var repoFullName = payload.repository.full_name
 		var repoURL = githubURL + repoFullName
