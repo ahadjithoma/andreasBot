@@ -72,6 +72,7 @@ module.exports = robot => {
 
         request(options)
             .then(function (body) {
+                console.log(body)
                 var installations = body.length
                 for (var i = 0; i < installations; i++) {
                     var installation_id = body[i].id
