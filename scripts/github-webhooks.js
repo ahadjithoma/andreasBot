@@ -527,8 +527,10 @@ module.exports = function (robot) {
 		console.log('userid length ', userids.length)
 		for (var i = 0; i < userids.length - 1; i++) {
 			try {
-				var user = userids[i]
-				console.log(user)
+				var id = userids[i]
+				console.log(id)
+
+				var user = cache.get(id)
 				var cachedGithubUsername = user.github_username
 				if (cachedGithubUsername == githubUsername) {
 					return robot.brain.userForId(id)
