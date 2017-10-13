@@ -17,26 +17,24 @@ var mongodb_uri = process.env.MONGODB_URL
 var privateKeyDir = process.env.GITHUB_PEM_DIR
 var privateKeyText = process.env.GITHUB_PEM
 
-// if (!appID || !mongodb_uri || (!privateKeyDir && !privateKeyText)) {
-//     console.log('warning', 'script: ' + path.basename(__filename) + ' is disabled due to missing env vars')
-//     return
-// }
+if (!appID || !mongodb_uri || (!privateKeyDir && !privateKeyText)) {
+    console.log('warning', 'script: ' + path.basename(__filename) + ' is disabled due to missing env vars')
+    return
+}
 
 module.exports = robot => {
 
     // runs once the bot starts 
     generateJWToken()
 
-    // runs on demand
+    // runs on demand from other scritps
     robot.on('generateJWToken', () => {
-        robot.logger.info('emit: generateJWToken')
         generateJWToken()
     })
 
     // generate a new token every 30 minutes. (Tokens expire after 60 minutes)
     var job = new CronJob('0 */30 * * * *',
         function () {
-            robot.logger.info('cronjob for generateJWToken')
             generateJWToken()
         },
         function () { return null; }, /* This function is executed when the job stops */
@@ -72,7 +70,6 @@ module.exports = robot => {
 
         request(options)
             .then(function (body) {
-                console.log(body)
                 var installations = body.length
                 for (var i = 0; i < installations; i++) {
                     var installation_id = body[i].id
