@@ -160,7 +160,7 @@ module.exports = (robot) => {
     // TO BE DELETED
     // FOR DEBUGGING
     robot.respond(/show cache/, function (res) {
-        // console.log(cache.data)
+        console.log(cache.data)
     })
     // ***********************************************
 
