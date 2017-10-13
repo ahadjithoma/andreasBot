@@ -211,10 +211,7 @@ module.exports = function (robot) {
 		var regex = /(?:^|\W)@(\w+)(?!\w)/g, match, matches = [];
 		while (match = regex.exec(commentText)) {
 			var matchedUser = match[1]
-			console.log('matchedUser ', matchedUser)
-
 			var user = getSlackUser(matchedUser)
-			console.log('slack user ', user)
 
 			if (user) {
 				updateConversationContent(user.id, { github_last_repo: repo, github_last_issue: issue })
@@ -521,26 +518,22 @@ module.exports = function (robot) {
 	function getSlackUser(githubUsername) {
 
 		var userids = cache.get('userIDs')
-		console.log(userids)
-		console.log(userids[0])
 
-		console.log('userid length ', userids.length)
-		for (var i = 0; i < userids.length - 1; i++) {
+		for (var i = 0; i < userids.length; i++) {
+			var id = userids[i]
+
+			var user = cache.get(id)
+			var cachedGithubUsername
 			try {
-				var id = userids[i]
-				console.log(id)
-
-				var user = cache.get(id)
 				var cachedGithubUsername = user.github_username
 				if (cachedGithubUsername == githubUsername) {
 					return robot.brain.userForId(id)
 				}
 			} catch (e) {
-				robot.logger.error('github-webhooks.js in getSlackUser().' + e)
+
 			}
 		}
 		return false
-
 	}
 
 
