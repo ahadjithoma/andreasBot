@@ -538,8 +538,9 @@ module.exports = function (robot) {
 			} catch (e) {
 				robot.logger.error('github-webhooks.js in getSlackUser().' + e)
 			}
-			return false
 		}
+		return false
+
 	}
 
 
