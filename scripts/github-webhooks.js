@@ -526,7 +526,7 @@ module.exports = function (robot) {
 
 		console.log('userid length ', userids.length)
 		for (var i = 0; i < userids.length - 1; i++) {
-			var user = cache.get(cache.get('userIDs')[0])
+			var user = userids[0]
 			console.log(user)
 			var cachedGithubUsername
 			try {
