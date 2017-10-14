@@ -515,17 +515,18 @@ module.exports = function (robot) {
 	/*************************************************************************/
 
 	function getSlackUser(githubUsername) {
-
+		console.log(githubUsername)
 		var userids = cache.get('userIDs')
 
 		console.log(userids + ' ' + userids.length)
-		for (var i = 0; i < userids.length -1; i++) {
+		for (var i = 0; i < userids.length - 1; i++) {
 			var id = userids[i]
 
 			var user = cache.get(id)
 			try {
-				console.log('i ' + i + ' id ' + id + ' user ' + user)
 				var cachedGithubUsername = user.github_username
+				console.log('i ' + i + ' id ' + id + ' user ' + user + ' cachedUser ' + cachedGithubUsername)
+
 				if (cachedGithubUsername == githubUsername) {
 					return robot.brain.userForId(id)
 				}
