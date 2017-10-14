@@ -514,31 +514,26 @@ module.exports = function (robot) {
 	/*                          helpful functions                            */
 	/*************************************************************************/
 
-    function getSlackUser(githubUsername) {
+	function getSlackUser(githubUsername) {
 
-        try {
-         
-        var userids = cache.get('userIDs')
-        for (var i = 0; i < userids.length; i++) {
-            var id = userids[i]
+		var userids = cache.get('userIDs')
 
-            var user = cache.get(id)
-            var cachedGithubUsername
-            try {
-                var cachedGithubUsername = user.github_username
-                if (cachedGithubUsername == githubUsername) {
-                    return robot.brain.userForId(id)
-                }
-            } catch (e) {
-                robot.logger.error(`script: github-webhooks.js in getSlackUser() ` + e)
-            }
-        }
-           
-        } catch (error) {
-            robot.logger.error(error) 
-            return false   
-        }
-    }
+		for (var i = 0; i < userids.length -1; i++) {
+			var id = userids[i]
+
+			var user = cache.get(id)
+			try {
+				var cachedGithubUsername = user.github_username
+				if (cachedGithubUsername == githubUsername) {
+					return robot.brain.userForId(id)
+				}
+			} catch (e) {
+				robot.logger.error(`script: github-webhooks.js in getSlackUser() ` + e)
+			}
+		}
+		return false
+	}
+
 
 	function bold(text) {
 		if (robot.adapterName == 'slack') {
