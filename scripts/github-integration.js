@@ -234,6 +234,7 @@ module.exports = function (robot) {
 
 	// reply instantly to the last github issue mentioned
 	robot.respond(/github reply (.*)/i, function (res) {
+		var commentText = res.match[1] 
 		var userid = res.message.user.id
 		try {
 			var repo = getConversationContent(userid, 'github_last_repo')
@@ -241,9 +242,10 @@ module.exports = function (robot) {
 			if (repo && issue) {
 				createIssueComment(userid, repo, issue, commentText)
 			} else {
-				throw null
+				throw `<github reply> command works only after mention on issue comment. (${res.message.user.name})`
 			}
 		} catch (error) {
+			robot.logger.error(error)
 			robot.messageRoom(userid, 'Sorry but i couldn\'t process your query.')
 		}
 	})
@@ -257,12 +259,12 @@ module.exports = function (robot) {
 			var issue = getConversationContent(userid, 'github_last_issue')
 			if (repo && issue) {
 				var dialog = switchBoard.startDialog(res);
-				res.reply(`Close issue ${issue} of repo ${repo}.\nAre you sure? (yes/no)`)
+				res.reply(`Close issue ${issue} of repo ${repo}.\nAre you sure? (y/n)`)
 				//Provide choices for the next step, wait for the user.
-				dialog.addChoice(/yes/, function (res2) {
+				dialog.addChoice(/y/i, function (res2) {
 					updateIssue(userid, repo, issue, { state: 'close' })
 				})
-				dialog.addChoice(/no/, function (res2) { 
+				dialog.addChoice(/n/i, function (res2) { 
 					res2.reply('ok then.')
 				})
 			} else {

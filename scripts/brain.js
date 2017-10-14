@@ -161,36 +161,9 @@ module.exports = (robot) => {
     // FOR DEBUGGING
     robot.respond(/show cache/, function (res) {
         console.log(cache.data)
-
-
-        console.log(getSlackUser('andreash92'))        
     })
 
-    function getSlackUser(githubUsername) {
 
-        try {
-         
-        var userids = cache.get('userIDs')
-        for (var i = 0; i < userids.length; i++) {
-            var id = userids[i]
-
-            var user = cache.get(id)
-            var cachedGithubUsername
-            try {
-                var cachedGithubUsername = user.github_username
-                if (cachedGithubUsername == githubUsername) {
-                    return robot.brain.userForId(id)
-                }
-            } catch (e) {
-                robot.logger.error(`script: github-webhooks.js in getSlackUser() ` + e)
-            }
-        }
-           
-        } catch (error) {
-            robot.logger.error(error) 
-            return false   
-        }
-    }
     // ***********************************************
 
 

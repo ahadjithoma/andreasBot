@@ -515,18 +515,15 @@ module.exports = function (robot) {
 	/*************************************************************************/
 
 	function getSlackUser(githubUsername) {
-		console.log(githubUsername)
+
 		var userids = cache.get('userIDs')
 
-		console.log(userids + ' ' + userids.length)
-		for (var i = 0; i < userids.length - 1; i++) {
+		for (var i = 0; i < userids.length; i++) {
 			var id = userids[i]
 
 			var user = cache.get(id)
 			try {
 				var cachedGithubUsername = user.github_username
-				console.log('i ' + i + ' id ' + id + ' user ' + user + ' cachedUser ' + cachedGithubUsername)
-
 				if (cachedGithubUsername == githubUsername) {
 					return robot.brain.userForId(id)
 				}
@@ -534,7 +531,7 @@ module.exports = function (robot) {
 				robot.logger.error(`script: github-webhooks.js in getSlackUser() ` + e)
 			}
 		}
-		// return false
+		return false
 	}
 
 
