@@ -168,8 +168,9 @@ module.exports = (robot) => {
 
     function getSlackUser(githubUsername) {
 
+        try {
+         
         var userids = cache.get('userIDs')
-
         for (var i = 0; i < userids.length; i++) {
             var id = userids[i]
 
@@ -184,7 +185,11 @@ module.exports = (robot) => {
                 robot.logger.error(`script: github-webhooks.js in getSlackUser() ` + e)
             }
         }
-        return false
+           
+        } catch (error) {
+            robot.logger.error(error) 
+            return false   
+        }
     }
     // ***********************************************
 
