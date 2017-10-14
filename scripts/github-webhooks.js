@@ -505,9 +505,8 @@ module.exports = function (robot) {
 		// 	} 
 
 		msg.attachments.push(attachment)
-
 		robot.messageRoom(room, msg)
-
+		checkForUserMentions(msg, payload.repository.name, issueNum)
 	};
 
 
@@ -530,7 +529,7 @@ module.exports = function (robot) {
 					return robot.brain.userForId(id)
 				}
 			} catch (e) {
-                robot.logger.error(`script: $github-webhooks.js in getSlackUser() ` + e)
+				robot.logger.error(`script: $github-webhooks.js in getSlackUser() ` + e)
 			}
 		}
 		return false
