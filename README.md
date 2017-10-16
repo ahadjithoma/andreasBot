@@ -1,3 +1,36 @@
+# Hubot
+
+```
+                     _______________
+                    /               \
+   //\              |   Greetings   |
+  ////\    _____    |               |
+ //////\  /_____\   \               /
+ ======= |[^_/\_]|   /--------------
+  |   | _|___@@__|__
+  +===+/  ///     \_\
+   | |_\ /// HUBOT/\\
+   |___/\//      /  \\
+         \      /   +---+
+          \____/    |   |
+           | //|    +===+
+            \//      |xx|
+ ```           
+            
+
+Hubot is a chat bot built on the [Hubot][hubot] framework.
+This version is designed to be deployed on [Heroku][heroku]. 
+
+# Documentation
+
+## How to run: 
+
+There are 3 ways to run hubot. Local, on Heroku or using Docker.
+
+### Run Local
+### Run on Heroku
+### Run using Docker
+
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 ## andreasbot
