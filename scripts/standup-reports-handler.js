@@ -476,12 +476,11 @@ module.exports = function (robot) {
         var timeout = c.standups.timeout
         var dialog = switchBoard.startDialog(msg, timeout)
         msg.reply(`*${standup.name}* ${question}`)
-        var regex = new RegExp(robot.name + " (.*)", "i")
-        dialog.addChoice(regex, function (msg2) {
+        dialog.addChoice(/ ((.*\s*)+)/i, function (msg2) { // this RegEx allow for multiline inputs using Shift+Enter
 
             var answer = msg2.match[1]
 
-            // save the answer in cache
+            // save (each) answer in cache
             cache.union(`${userid}.${standup.name}`, { q: question, a: answer, c: attachmentColor })
 
             // move to next question 
@@ -500,6 +499,8 @@ module.exports = function (robot) {
                 var username = robot.brain.userForId(userid).name
 
                 var reportMsg = { attachments: [] }
+                var reportObj = { report: [] } // the report object to store in mongodb 
+
                 var report = cache.data[userid][standup.name]
 
                 msg.reply(`Thanks for reporting on ${standup.name} standup! Keep up the good work :wink:`)
@@ -511,17 +512,16 @@ module.exports = function (robot) {
                     attachment.text = element.a
                     attachment.color = element.c
                     reportMsg.attachments.push(attachment)
+                    reportObj.report.push({ question: element.q, answer: element.a })
                 }).then(() => {
-                    var date = dateFormat(new Date(), "dd/mm/yyyy")
+                    var fullDate = new Date()
+                    var date = dateFormat(fullDate, "dd/mm/yyyy")
                     reportMsg.text = `*${user}* (${username}) posted a status update for *${date}* on *${standup.name}* standup`
                     robot.messageRoom(standup.channel, reportMsg)
-                    storeReport(reportMsg, date)
+                    storeReport(userid, reportObj.report, fullDate)
                 }).catch(err => {
                     console.log(err)
                 })
-
-
-                // TODO (Feature): Save in DB
 
                 // delete after save in DB
                 delete cache.data[userid][standup.name]
@@ -529,10 +529,44 @@ module.exports = function (robot) {
         })
     }
 
-    function storeReport(report, date){
-        // console.log(date.getDay())
+    function storeReport(userid, report, fullDate) {
+        var day = getDaysNames(fullDate.getDay().toString())
+        var createdAt = new Date(dateFormat(fullDate, 'yyyy-mm-dd')) // Just the date -> for db.find queries
+        report.splice(0, 0, { question: 'date', answer: dateFormat(new Date(), 'dd/mm/yyyy, HH:MM') })
         var db = mongoskin.MongoClient.connect(mongodb_uri)
-        db.bind('standupReports')
+        db.bind('standupReports').findOneAsync(
+            {
+                day: day,
+                userid, userid,
+                createdAt: createdAt
+            }).then((storedReport) => {
+                if (storedReport) {
+                    storedReport.reports.push(report)
+                    report = storedReport.reports
+                }
+                else {
+                    report = [report]
+                }
+            }).then(() => {
+                // report = [report]
+            }).then(() => {
+                db.bind('standupReports').findOneAndUpdateAsync(
+                    {
+                        day: day,
+                        userid, userid
+                    },
+                    {
+                        $set: {
+                            createdAt: createdAt,
+                            // createdAt: new Date(`${dateElements[2]}-${dateElements[1]}-${dateElements[0]}`),
+                            reports: report
+                        },
+                    },
+                    { upsert: true })
+            }).catch(error => {
+                robot.logger.error(error)
+            })
+
     }
 
     // set query = {} to get All the stored standups (actually is for a future feature when having more standups)
@@ -891,6 +925,7 @@ module.exports = function (robot) {
         }
     }
 
+    // cronDay must be string because of the replace() function
     function getDaysNames(cronDay) {
         if (cronDay == '*') {
             return 'Every Day'
@@ -914,5 +949,6 @@ module.exports = function (robot) {
         var validateDayPattern = /^[^a-zA-Z]+$/
         return validateDayPattern.test(days);
     }
+
 
 }
