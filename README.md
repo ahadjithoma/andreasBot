@@ -28,10 +28,89 @@ This version is designed to be deployed on [Heroku][heroku].
 There are 3 ways to run hubot. Local, on Heroku or using Docker.
 
 ### Run Local
-### Run on Heroku
+Requirements: 
+
+Firstly, make sure you have installed nodejs & npm and dependencies:
+    
+    % sudo apt-get install nodejs npm
+    % apt-get install build-essential libssl-dev git-core libexpat1-dev
+  
+To run hubot local you will need to clone it first:
+
+    % mkdir hubot && cd hubot
+    % git clone https://github.com/AuthEceSoftEng/chatops.git      
+    
+Install project's depenndencies. Inside hubot directory run: 
+
+    % npm install 
+
+For using Hubot in slack and using all his available integrations, you must set all the needed environment variables. Example of those vatriables can be found in the file env_example
+Set the environment variables using `% export` or create a file `.env` in $HOME directory:
+
+    % cd $HOME
+    % touch .env
+    % pico .env
+    Add your environment variables in this form: ENV_VAR_NAME=VALUE
+    
+To run the bot:
+    
+    % ./bin/hubot -a adapter slack
+
+You are ready to go
+
+When running local you will not be able to set up any webhooks unless you set a public host url.<br>
+One way to do this is by using ngrok tool. 
+    
+    % ngrok http $PORT
+    Hubot by default listens on port 8080
+
+### Run on Heroku 
+(Recommended for easy and fast run)<br>
+
+Just press the Deploy Button bellow, add the environment variables and you are ready to go. <br>
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
 ### Run using Docker
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+For using docker, first install docker cli. 
+
+After that, you have to create a docker image using the follow command:  
+
+    % sudo docker build https://github.com/AuthEceSoftEng/chatops --tag <image_repo_name>:<image_tag_name>
+    OR 
+    % git clone https://github.com/AuthEceSoftEng/chatops.git      
+    % sudo docker build . --tag <image_repo_name>:<image_tag_name>
+
+Set the environment variables:
+
+    % touch env
+    % pico env
+    Add your environment variables in this form: ENV_VAR_NAME=VALUE
+
+Run the image: 
+    
+    % sudo docker run -it --name <container_name> --env-file env <image_repository_name>:<image_tag_name>
+
+## Integrations Set-Up
+
+### GitHub
+To use GitHub integration you must first register a new [GitHub App](https://developer.github.com/apps/building-integrations/setting-up-and-registering-github-apps/registering-github-apps/) in you account or organization
+
+After a GitHub App is registered, you'll need to generate a **private key**. To generate a private key, click on your app's name, then click the Generate private key button. Open the .pem file in any text editor and paste the content in the relevant field in environment variables.
+
+You you also need the **app ID** and **OAuth credentials** and specificly you need **Client ID** and **Client Secret** where you can find them at the bottom of the GitHub App's page.
+
+![Screenshot](readme_files/github%20app%20credentials.png)
+
+
+  
+### Trello 
+
+### Jenkins 
+
+### Dialogflow 
+
+# Hubot Framework Fast-Start Documentation
 
 ## andreasbot
 
