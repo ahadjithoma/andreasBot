@@ -1,3 +1,5 @@
+// Dialogflow (api.ai) not set
+
 // Commands: 
 //   `standups email report` - Send weedkly standups in CSV file to the preconfigured email 
 //   `standups email weekly report` - Send weedkly standups in CSV file to the preconfigured email 

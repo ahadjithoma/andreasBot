@@ -133,7 +133,7 @@ module.exports = function (robot) {
 		listGithubPullRequestsListener(res, repo, state)
 	})
 
-	// api.ai disabled
+	// api.ai disabled -> not needed (?)
 	robot.on('listGithubPullRequests', (data, res) => {
 		var state = data.parameters.state.replace(/"/g, '')
 		var repo = data.parameters.repo.replace(/"/g, '')
@@ -172,17 +172,15 @@ module.exports = function (robot) {
 		listRepoCommits(userid, repo, commitsCnt)
 	})
 
-	// api.ai disabled
+	// dialogflow todo: not tested
 	robot.on('listGithubRepoCommits', function (data, res) {
 		var userid = res.message.user.id
-		var commitsCnt = data.parameters.commitsCnt
-		var repo = data.parameters.repo
+		var commitsCnt = data.parameters.limits
+		var repo = data.parameters.repoName
 		listRepoCommits(userid, repo)
 	})
 
 
-
-	// could be replaced with api.ai
 	robot.respond(/\bgithub\s(create|open)\sissue\b$/i, function (res) {
 		var userid = res.message.user.id
 		dialog.startDialog(switchBoard, res, convModel.createIssue)
@@ -194,6 +192,20 @@ module.exports = function (robot) {
 				robot.logger.error(error)
 			})
 	})
+
+	// dialogflow todo: not tested
+	robot.on('createGithubIssue', (data, res) => {
+		var userid = res.message.user.id
+		dialog.startDialog(switchBoard, res, convModel.createIssue)
+			.then(data => {
+				createIssue(userid, data.repo, data.title, data.body)
+			})
+			.catch(error => {
+				res.reply(error.message)
+				robot.logger.error(error)
+			})
+	})
+
 
 	robot.respond(/github repo (.*) create issue (.*)/i, function (res) {
 		var userid = res.message.user.id
@@ -207,11 +219,6 @@ module.exports = function (robot) {
 		})
 	})
 
-	// api.ai disabled
-	robot.on('createGithubIssue', (data, res) => {
-	})
-
-
 
 	robot.respond(/github repo (.*) issue (\d+)( add)? comment/i, function (res) {
 		var userid = res.message.user.id
@@ -223,18 +230,26 @@ module.exports = function (robot) {
 			var commentText = res.match[1]
 			createIssueComment(userid, repo, issueNum, commentText)
 		})
-
 	})
 
-	// api.ai disabled
+	// dialogflow todo: not tested
 	robot.on('addGithubIssueComment', (data, res) => {
+		var userid = res.message.user.id
+		var issueNum = data.parameter.issueNum
+		var repo = data.parameter.repoName
+		res.reply('Add your comment here:')
+		var dialog = switchBoard.startDialog(res, 1000 * 60 * 10)
+		dialog.addChoice(/ ((.*\s*)+)/i, function (res) {
+			var commentText = res.match[1]
+			createIssueComment(userid, repo, issueNum, commentText)
+		})
 	})
 
 
 
 	// reply instantly to the last github issue mentioned
 	robot.respond(/github reply (.*)/i, function (res) {
-		var commentText = res.match[1] 
+		var commentText = res.match[1]
 		var userid = res.message.user.id
 		try {
 			var repo = getConversationContent(userid, 'github_last_repo')
@@ -264,7 +279,7 @@ module.exports = function (robot) {
 				dialog.addChoice(/y/i, function (res2) {
 					updateIssue(userid, repo, issue, { state: 'close' })
 				})
-				dialog.addChoice(/n/i, function (res2) { 
+				dialog.addChoice(/n/i, function (res2) {
 					res2.reply('ok then.')
 				})
 			} else {
