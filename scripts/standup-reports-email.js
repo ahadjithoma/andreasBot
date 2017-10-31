@@ -6,7 +6,6 @@
 //   `standups email weekly report (to) <email>` - Send weedkly standups in CSV file to the given email 
 //   `standups email today report (to) <email>` - Send daily standups in CSV file to the given email 
 
-
 'use strict'
 
 const Conversation = require('./hubot-conversation/index.js')
