@@ -1,8 +1,8 @@
 // Commands:
 //	 `github login` - Login to GitHub. 
 //	 `github repos` - View GitHub's account/organization accessible repositories. 
-//	 `github (last <num>) (open|closed|all|mentioned) issues of repo <repo_name>` - View Issues of specific rerpo. 
-//	 `github comments issue <num> repo <repo>` - View comments of a GitHub Issue. 
+//	 `github repo <repo_name> (last <num>) (open|closed|all|mentioned) issues` - View Issues of specific rerpo. 
+//	 `github repo <repo> issue <issue_num> comments` - View comments of a GitHub Issue. 
 //	 `github (open|closed|all) pull requests repo <repo>` - View GitHub Pull Requests of specific reopsitory. Default: open.
 //	 `github (open|closed|all) pull requests all repos` - View GitHub Pull Requests of all accesible repositories.
 //	 `github (last <num>) commits repo <repo>` - View GitHub Commits of a specific repository.
@@ -78,10 +78,10 @@ module.exports = function (robot) {
 
 
 
-	robot.respond(/github( last (\d+)|) (open |closed |all |mentioned |)issues?( of)? repo (.*)/i, function (res) {
-		var repo = res.match.pop().replace(/"/g, '')
-		var issuesCnt = res.match[2]
-		var parameter = res.match[3].trim()
+	robot.respond(/github repo (.*)( last (\d+)|) (open |closed |all |mentioned |)issues?/i, function (res) {
+		var repo = res.match[1].replace(/"/g, '')
+		var issuesCnt = res.match[3]
+		var parameter = res.match[4].trim()
 		listGithubIssuesListener(res, repo, parameter, issuesCnt)
 	})
 
@@ -104,10 +104,8 @@ module.exports = function (robot) {
 		listRepoIssues(userid, repo, paramsObj, issuesCnt)
 	}
 
-
-
-	robot.respond(/github comments( of)? issue (\d+)( of)? repo (.*)/i, function (res) {
-		var repo = res.match.pop().replace(/"/g, '')
+	robot.respond(/github repo (.*) issue (\d+) comments/i, function (res) {
+		var repo = res.match[1].replace(/"/g, '')
 		var issueNum = res.match[2]//.trim()
 		githubIssueCommentsListener(res, issueNum, repo)
 	})
