@@ -91,6 +91,33 @@ Run the image:
     
     % sudo docker run -it --name <container_name> --env-file env <image_repository_name>:<image_tag_name>
 
+## Environment Variables
+
+You need to set some environment variables to take full advantage of Hubot. 
+Here is a list of all the environment variables. A more deep explanation for most of them can be found in the Integraions Set-up section. 
+
+HUBOT_SLACK_TOKEN=xoxb-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+APIAI_TOKEN=5c17f2b567564726bbd551ea2454b1b7
+
+ENCRYPTION_ALGORITHM=aes-256-ctr
+ENCRYPTION_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+GITHUB_APP_ID=XXXX
+GITHUB_WEBHOOK_SECRET=
+GITHUB_PEM_DIR=
+GITHUB_APP_CLIENT_ID=Iv1.d6ae001d38eb542b
+GITHUB_APP_CLIENT_SECRET=5187dd2de3ba207581daa6d44d1d80c29eb1816a
+
+export HUBOT_HOST_URL=
+	
+HUBOT_TRELLO_KEY=51def9cb08cf171cd0970d8607ad8f97
+HUBOT_TRELLO_TEAM=anbotteam1
+HUBOT_TRELLO_OAUTH=e2aa295396c9d27a08f164f6d25ba7fc3f7d21daaf52aafe5afb82ddc66f53b7
+
+JENKINS_URL=http://localhost:9999
+MONGODB_URL=
+GITHUB_PEM
+
 ## Integrations Set-Up
 
 ### GitHub
