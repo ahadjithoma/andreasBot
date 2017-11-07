@@ -27,6 +27,12 @@ This version is designed to be deployed on [Heroku][heroku].
 
 There are 3 ways to run hubot. Local, on Heroku or using Docker.
 
+### Run on Heroku 
+(Recommended for easy and fast run)<br>
+
+Just press the Deploy Button bellow, add the environment variables and you are ready to go. <br>
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
 ### Run Local
 Requirements: 
 
@@ -63,12 +69,6 @@ One way to do this is by using ngrok tool.
     
     % ngrok http $PORT
     Hubot by default listens on port 8080
-
-### Run on Heroku 
-(Recommended for easy and fast run)<br>
-
-Just press the Deploy Button bellow, add the environment variables and you are ready to go. <br>
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 ### Run using Docker
 
@@ -125,8 +125,12 @@ Here is a list of all the environment variables. A more deep explanation for mos
 To use hubot, you will need a [hubot slack integration](https://hubotdevteam.slack.com/apps/A0F7XDU93-hubot). 
 Follow the link above and click “Add Configuration”. Slack will ask you to designate a username for your bot.
 
+![Screenshot](readme_files/slack_hubot.png)
+
 Once the username is provided, Slack will create an account on your team with that username and assign it an API token. It is very important that you keep this API token a secret, so do not check it into your git repository. This statement exists for all integration tokens. You’ll also have the option to customize your bot’s icon, first and last name, what it does, and so forth.
- 
+
+![Screenshot](readme_files/slack_token.png)
+
 Set the slack api token to env variable: HUBOT_SLACK_TOKEN.
 
 
@@ -136,7 +140,6 @@ To use GitHub integration you must first register a new [GitHub App](https://dev
 After a GitHub App is registered, you'll need to generate a **private key**. To generate a private key, click on your app's name, then click the Generate private key button. Open the .pem file in any text editor and paste the content in the relevant field in environment variables.
 
 You you also need the **app ID** and **OAuth credentials** and specificly you need **Client ID** and **Client Secret** where you can find them at the bottom of the GitHub App's page.
-
 
 ![Screenshot](readme_files/Screenshot_2.png)
 
