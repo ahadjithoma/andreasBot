@@ -135,13 +135,20 @@ Set the slack api token to env variable: HUBOT_SLACK_TOKEN.
 
 
 ### GitHub
-To use GitHub integration you must first register a new [GitHub App](https://developer.github.com/apps/building-integrations/setting-up-and-registering-github-apps/registering-github-apps/) in you account or organization
 
-After a GitHub App is registered, you'll need to generate a **private key**. To generate a private key, click on your app's name, then click the Generate private key button. Open the .pem file in any text editor and paste the content in the relevant field in environment variables.
+1. To use GitHub integration you must first register a new [GitHub App](https://developer.github.com/apps/building-integrations/setting-up-and-registering-github-apps/registering-github-apps/) in you account or organization.
 
-You you also need the **app ID** and **OAuth credentials** and specificly you need **Client ID** and **Client Secret** where you can find them at the bottom of the GitHub App's page.
+2. After a GitHub App is registered, you'll need to generate a **private key**. To generate a private key, click on your app's name, then click the Generate private key button. Open the .pem file in any text editor and paste the content in the relevant field in environment variables.
 
-![Screenshot](readme_files/Screenshot_2.png)
+![Screenshot](readme_files/github_pem_example.png)
+
+3. You you also need the **app ID** and **OAuth credentials** and specificly you need **Client ID** and **Client Secret** where you can find them at the bottom of the GitHub App's page.
+
+![Screenshot](readme_files/github_app_credentials.png)
+
+4. Configure App as bellow. 
+
+![Screenshot](readme_files/github_app_settings.png)
 
 ### Trello 
 To use trello integration you must provide Trello API Key, OAuth Secret and your Team name. 
