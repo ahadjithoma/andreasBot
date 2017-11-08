@@ -183,6 +183,18 @@ After that, configure the Plugin:
 5. Set APIAI_TOKEN=(Client access token). For the token, check the screenshot bellow 
 ![Screenshot](readme_files/dialogflow_token.png)
 
+### Standup Meetings - Daily Reports 
+
+Hubot provides a descent way for users to post reports to a common slack channel. 
+These reports can be sent in a CSV format via email. For that reason, hubot must:
+* Own an email account (tested on outlook and gmail)
+* (optional) Know a preconfigured email address to send the reports.
+
+Set these env variabes:
+    
+    HUBOT_EMAIL=(Hubot's email account. e.g. hubot@outlook.com)
+    HUBOT_EMAIL_PASS=(Hubot's email account password)
+    STANDUPS_EMAIL=(a preconfigure email for sending standups reports)
 
 ##  Scripting
 First, read the full Hubot Framework [Scripting Documentation](https://hubot.github.com/docs/scripting/)
