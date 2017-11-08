@@ -118,6 +118,9 @@ Here is a list of all the environment variables. A more deep explanation for mos
     HUBOT_TRELLO_TEAM
     HUBOT_TRELLO_OAUTH
     
+    HUBOT_EMAIL=(Hubot's email account. e.g. hubot@outlook.com)
+    HUBOT_EMAIL_PASS=(Hubot's email account password)
+    STANDUPS_EMAIL=(a preconfigure email for sending standups reports)
 
 ## Integrations Set-Up
 
@@ -167,6 +170,7 @@ After that, configure the Plugin:
 3. To send to a room: http://<hubot-host>:<hubot-port>/hubot/jenkins-notifications?room=<room>
 4. To send to a user: http://<hubot-host>:<hubot-port>/hubot/jenkins-notifications?user=<username>
 5. Add log lines if you want to
+  
 ![Screenshot](readme_files/jenkins_notifications_plugin.png)
 
 ### Dialogflow (ex API.AI)
