@@ -18,8 +18,8 @@
  ```           
             
 
-Hubot is a chat bot built on the [Hubot][hubot] framework.
-This version is designed to be deployed on [Heroku][heroku]. 
+Hubot is a chat bot built on the [Hubot][https://hubot.github.com/docs] framework.
+This version is designed to be deployed on [Heroku][www.heroku.com]. 
 
 # Documentation
 
